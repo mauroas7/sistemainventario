@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Controllers\InicioController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
 /* Ruta Raíz Inteligente */
 Route::get('/', function () {
     // Si el usuario tiene sesión activa, va al sistema. Si no, al login.
@@ -12,20 +13,17 @@ Route::get('/', function () {
 
 /* Rutas del Sistema (Requieren Autenticación) */
 Route::middleware(['auth', 'verified'])->group(function () {
-    
+
     // --- RUTAS OPERATIVAS ---
 
-    Route::get('/inicio', function () {
-        return Inertia::render('Inicio/Index');
-    })->name('inicio');
+   Route::get('/inicio', [InicioController::class, 'index'])
+       ->name('inicio');
 
-    Route::get('/envio/crear-ticket', function () {
-        return Inertia::render('Envio/Create');
-    })->name('envio.crear');
+   Route::get('/envio/crear-ticket', [TicketController::class, 'create'])
+       ->name('envio.crear');
 
-    Route::get('/recepcion/bandeja', function () {
-        return Inertia::render('Recepcion/Index');
-    })->name('recepcion.bandeja');
+   Route::get('/recepcion/bandeja', [TicketController::class, 'inbox'])
+       ->name('recepcion.bandeja');
 
 
     // --- RUTAS DE PATRIMONIO ---
