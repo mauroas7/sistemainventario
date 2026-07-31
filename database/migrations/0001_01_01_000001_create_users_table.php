@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         // 1. CREAMOS LA TABLA AREAS PRIMERO
-        Schema::create('areas', function (Blueprint $table) {
-            $table->id();
-            $table->string('nombre');
-            $table->timestamps();
-        });
+        // Schema::create('areas', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->string('nombre');
+        //     $table->timestamps();
+        // });
 
         // 2. CREAMOS LA TABLA USERS (Campos por defecto de Laravel + los nuestros)
         Schema::create('users', function (Blueprint $table) {
@@ -25,10 +25,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            
+
             // Nuestros campos institucionales
-            $table->string('rol')->default('coordinador');
-            $table->foreignId('area_id')->nullable()->constrained('areas');
+            $table->string('rol')->default('usuario');
 
             $table->rememberToken();
             $table->timestamps();
@@ -60,6 +59,5 @@ return new class extends Migration
         Schema::dropIfExists('password_reset_tokens');
         // El orden de borrado debe ser inverso al de creación
         Schema::dropIfExists('users');
-        Schema::dropIfExists('areas'); 
     }
 };

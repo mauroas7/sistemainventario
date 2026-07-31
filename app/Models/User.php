@@ -7,6 +7,8 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -22,6 +24,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'rol',
+        'area_id',
     ];
 
     /**
@@ -45,5 +49,35 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Área a la que pertenece el usuario.
+     */
+    public function area(): BelongsTo
+    {
+        return $this->belongsTo(Area::class);
+    }
+
+    /**
+     * Movimientos creados por el usuario.
+     */
+    public function movimientosCreados(): HasMany
+    {
+        return $this->hasMany(
+            Movimiento::class,
+            'creado_por'
+        );
+    }
+
+    /**
+     * Movimientos recibidos por el usuario.
+     */
+    public function movimientosRecibidos(): HasMany
+    {
+        return $this->hasMany(
+            Movimiento::class,
+            'recibido_por'
+        );
     }
 }

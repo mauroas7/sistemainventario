@@ -2,156 +2,109 @@
 
 namespace Database\Seeders;
 
-use App\Models\Bien;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Area;
+use App\Models\Bien;
+use App\Models\EstadoBien;
 
 class BienSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
+        $areas = Area::pluck('id', 'nombre');
+        $estados = EstadoBien::pluck('id', 'nombre');
+
         $bienes = [
+
             [
-                'codigo_patrimonial' => 'B001',
-                'nombre' => 'Notebook Dell Latitude',
-                'categoria' => 'Informática',
-                'marca' => 'Dell',
-                'modelo' => 'Latitude 5420',
+                'codigo' => 'NB001',
+                'nombre' => 'Notebook Dell Latitude 5420',
+                'descripcion' => 'Notebook utilizada por Sistemas.',
+                'area' => 'Sistemas',
+                'ubicacion' => 'Sistemas',
                 'estado' => 'Disponible',
-                'ubicacion' => 'Administración',
             ],
+
             [
-                'codigo_patrimonial' => 'B002',
-                'nombre' => 'Impresora HP LaserJet',
-                'categoria' => 'Impresión',
-                'marca' => 'HP',
-                'modelo' => 'M404dn',
-                'estado' => 'Disponible',
-                'ubicacion' => 'Secretaría',
-            ],
-            [
-                'codigo_patrimonial' => 'B003',
-                'nombre' => 'Monitor LG 24 pulgadas',
-                'categoria' => 'Informática',
-                'marca' => 'LG',
-                'modelo' => '24MK430H',
-                'estado' => 'Disponible',
+                'codigo' => 'NB002',
+                'nombre' => 'Notebook Lenovo ThinkPad',
+                'descripcion' => 'Notebook asignada a Laboratorio.',
+                'area' => 'Sistemas',
                 'ubicacion' => 'Laboratorio',
+                'estado' => 'Prestado',
             ],
+
             [
-                'codigo_patrimonial' => 'B004',
-                'nombre' => 'Proyector Epson',
-                'categoria' => 'Audiovisual',
-                'marca' => 'Epson',
-                'modelo' => 'PowerLite',
-                'estado' => 'Disponible',
-                'ubicacion' => 'Aula 1',
+                'codigo' => 'MON001',
+                'nombre' => 'Monitor Samsung 24"',
+                'descripcion' => 'Monitor LED Full HD.',
+                'area' => 'Administración',
+                'ubicacion' => 'Dirección',
+                'estado' => 'En uso',
             ],
+
             [
-                'codigo_patrimonial' => 'B005',
-                'nombre' => 'CPU Lenovo ThinkCentre',
-                'categoria' => 'Informática',
-                'marca' => 'Lenovo',
-                'modelo' => 'ThinkCentre',
-                'estado' => 'Disponible',
+                'codigo' => 'IMP001',
+                'nombre' => 'Impresora HP LaserJet',
+                'descripcion' => 'Impresora láser.',
+                'area' => 'Administración',
                 'ubicacion' => 'Administración',
+                'estado' => 'En mantenimiento',
             ],
+
             [
-                'codigo_patrimonial' => 'B006',
-                'nombre' => 'Silla ergonómica',
-                'categoria' => 'Mobiliario',
-                'marca' => 'Rolic',
-                'modelo' => 'ERG-1',
+                'codigo' => 'PRO001',
+                'nombre' => 'Proyector Epson',
+                'descripcion' => 'Proyector para capacitaciones.',
+                'area' => 'Patrimonio',
+                'ubicacion' => 'Patrimonio',
                 'estado' => 'Disponible',
-                'ubicacion' => 'Dirección',
             ],
+
             [
-                'codigo_patrimonial' => 'B007',
-                'nombre' => 'Escritorio de oficina',
-                'categoria' => 'Mobiliario',
-                'marca' => 'Genérico',
-                'modelo' => '120x60',
-                'estado' => 'Disponible',
-                'ubicacion' => 'Dirección',
-            ],
-            [
-                'codigo_patrimonial' => 'B008',
-                'nombre' => 'Notebook HP ProBook',
-                'categoria' => 'Informática',
-                'marca' => 'HP',
-                'modelo' => 'ProBook 450',
-                'estado' => 'Disponible',
-                'ubicacion' => 'Recursos Humanos',
-            ],
-            [
-                'codigo_patrimonial' => 'B009',
-                'nombre' => 'Scanner Canon',
-                'categoria' => 'Digitalización',
-                'marca' => 'Canon',
-                'modelo' => 'LiDE 300',
-                'estado' => 'Disponible',
-                'ubicacion' => 'Archivo',
-            ],
-            [
-                'codigo_patrimonial' => 'B010',
-                'nombre' => 'Router TP-Link',
-                'categoria' => 'Redes',
-                'marca' => 'TP-Link',
-                'modelo' => 'Archer C6',
-                'estado' => 'Disponible',
-                'ubicacion' => 'Sistemas',
-            ],
-            [
-                'codigo_patrimonial' => 'B011',
-                'nombre' => 'Switch Cisco',
-                'categoria' => 'Redes',
-                'marca' => 'Cisco',
-                'modelo' => '2960',
-                'estado' => 'Disponible',
-                'ubicacion' => 'Sistemas',
-            ],
-            [
-                'codigo_patrimonial' => 'B012',
-                'nombre' => 'Monitor Samsung 27 pulgadas',
-                'categoria' => 'Informática',
-                'marca' => 'Samsung',
-                'modelo' => 'F27T350',
-                'estado' => 'Disponible',
-                'ubicacion' => 'Contaduría',
-            ],
-            [
-                'codigo_patrimonial' => 'B013',
-                'nombre' => 'UPS APC',
-                'categoria' => 'Energía',
-                'marca' => 'APC',
-                'modelo' => 'BV1000I',
-                'estado' => 'Disponible',
-                'ubicacion' => 'Sala de servidores',
-            ],
-            [
-                'codigo_patrimonial' => 'B014',
+                'codigo' => 'TAB001',
                 'nombre' => 'Tablet Samsung',
-                'categoria' => 'Informática',
-                'marca' => 'Samsung',
-                'modelo' => 'Galaxy Tab A9',
-                'estado' => 'Disponible',
+                'descripcion' => 'Tablet institucional.',
+                'area' => 'Enfermería',
                 'ubicacion' => 'Enfermería',
-            ],
-            [
-                'codigo_patrimonial' => 'B015',
-                'nombre' => 'Notebook ASUS VivoBook',
-                'categoria' => 'Informática',
-                'marca' => 'ASUS',
-                'modelo' => 'VivoBook 15',
                 'estado' => 'Disponible',
-                'ubicacion' => 'Compras',
             ],
+
+            [
+                'codigo' => 'ECG001',
+                'nombre' => 'Electrocardiógrafo',
+                'descripcion' => 'Equipo médico.',
+                'area' => 'Laboratorio',
+                'ubicacion' => 'Laboratorio',
+                'estado' => 'En uso',
+            ],
+
+            [
+                'codigo' => 'SW001',
+                'nombre' => 'Switch Cisco 24 puertos',
+                'descripcion' => 'Equipo de red.',
+                'area' => 'Sistemas',
+                'ubicacion' => 'Sistemas',
+                'estado' => 'Disponible',
+            ],
+
         ];
 
         foreach ($bienes as $bien) {
-            Bien::updateOrCreate(
-                ['codigo_patrimonial' => $bien['codigo_patrimonial']],
-                $bien
-            );
+
+            Bien::create([
+                'codigo' => $bien['codigo'],
+                'nombre' => $bien['nombre'],
+                'descripcion' => $bien['descripcion'],
+
+                'area_id' => $areas[$bien['area']],
+                'ubicacion_actual_id' => $areas[$bien['ubicacion']],
+                'estado_id' => $estados[$bien['estado']],
+            ]);
         }
     }
 }
