@@ -4,7 +4,12 @@ import { Link, usePage } from '@inertiajs/react';
 export default function SidebarLayout({ children, roleSelector }) {
     const { url } = usePage();
     const { auth } = usePage().props; // Obtenemos el usuario logueado desde Inertia
+    const rol = auth?.user?.rol;
 
+    const puedeVerPatrimonio =
+       rol === 'coordinador' || rol === 'admin';
+
+    const esAdmin = rol === 'admin';
     // Función auxiliar para determinar si un link está activo
     const isActive = (path) => url.startsWith(path);
 
@@ -77,14 +82,58 @@ export default function SidebarLayout({ children, roleSelector }) {
                         Navegación
                     </div>
 
-                    <nav>
-                        <SidebarSection title="Inicio" path="/inicio" label="Inicio" />
-                        <SidebarSection title="Envío" path="/envio/crear-ticket" label="Crear ticket de envío" />
-                        <SidebarSection title="Recepción" path="/recepcion/bandeja" label="Bandeja de recepción" />
-                        
-                        {/* Esta sección idealmente solo la vería el rol 'inventario' (Silvana) */}
-                        <SidebarSection title="Control Patrimonial" path="/patrimonio/dashboard" label="Dashboard patrimonial" />
-                    </nav>
+                   <nav>
+    {/* Todos los roles */}
+    <SidebarSection
+        title="Inicio"
+        path="/inicio"
+        label="Inicio"
+    />
+
+    <SidebarSection
+        title="Envío"
+        path="/envio/crear-ticket"
+        label="Crear ticket de envío"
+    />
+
+    <SidebarSection
+        title="Recepción"
+        path="/recepcion/bandeja"
+        label="Bandeja de recepción"
+    />
+
+    {/* Coordinador y administrador */}
+    {puedeVerPatrimonio && (
+        <>
+            <SidebarSection
+                title="Control Patrimonial"
+                path="/patrimonio/dashboard"
+                label="Dashboard patrimonial"
+            />
+
+            <SidebarSection
+                title="Bienes"
+                path="/patrimonio/bienes"
+                label="Directorio de bienes"
+            />
+
+            <SidebarSection
+                title="Auditoría"
+                path="/patrimonio/tickets/show"
+                label="Auditoría de tickets"
+            />
+        </>
+    )}
+
+    {/* Solamente administrador */}
+    {esAdmin && (
+        <SidebarSection
+            title="Administración"
+            path="/patrimonio/configuracion"
+            label="Configuración"
+        />
+    )}
+</nav>
                 </aside>
 
                 {/* 3. Área de Contenido Principal */}
