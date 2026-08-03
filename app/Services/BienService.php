@@ -6,12 +6,18 @@ use App\Models\Bien;
 
 class BienService
 {
-    public function obtenerBienes()
+    public function obtenerBienes(?int $areaId = null, bool $esAdmin = false)
     {
-        return Bien::with([
+        $query = Bien::with([
             'area',
             'ubicacionActual',
             'estado'
-        ])->orderBy('id')->get();
+        ])->orderBy('id');
+
+        if (! $esAdmin) {
+            $query->where('area_id', $areaId);
+        }
+
+        return $query->get();
     }
 }

@@ -2,21 +2,32 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Area;
 use App\Models\Bien;
 use App\Models\EstadoBien;
+use App\Models\User;
 
 class BienSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Inventario inicial.
+     *
+     * Todos los bienes arrancan en su área, sin movimientos previos: la ubicación
+     * actual coincide con el área responsable porque todavía no hubo ningún traslado
+     * que explique una diferencia. A partir de acá, cualquier cambio de ubicación o
+     * de responsable tiene que venir de un movimiento informado desde el portal.
      */
     public function run(): void
     {
         $areas = Area::pluck('id', 'nombre');
         $estados = EstadoBien::pluck('id', 'nombre');
+
+        // Responsable por defecto: el usuario del área a la que pertenece el bien.
+        $responsablePorArea = User::query()
+            ->whereNotNull('area_id')
+            ->get()
+            ->keyBy('area_id');
 
         $bienes = [
 
@@ -25,17 +36,15 @@ class BienSeeder extends Seeder
                 'nombre' => 'Notebook Dell Latitude 5420',
                 'descripcion' => 'Notebook utilizada por Sistemas.',
                 'area' => 'Sistemas',
-                'ubicacion' => 'Sistemas',
                 'estado' => 'Disponible',
             ],
 
             [
                 'codigo' => 'NB002',
                 'nombre' => 'Notebook Lenovo ThinkPad',
-                'descripcion' => 'Notebook asignada a Laboratorio.',
+                'descripcion' => 'Notebook de uso general.',
                 'area' => 'Sistemas',
-                'ubicacion' => 'Laboratorio',
-                'estado' => 'Prestado',
+                'estado' => 'Disponible',
             ],
 
             [
@@ -43,7 +52,6 @@ class BienSeeder extends Seeder
                 'nombre' => 'Monitor Samsung 24"',
                 'descripcion' => 'Monitor LED Full HD.',
                 'area' => 'Administración',
-                'ubicacion' => 'Dirección',
                 'estado' => 'En uso',
             ],
 
@@ -52,8 +60,7 @@ class BienSeeder extends Seeder
                 'nombre' => 'Impresora HP LaserJet',
                 'descripcion' => 'Impresora láser.',
                 'area' => 'Administración',
-                'ubicacion' => 'Administración',
-                'estado' => 'En mantenimiento',
+                'estado' => 'En uso',
             ],
 
             [
@@ -61,7 +68,6 @@ class BienSeeder extends Seeder
                 'nombre' => 'Proyector Epson',
                 'descripcion' => 'Proyector para capacitaciones.',
                 'area' => 'Patrimonio',
-                'ubicacion' => 'Patrimonio',
                 'estado' => 'Disponible',
             ],
 
@@ -70,7 +76,6 @@ class BienSeeder extends Seeder
                 'nombre' => 'Tablet Samsung',
                 'descripcion' => 'Tablet institucional.',
                 'area' => 'Enfermería',
-                'ubicacion' => 'Enfermería',
                 'estado' => 'Disponible',
             ],
 
@@ -79,7 +84,6 @@ class BienSeeder extends Seeder
                 'nombre' => 'Electrocardiógrafo',
                 'descripcion' => 'Equipo médico.',
                 'area' => 'Laboratorio',
-                'ubicacion' => 'Laboratorio',
                 'estado' => 'En uso',
             ],
 
@@ -88,21 +92,30 @@ class BienSeeder extends Seeder
                 'nombre' => 'Switch Cisco 24 puertos',
                 'descripcion' => 'Equipo de red.',
                 'area' => 'Sistemas',
-                'ubicacion' => 'Sistemas',
                 'estado' => 'Disponible',
             ],
 
         ];
 
-        foreach ($bienes as $bien) {
+        foreach ($bienes as $indice => $bien) {
+
+            $areaId = $areas[$bien['area']];
 
             Bien::create([
+                // Número interno del Excel de Patrimonio.
                 'codigo' => $bien['codigo'],
+
+                // Número de Diaguita: único para toda la UNCuyo, ronda el 950.000.
+                // Los dos últimos quedan sin número a propósito, para representar los
+                // ~2.000 bienes del hospital que todavía no están cargados en Diaguita.
+                'numero_diaguita' => $indice < 6 ? (string) (950000 + $indice) : null,
+
                 'nombre' => $bien['nombre'],
                 'descripcion' => $bien['descripcion'],
 
-                'area_id' => $areas[$bien['area']],
-                'ubicacion_actual_id' => $areas[$bien['ubicacion']],
+                'area_id' => $areaId,
+                'ubicacion_actual_id' => $areaId,
+                'responsable_id' => $responsablePorArea->get($areaId)?->id,
                 'estado_id' => $estados[$bien['estado']],
             ]);
         }

@@ -33,18 +33,23 @@ export default function Login({ status, canResetPassword }) {
                 <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
                 
                 <div className="relative z-10 text-white text-center px-12">
-                    <div className="w-24 h-24 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-8 backdrop-blur-sm border border-white/20">
-                        {/* Icono de Hospital/Sistema */}
-                        <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                        </svg>
-                    </div>
+                    <img
+                        src="/img/Logo HU Blanco.png"
+                        alt="Hospital Universitario Dra. María Victoria Gómez de Erice"
+                        className="h-20 w-auto mx-auto mb-8"
+                    />
                     <h1 className="text-4xl font-bold mb-4 tracking-tight">Sistema de Gestión de Bienes</h1>
                     <p className="text-blue-100 text-lg font-medium">Portal Hospitalario</p>
                     <p className="text-blue-200/80 text-sm mt-8 max-w-md mx-auto">
                         Acceso restringido para personal autorizado. Toda transacción en este sistema está sujeta a auditoría patrimonial.
                     </p>
                 </div>
+
+                <img
+                    src="/img/logo acreditacion.png"
+                    alt="Acreditaciones Hospital Universitario"
+                    className="absolute bottom-8 left-1/2 -translate-x-1/2 h-9 w-auto opacity-90"
+                />
             </div>
 
             {/* Panel Derecho: Formulario de Login */}
@@ -123,10 +128,8 @@ export default function Login({ status, canResetPassword }) {
                         
                         <div className="text-center mt-6">
                             <p className="text-sm text-gray-500">
-                                ¿No tiene cuenta?{' '}
-                                <Link href={route('register')} className="font-medium text-institucional-primario hover:text-blue-800 transition-colors">
-                                    Solicitar acceso
-                                </Link>
+                                ¿No tiene cuenta? Las altas las gestiona{' '}
+                                <span className="font-medium text-institucional-primario">Gestión de Bienes e Insumos</span>.
                             </p>
                         </div>
                     </form>

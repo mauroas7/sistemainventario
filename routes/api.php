@@ -11,52 +11,59 @@ use App\Http\Controllers\Api\MovimientoController;
 use App\Http\Controllers\Api\UserController;
 
 
-// <------- Rutas para areas ------->
-Route::get('/areas', [AreaController::class, 'index']);
+// Protegemos todas las rutas API con Sanctum y aplicamos middleware de roles cuando corresponde.
+Route::middleware(['auth:sanctum'])->group(function () {
+    // <------- Rutas para areas ------->
+    Route::get('/areas', [AreaController::class, 'index']);
 
-// <------- Rutas para estado del bien ------->
-Route::get('/estadoBien', [EstadoBienController::class, 'index']);
+    // <------- Rutas para estado del bien ------->
+    Route::get('/estadoBien', [EstadoBienController::class, 'index']);
 
-// <------- Rutas para estado del movimiento ------->
-Route::get('/estadoMovimiento', [EstadoMovimientoController::class, 'index']);
+    // <------- Rutas para estado del movimiento ------->
+    Route::get('/estadoMovimiento', [EstadoMovimientoController::class, 'index']);
 
-// <------- Rutas para tipo del movimiento ------->
-Route::get('/tipoMovimiento', [TipoMovimientoController::class, 'index']);
+    // <------- Rutas para tipo del movimiento ------->
+    Route::get('/tipoMovimiento', [TipoMovimientoController::class, 'index']);
 
-// <------- Rutas para motivo del movimiento ------->
-Route::get('/motivo', [MotivoController::class, 'index']);
+    // <------- Rutas para motivo del movimiento ------->
+    Route::get('/motivo', [MotivoController::class, 'index']);
 
-// <------- Rutas para bienes ------->
-Route::get('/bien', [BienController::class, 'index']);
-
-
-// <------- Rutas para movimientos ------->
-
-// Esto genera automáticamente las siguientes rutas:
-//     - /api/movimientos               --> index()
-//     - /api/movimientos/{movimiento}  --> show()
-//     - /api/movimientos               --> store()
-//     - /api/movimientos/{movimiento}  --> update()
-Route::apiResource('movimientos', MovimientoController::class)
-    ->only(['index', 'show', 'store', 'update']);
+    // <------- Rutas para bienes ------->
+    // El listado se filtra por área del usuario salvo que sea admin.
+    Route::get('/bien', [BienController::class, 'index']);
 
 
-// <------- Rutas para usuario ------->
+    // <------- Rutas para movimientos ------->
+    // Lectura: cualquier usuario autenticado, mismo scoping por área que la bandeja de recepción.
+    Route::get('/movimientos', [MovimientoController::class, 'index']);
+    Route::get('/movimientos/{movimiento}', [MovimientoController::class, 'show']);
 
-// Obtener usuarios
-Route::get('/users', [UserController::class, 'index']);
+    // Escritura directa por API: reservada a administradores (la creación y recepción
+    // normales de tickets se hacen vía las rutas web de TicketController).
+    Route::middleware(\App\Http\Middleware\RequireRole::class . ':admin')->group(function () {
+        Route::post('/movimientos', [MovimientoController::class, 'store']);
+        Route::put('/movimientos/{movimiento}', [MovimientoController::class, 'update']);
+        Route::patch('/movimientos/{movimiento}', [MovimientoController::class, 'update']);
+    });
 
-// Registrar usuario 
-Route::post('/users', [UserController::class, 'store']);
 
-// Devuelve un usuario con su area
-Route::get('/users/{user}', [UserController::class, 'show']);
+    // <------- Rutas para usuario ------->
+    // Gestión de usuarios limitada a administradores (role: admin)
+    Route::get('/users', [UserController::class, 'index'])
+        ->middleware(\App\Http\Middleware\RequireRole::class . ':admin');
 
-// Actualiza completamente un usuario
-Route::put('/users/{user}', [UserController::class, 'update']);
+    Route::post('/users', [UserController::class, 'store'])
+        ->middleware(\App\Http\Middleware\RequireRole::class . ':admin');
 
-// Solo actualiza algunos campos
-Route::patch('/users/{user}', [UserController::class, 'update']);
+    Route::get('/users/{user}', [UserController::class, 'show'])
+        ->middleware(\App\Http\Middleware\RequireRole::class . ':admin');
 
-// Eliminar usuario
-Route::delete('/users/{user}', [UserController::class, 'destroy']);
+    Route::put('/users/{user}', [UserController::class, 'update'])
+        ->middleware(\App\Http\Middleware\RequireRole::class . ':admin');
+
+    Route::patch('/users/{user}', [UserController::class, 'update'])
+        ->middleware(\App\Http\Middleware\RequireRole::class . ':admin');
+
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])
+        ->middleware(\App\Http\Middleware\RequireRole::class . ':admin');
+});

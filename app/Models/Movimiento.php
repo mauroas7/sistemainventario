@@ -13,6 +13,9 @@ class Movimiento extends Model
         'bien_id',
         'creado_por',
         'recibido_por',
+        'responsable_anterior_id',
+        'responsable_nuevo_id',
+        'registrado_por',
         'area_origen_id',
         'area_destino_id',
         'tipo_movimiento_id',
@@ -21,9 +24,12 @@ class Movimiento extends Model
         'condicion_al_salir',
         'condicion_al_recibir',
         'observaciones_salida',
+        'imagen_salida',
         'observaciones_recepcion',
         'fecha_movimiento',
         'fecha_recepcion',
+        'fecha_registro_diaguita',
+        'fecha_cierre',
     ];
 
     protected function casts(): array
@@ -31,6 +37,8 @@ class Movimiento extends Model
         return [
             'fecha_movimiento' => 'datetime',
             'fecha_recepcion' => 'datetime',
+            'fecha_registro_diaguita' => 'datetime',
+            'fecha_cierre' => 'datetime',
         ];
     }
 
@@ -61,6 +69,39 @@ class Movimiento extends Model
         return $this->belongsTo(
             User::class,
             'recibido_por'
+        );
+    }
+
+    /**
+     * Quién tenía el bien a cargo cuando se informó el movimiento.
+     */
+    public function responsableAnterior(): BelongsTo
+    {
+        return $this->belongsTo(
+            User::class,
+            'responsable_anterior_id'
+        );
+    }
+
+    /**
+     * A quién pasa el bien: es quien debe firmar la nueva ficha de inventario.
+     */
+    public function responsableNuevo(): BelongsTo
+    {
+        return $this->belongsTo(
+            User::class,
+            'responsable_nuevo_id'
+        );
+    }
+
+    /**
+     * Usuario de Patrimonio que volcó el movimiento a Diaguita.
+     */
+    public function registrador(): BelongsTo
+    {
+        return $this->belongsTo(
+            User::class,
+            'registrado_por'
         );
     }
 

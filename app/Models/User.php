@@ -25,6 +25,7 @@ class User extends Authenticatable
     'email',
     'password',
     'rol',
+    'activo',
     'area_id',
 ];
     /**
@@ -47,7 +48,16 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'activo' => 'boolean',
         ];
+    }
+
+    /**
+     * Usuarios habilitados para operar y para figurar como responsables de un bien.
+     */
+    public function scopeActivos($query)
+    {
+        return $query->where('activo', true);
     }
 
     /**

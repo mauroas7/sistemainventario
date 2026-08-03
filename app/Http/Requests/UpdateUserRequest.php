@@ -45,12 +45,28 @@ class UpdateUserRequest extends FormRequest
                 'in:admin,coordinador,usuario',
             ],
 
+            // Ver StoreUserRequest: sin área la cuenta no ve ningún bien.
             'area_id' => [
+                'exclude_if:rol,admin',
                 'sometimes',
-                'nullable',
+                'required',
                 'integer',
                 'exists:areas,id',
             ],
+
+            'activo' => [
+                'sometimes',
+                'boolean',
+            ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'email.unique' => 'Ya existe un usuario con ese correo.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'area_id.required' => 'Seleccioná el área. Es lo que determina qué bienes va a ver.',
         ];
     }
 }

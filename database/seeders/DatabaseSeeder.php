@@ -2,14 +2,18 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Carga inicial del sistema.
+     *
+     * Solo se siembran los catálogos y los datos maestros (áreas, estados, motivos,
+     * usuarios y bienes). Los movimientos NO se siembran: son el registro histórico
+     * de traslados reales y se generan informándolos desde el portal. Sembrarlos
+     * inventaba historial patrimonial y dejaba a los bienes en ubicaciones que ningún
+     * ticket explicaba.
      */
     public function run(): void
     {
@@ -21,7 +25,6 @@ class DatabaseSeeder extends Seeder
             MotivoSeeder::class,
             UserSeeder::class,
             BienSeeder::class,
-            MovimientoSeeder::class,
         ]);
     }
 }

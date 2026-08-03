@@ -12,10 +12,12 @@ class Bien extends Model
     
     protected $fillable = [
         'codigo',
+        'numero_diaguita',
         'nombre',
         'descripcion',
         'area_id',
         'ubicacion_actual_id',
+        'responsable_id',
         'estado_id',
     ];
 
@@ -38,6 +40,17 @@ class Bien extends Model
         return $this->belongsTo(
             Area::class,
             'ubicacion_actual_id'
+        );
+    }
+
+    /**
+     * Persona que tiene el bien a cargo y firma la ficha de inventario.
+     */
+    public function responsable(): BelongsTo
+    {
+        return $this->belongsTo(
+            User::class,
+            'responsable_id'
         );
     }
 

@@ -50,6 +50,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Las cuentas dadas de baja conservan su historial pero no pueden operar.
+        if (! Auth::user()->activo) {
+            Auth::guard('web')->logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Esta cuenta está desactivada. Comunicate con Gestión de Bienes e Insumos.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

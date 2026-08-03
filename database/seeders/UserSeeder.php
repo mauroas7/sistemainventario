@@ -15,6 +15,16 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Gestión de Bienes e Insumos: recibe los avisos de movimiento y es quien
+        // vuelca todo a Diaguita. Es el rol admin del sistema.
+        User::create([
+            'name' => 'Silvana - Gestión de Bienes',
+            'email' => 'patrimonio@hospital.test',
+            'password' => Hash::make('password'),
+            'rol' => 'admin',
+            'area_id' => Area::where('nombre', 'Patrimonio')->first()->id,
+        ]);
+
         User::create([
             'name' => 'Administrador',
             'email' => 'admin@hospital.test',

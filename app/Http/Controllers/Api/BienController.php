@@ -13,9 +13,14 @@ class BienController extends Controller
         private BienService $bienService
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        $bienes = $this->bienService->obtenerBienes();
+        $user = $request->user();
+
+        $bienes = $this->bienService->obtenerBienes(
+            $user?->area_id,
+            $user?->rol === 'admin'
+        );
 
         return BienResource::collection($bienes);
     }

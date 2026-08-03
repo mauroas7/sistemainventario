@@ -7,15 +7,17 @@ use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
-
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    // El registro público queda deshabilitado a propósito.
+    //
+    // El área de un usuario define qué bienes ve y quién puede figurar como
+    // responsable patrimonial de un bien del Estado; eso no puede autoasignárselo
+    // cada uno. Las cuentas las da de alta Gestión de Bienes desde Configuración.
+    // Para reabrirlo habría que además pedir área y rol, y sumar un circuito de
+    // aprobación (que es lo que el texto de la pantalla prometía sin implementar).
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
