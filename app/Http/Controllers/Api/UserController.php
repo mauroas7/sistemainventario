@@ -2,83 +2,85 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\UpdateUserRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listar todos los usuarios.
      */
-   public function index()
-{
-    $usuarios = User::with('area')
-        ->orderBy('id')
-        ->get();
+    public function index()
+    {
+        $usuarios = User::with('area')
+            ->orderBy('id')
+            ->get();
 
-    return response()->json([
-        'data' => $usuarios,
-    ]);
-}
+        return response()->json([
+            'data' => $usuarios,
+        ]);
+    }
 
     /**
-     * Store a newly created resource in storage.
+     * Crear un usuario.
      */
-public function store(StoreUserRequest $request)
-{
-    $datosValidados = $request->validated();
+    public function store(StoreUserRequest $request)
+    {
+        $datosValidados = $request->validated();
 
-    $usuario = User::create($datosValidados);
+        $usuario = User::create($datosValidados);
 
-    $usuario->load('area');
+        $usuario->load('area');
 
-    return response()->json([
-        'message' => 'Usuario creado correctamente',
-        'data' => $usuario,
-    ], 201);
-}
+        return response()->json([
+            'message' => 'Usuario creado correctamente',
+            'data' => $usuario,
+        ], 201);
+    }
 
     /**
-     * Display the specified resource.
+     * Mostrar un usuario.
      */
-   public function show(User $user)
-{
-    $user->load('area');
+    public function show(User $user)
+    {
+        $user->load('area');
 
-    return response()->json([
-        'data' => $user,
-    ]);
-}
+        return response()->json([
+            'data' => $user,
+        ]);
+    }
 
     /**
-     * Update the specified resource in storage.
+     * Actualizar un usuario.
      */
-   public function update(UpdateUserRequest $request, User $user)
-{
-    $datosValidados = $request->validated();
+    public function update(
+        UpdateUserRequest $request,
+        User $user
+    ) {
+        $datosValidados = $request->validated();
 
-    $user->update($datosValidados);
+        $user->update($datosValidados);
 
-    $user->load('area');
+        $user->load('area');
 
-    return response()->json([
-        'message' => 'Usuario actualizado correctamente',
-        'data' => $user,
-    ]);
-}
+        return response()->json([
+            'message' => 'Usuario actualizado correctamente',
+            'data' => $user,
+        ]);
+    }
 
     /**
-     * Remove the specified resource from storage.
+     * Eliminar un usuario.
      */
-   public function destroy(User $user)
-{
-    $user->delete();
+    public function destroy(User $user)
+    {
+        
+    $user->delete("");
 
-    return response()->json([
-        'message' => 'Usuario eliminado correctamente',
-    ]);
-}
+        return response()->json([
+            'message' => 'Usuario eliminado correctamente',
+        ]);
+    }
 }
