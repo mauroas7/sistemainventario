@@ -2,7 +2,11 @@
 
 namespace App\Services;
 
+use Illuminate\Validation\ValidationException;
 use App\Models\Movimiento;
+use App\Models\EstadoMovimiento;
+use App\Models\User;
+use App\Models\Bien;
 
 class MovimientoService
 {
@@ -24,9 +28,66 @@ class MovimientoService
     }
 
     // Crear un movimiento.
-    public function crear(array $datos)
+    public function crear(array $datos): Movimiento
     {
-        return Movimiento::create($datos);
+        // Temporalmente utilizamos un usuario fijo.
+        // Luego será auth()->user().
+        $usuario = User::with('area')->findOrFail(1);
+
+        // Obtiene el bien.
+        $bien = Bien::findOrFail($datos['bien_id']);
+
+        // 1. El bien debe encontrarse físicamente en el área del usuario.
+        if ($bien->ubicacion_actual_id !== $usuario->area_id) {
+            throw new \Exception(
+                'No puede mover un bien que no se encuentra en su área.'
+            );
+        }
+
+        // 2. El área destino debe ser distinta del área origen.
+        if ((int) $datos['area_destino_id'] === (int) $usuario->area_id) {
+            throw ValidationException::withMessages([
+                'area_destino_id' => [
+                    'El área de destino debe ser distinta del área de origen.'
+                ]
+            ]);
+        }
+
+        // 3. El bien no puede tener otro movimiento pendiente.
+        $movimientoPendiente = Movimiento::where('bien_id', $bien->id)
+            ->whereHas('estadoMovimiento', function ($query) {
+                $query->where('nombre', 'Pendiente');
+            })
+            ->exists();
+
+        if ($movimientoPendiente) {
+            throw ValidationException::withMessages([
+                'bien_id' => [
+                    'El bien ya posee un movimiento pendiente.'
+                ]
+            ]);
+        }
+
+        // Completa automáticamente los datos del movimiento.
+        $datos['creado_por'] = $usuario->id;
+        $datos['area_origen_id'] = $usuario->area_id;
+        $datos['estado_movimiento_id'] = 1; // Pendiente
+        $datos['fecha_movimiento'] = now();
+
+        // Crea el movimiento.
+        $movimiento = Movimiento::create($datos);
+
+        // Retorna el movimiento con sus relaciones.
+        return $movimiento->load([
+            'bien',
+            'creador',
+            'receptor',
+            'areaOrigen',
+            'areaDestino',
+            'tipoMovimiento',
+            'motivo',
+            'estadoMovimiento',
+        ]);
     }
 
     // Actualizar un movimiento.

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreMovimientoRequest;
 use App\Http\Resources\MovimientoResource;
 use App\Services\MovimientoService;
 use App\Models\Movimiento;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class MovimientoController extends Controller
 {
@@ -29,28 +31,16 @@ class MovimientoController extends Controller
     }
 
     // POST - Crear movimiento
-    public function store(Request $request)
+    public function store(StoreMovimientoRequest $request): JsonResponse
     {
-        $datos = $request->only([
-            'bien_id',
-            'creado_por',
-            'recibido_por',
-            'area_origen_id',
-            'area_destino_id',
-            'tipo_movimiento_id',
-            'motivo_id',
-            'estado_movimiento_id',
-            'condicion_al_salir',
-            'condicion_al_recibir',
-            'observaciones_salida',
-            'observaciones_recepcion',
-            'fecha_movimiento',
-            'fecha_recepcion',
-        ]);
+        $movimiento = $this->movimientoService->crear(
+            $request->validated()
+        );
 
-        $movimiento = $this->movimientoService->crear($datos);
-
-        return new MovimientoResource($movimiento);
+        return response()->json([
+            'message' => 'Movimiento registrado correctamente.',
+            'data' => new MovimientoResource($movimiento),
+        ], 201);
     }
 
     public function update(Request $request, Movimiento $movimiento)
