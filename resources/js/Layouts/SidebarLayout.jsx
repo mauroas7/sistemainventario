@@ -116,12 +116,6 @@ export default function SidebarLayout({ children, roleSelector }) {
                 path="/patrimonio/bienes"
                 label="Directorio de bienes"
             />
-
-            <SidebarSection
-                title="Auditoría"
-                path="/patrimonio/tickets/show"
-                label="Auditoría de tickets"
-            />
         </>
     )}
 

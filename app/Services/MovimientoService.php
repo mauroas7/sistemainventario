@@ -5,7 +5,6 @@ namespace App\Services;
 use Illuminate\Validation\ValidationException;
 use App\Models\Movimiento;
 use App\Models\EstadoMovimiento;
-use App\Models\User;
 use App\Models\Bien;
 
 class MovimientoService
@@ -30,9 +29,7 @@ class MovimientoService
     // Crear un movimiento.
     public function crear(array $datos): Movimiento
     {
-        // Temporalmente utilizamos un usuario fijo.
-        // Luego será auth()->user().
-        $usuario = User::with('area')->findOrFail(1);
+        $usuario = auth()->user();
 
         // Obtiene el bien.
         $bien = Bien::findOrFail($datos['bien_id']);

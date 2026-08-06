@@ -1,8 +1,57 @@
-import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
 
-export default function Create({ bienes = [] }) {
+const initialForm = {
+    bien_id: '',
+    tipo_movimiento_id: '',
+    area_destino_id: '',
+    motivo_id: '',
+    condicion_al_salir: '',
+    observaciones_salida: '',
+};
+
+export default function Create({ bienes = [], areas = [], tiposMovimiento = [], motivos = [] }) {
+    const { auth } = usePage().props;
+    const usuario = auth?.user;
+    const areaOrigen = usuario?.area;
+    const destinos = areas.filter((area) => area.id !== areaOrigen?.id);
+
+    const [form, setForm] = useState(initialForm);
+    const [errors, setErrors] = useState({});
+    const [processing, setProcessing] = useState(false);
+    const [success, setSuccess] = useState(false);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setProcessing(true);
+        setErrors({});
+        setSuccess(false);
+
+        window.axios
+            .post(route('movimientos.store'), form)
+            .then(() => {
+                setSuccess(true);
+                setForm(initialForm);
+                router.reload({ only: ['bienes'] });
+            })
+            .catch((error) => {
+                if (error.response?.status === 422) {
+                    setErrors(error.response.data.errors || {});
+                } else {
+                    setErrors({
+                        general: [error.response?.data?.message || 'No se pudo registrar el movimiento.'],
+                    });
+                }
+            })
+            .finally(() => setProcessing(false));
+    };
+
     return (
         <SidebarLayout>
             <Head title="Crear Ticket de Envío" />
@@ -15,7 +64,23 @@ export default function Create({ bienes = [] }) {
 
                 {/* Contenedor del formulario */}
                 <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-                    <form className="space-y-6">
+                    {success && (
+                        <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+                            Ticket creado correctamente.
+                        </div>
+                    )}
+
+                    {Object.keys(errors).length > 0 && (
+                        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                            <ul className="list-disc pl-5">
+                                {Object.values(errors).flat().map((msg, i) => (
+                                    <li key={i}>{msg}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    <form className="space-y-6" onSubmit={handleSubmit}>
 
                         {/* Fila 1: Solicitantes */}
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -27,7 +92,7 @@ export default function Create({ bienes = [] }) {
                                 <input
                                     type="text"
                                     readOnly
-                                    defaultValue="Área Académica"
+                                    value={areaOrigen?.nombre || 'Sin área asignada'}
                                     className="w-full rounded-lg border-gray-300 bg-gray-50 text-gray-700 shadow-sm focus:ring-0 sm:text-sm"
                                 />
                             </div>
@@ -40,7 +105,7 @@ export default function Create({ bienes = [] }) {
                                 <input
                                     type="text"
                                     readOnly
-                                    defaultValue="Coordinador Académico"
+                                    value={usuario?.name || ''}
                                     className="w-full rounded-lg border-gray-300 bg-gray-50 text-gray-700 shadow-sm focus:ring-0 sm:text-sm"
                                 />
                             </div>
@@ -59,7 +124,8 @@ export default function Create({ bienes = [] }) {
                                 <select
                                     id="bien_id"
                                     name="bien_id"
-                                    defaultValue=""
+                                    value={form.bien_id}
+                                    onChange={handleChange}
                                     required
                                     className="w-full rounded-lg border-gray-300 text-gray-700 shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm"
                                 >
@@ -69,39 +135,43 @@ export default function Create({ bienes = [] }) {
 
                                     {bienes.map((bien) => (
                                         <option key={bien.id} value={bien.id}>
-                                            {bien.codigo_patrimonial} - {bien.nombre}
-                                            {bien.marca ? ` - ${bien.marca}` : ''}
-                                            {bien.modelo ? ` ${bien.modelo}` : ''}
+                                            {bien.codigo} - {bien.nombre}
                                         </option>
                                     ))}
                                 </select>
 
                                 {bienes.length === 0 && (
                                     <p className="mt-2 text-sm text-red-600">
-                                        No hay bienes disponibles registrados.
+                                        No hay bienes disponibles registrados en su área.
                                     </p>
                                 )}
                             </div>
 
                             <div>
                                 <label
-                                    htmlFor="tipo_movimiento"
+                                    htmlFor="tipo_movimiento_id"
                                     className="mb-1 block text-sm font-medium text-blue-900/70"
                                 >
                                     Tipo de movimiento *
                                 </label>
 
                                 <select
-                                    id="tipo_movimiento"
-                                    name="tipo_movimiento"
-                                    defaultValue="Reparación"
+                                    id="tipo_movimiento_id"
+                                    name="tipo_movimiento_id"
+                                    value={form.tipo_movimiento_id}
+                                    onChange={handleChange}
                                     required
                                     className="w-full rounded-lg border-gray-300 text-gray-700 shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm"
                                 >
-                                    <option value="Reparación">Reparación</option>
-                                    <option value="Traslado">Traslado</option>
-                                    <option value="Préstamo">Préstamo</option>
-                                    <option value="Devolución">Devolución</option>
+                                    <option value="" disabled>
+                                        Seleccione un tipo
+                                    </option>
+
+                                    {tiposMovimiento.map((tipo) => (
+                                        <option key={tipo.id} value={tipo.id}>
+                                            {tipo.nombre}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -116,35 +186,40 @@ export default function Create({ bienes = [] }) {
                                     Origen *
                                 </label>
 
-                                <select
+                                <input
                                     id="origen"
-                                    name="origen"
-                                    defaultValue="Área Académica"
-                                    required
-                                    className="w-full rounded-lg border-gray-300 text-gray-700 shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm"
-                                >
-                                    <option value="Área Académica">
-                                        Área Académica
-                                    </option>
-                                </select>
+                                    type="text"
+                                    readOnly
+                                    value={areaOrigen?.nombre || 'Sin área asignada'}
+                                    className="w-full rounded-lg border-gray-300 bg-gray-50 text-gray-700 shadow-sm focus:ring-0 sm:text-sm"
+                                />
                             </div>
 
                             <div>
                                 <label
-                                    htmlFor="destino"
+                                    htmlFor="area_destino_id"
                                     className="mb-1 block text-sm font-medium text-blue-900/70"
                                 >
                                     Destino *
                                 </label>
 
                                 <select
-                                    id="destino"
-                                    name="destino"
-                                    defaultValue="TICs"
+                                    id="area_destino_id"
+                                    name="area_destino_id"
+                                    value={form.area_destino_id}
+                                    onChange={handleChange}
                                     required
                                     className="w-full rounded-lg border-gray-300 text-gray-700 shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm"
                                 >
-                                    <option value="TICs">TICs</option>
+                                    <option value="" disabled>
+                                        Seleccione un destino
+                                    </option>
+
+                                    {destinos.map((area) => (
+                                        <option key={area.id} value={area.id}>
+                                            {area.nombre}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -153,70 +228,71 @@ export default function Create({ bienes = [] }) {
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
                                 <label
-                                    htmlFor="motivo"
+                                    htmlFor="motivo_id"
                                     className="mb-1 block text-sm font-medium text-blue-900/70"
                                 >
                                     Motivo *
                                 </label>
 
                                 <select
-                                    id="motivo"
-                                    name="motivo"
-                                    defaultValue="Rotura"
+                                    id="motivo_id"
+                                    name="motivo_id"
+                                    value={form.motivo_id}
+                                    onChange={handleChange}
                                     required
                                     className="w-full rounded-lg border-gray-300 text-gray-700 shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm"
                                 >
-                                    <option value="Rotura">Rotura</option>
-                                    <option value="Mantenimiento">
-                                        Mantenimiento
+                                    <option value="" disabled>
+                                        Seleccione un motivo
                                     </option>
-                                    <option value="Cambio de ubicación">
-                                        Cambio de ubicación
-                                    </option>
-                                    <option value="Uso temporal">
-                                        Uso temporal
-                                    </option>
+
+                                    {motivos.map((motivo) => (
+                                        <option key={motivo.id} value={motivo.id}>
+                                            {motivo.nombre}
+                                        </option>
+                                    ))}
                                 </select>
+                            </div>
+
+                            <div>
+                                <label
+                                    htmlFor="condicion_al_salir"
+                                    className="mb-1 block text-sm font-medium text-blue-900/70"
+                                >
+                                    Condición al salir
+                                </label>
+
+                                <input
+                                    id="condicion_al_salir"
+                                    name="condicion_al_salir"
+                                    type="text"
+                                    value={form.condicion_al_salir}
+                                    onChange={handleChange}
+                                    className="w-full rounded-lg border-gray-300 text-gray-700 shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm"
+                                />
                             </div>
                         </div>
 
                         {/* Fila 5: Observaciones */}
                         <div>
                             <label
-                                htmlFor="observaciones"
+                                htmlFor="observaciones_salida"
                                 className="mb-1 block text-sm font-medium text-blue-900/70"
                             >
                                 Observaciones
                             </label>
 
                             <textarea
-                                id="observaciones"
-                                name="observaciones"
+                                id="observaciones_salida"
+                                name="observaciones_salida"
                                 rows={3}
-                                defaultValue="No enciende. Se entrega con cargador."
+                                value={form.observaciones_salida}
+                                onChange={handleChange}
                                 className="w-full rounded-lg border-gray-300 text-gray-700 shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm"
                             />
                         </div>
 
-                        {/* Fila 6: Adjuntar foto */}
-                        <div>
-                            <label
-                                htmlFor="foto"
-                                className="mb-1 block text-sm font-medium text-blue-900/70"
-                            >
-                                Adjuntar foto (opcional)
-                            </label>
-
-                            <input
-                                id="foto"
-                                name="foto"
-                                type="file"
-                                accept="image/*"
-                                className="w-full rounded-lg border border-gray-300 bg-white text-sm text-gray-500 shadow-sm file:mr-4 file:rounded-md file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
-                            />
-                        </div>
-
-                        {/* Fila 7: Botones */}
+                        {/* Fila 6: Botones */}
                         <div className="flex items-center space-x-4 pt-4">
                             <Link
                                 href="/inicio"
@@ -226,11 +302,11 @@ export default function Create({ bienes = [] }) {
                             </Link>
 
                             <button
-                                type="button"
-                                disabled={bienes.length === 0}
+                                type="submit"
+                                disabled={bienes.length === 0 || processing}
                                 className="rounded-lg bg-institucional-primario px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-900 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Crear ticket
+                                {processing ? 'Creando...' : 'Crear ticket'}
                             </button>
                         </div>
                     </form>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
 
-export default function Index() {
+export default function Index({ totalAreas = 0, totalUsuarios = 0, totalEstadosBien = 0 }) {
     return (
         <SidebarLayout>
             <Head title="Configuración del Sistema" />
@@ -33,7 +33,7 @@ export default function Index() {
                                 Alta y baja de consultorios, oficinas y departamentos del hospital.
                             </p>
                             <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 border border-gray-100 mb-6">
-                                <span className="font-bold text-institucional-primario">42</span> áreas registradas actualmente.
+                                <span className="font-bold text-institucional-primario">{totalAreas}</span> áreas registradas actualmente.
                             </div>
                         </div>
                         <button className="w-full py-2 bg-white text-institucional-primario border border-gray-300 rounded-lg font-medium text-sm hover:bg-gray-50 shadow-sm transition-colors">
@@ -54,7 +54,7 @@ export default function Index() {
                                 Gestión de coordinadores y asignación de responsables por área.
                             </p>
                             <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 border border-gray-100 mb-6">
-                                <span className="font-bold text-institucional-primario">18</span> responsables activos.
+                                <span className="font-bold text-institucional-primario">{totalUsuarios}</span> usuarios registrados.
                             </div>
                         </div>
                         <button className="w-full py-2 bg-white text-institucional-primario border border-gray-300 rounded-lg font-medium text-sm hover:bg-gray-50 shadow-sm transition-colors">
@@ -70,16 +70,16 @@ export default function Index() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-1">Categorías de Bienes</h3>
+                            <h3 className="text-lg font-bold text-gray-900 mb-1">Estados de Bienes</h3>
                             <p className="text-sm text-gray-500 mb-4">
-                                Clasificación de inventario (Ej: Equipamiento Médico, Informática).
+                                Estados posibles de un bien (Ej: Disponible, En uso, Dañado).
                             </p>
                             <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 border border-gray-100 mb-6">
-                                <span className="font-bold text-institucional-primario">8</span> categorías principales.
+                                <span className="font-bold text-institucional-primario">{totalEstadosBien}</span> estados registrados.
                             </div>
                         </div>
                         <button className="w-full py-2 bg-white text-institucional-primario border border-gray-300 rounded-lg font-medium text-sm hover:bg-gray-50 shadow-sm transition-colors">
-                            Administrar Categorías
+                            Administrar Estados
                         </button>
                     </div>
 

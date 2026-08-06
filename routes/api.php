@@ -35,10 +35,15 @@ Route::get('/bien', [BienController::class, 'index']);
 // Esto genera automáticamente las siguientes rutas:
 //     - /api/movimientos               --> index()
 //     - /api/movimientos/{movimiento}  --> show()
-//     - /api/movimientos               --> store()
 //     - /api/movimientos/{movimiento}  --> update()
 Route::apiResource('movimientos', MovimientoController::class)
-    ->only(['index', 'show', 'store', 'update']);
+    ->only(['index', 'show', 'update']);
+
+// store() necesita conocer al usuario autenticado (creado_por, area_origen_id),
+// por eso corre con sesión web en vez del grupo "api" (que no la comparte).
+Route::middleware(['web', 'auth'])
+    ->post('/movimientos', [MovimientoController::class, 'store'])
+    ->name('movimientos.store');
 
 
 // <------- Rutas para usuario ------->

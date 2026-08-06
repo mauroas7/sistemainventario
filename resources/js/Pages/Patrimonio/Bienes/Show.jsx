@@ -2,7 +2,13 @@ import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
 
-export default function Show() {
+function formatFecha(iso) {
+    if (!iso) return '—';
+    const fecha = new Date(iso);
+    return `${fecha.toLocaleDateString('es-AR')} - ${fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} hs`;
+}
+
+export default function Show({ bien, movimientos = [] }) {
     return (
         <SidebarLayout>
             <Head title="Historial del Bien" />
@@ -15,11 +21,11 @@ export default function Show() {
                             Ficha y Registro Histórico
                         </h2>
                         <p className="text-sm text-gray-500 mt-1">
-                            Bien <span className="font-bold text-gray-700">#3242 - Notebook Dell Latitude</span>
+                            Bien <span className="font-bold text-gray-700">{bien.codigo} - {bien.nombre}</span>
                         </p>
                     </div>
-                    <Link 
-                        href="/patrimonio/dashboard"
+                    <Link
+                        href={route('patrimonio.dashboard')}
                         className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium text-sm hover:bg-gray-50 shadow-sm transition-colors"
                     >
                         Volver al Dashboard
@@ -27,30 +33,30 @@ export default function Show() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
+
                     {/* Columna Izquierda: Ficha Técnica (1/3) */}
                     <div className="space-y-6">
                         <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                             <h3 className="text-sm font-bold text-institucional-primario uppercase tracking-wider mb-4 border-b pb-2">
                                 Datos del Activo
                             </h3>
-                            
+
                             <div className="space-y-4">
                                 <div>
-                                    <p className="text-xs text-gray-500">ID Patrimonial</p>
-                                    <p className="text-sm font-bold text-gray-900">3242</p>
+                                    <p className="text-xs text-gray-500">Código</p>
+                                    <p className="text-sm font-bold text-gray-900">{bien.codigo}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500">Categoría</p>
-                                    <p className="text-sm text-gray-900">Equipamiento Informático</p>
+                                    <p className="text-xs text-gray-500">Nombre</p>
+                                    <p className="text-sm text-gray-900">{bien.nombre}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500">Número de Serie (S/N)</p>
-                                    <p className="text-sm font-mono text-gray-700">DL-9843-XX2</p>
+                                    <p className="text-xs text-gray-500">Descripción</p>
+                                    <p className="text-sm text-gray-700">{bien.descripcion || 'Sin descripción'}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500">Fecha de Alta</p>
-                                    <p className="text-sm text-gray-900">15/03/2023</p>
+                                    <p className="text-xs text-gray-500">Área responsable</p>
+                                    <p className="text-sm text-gray-900">{bien.area.nombre}</p>
                                 </div>
                             </div>
 
@@ -58,8 +64,13 @@ export default function Show() {
                                 <p className="text-xs text-gray-500 mb-1">Ubicación Actual</p>
                                 <div className="flex items-center space-x-2">
                                     <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                    <p className="text-sm font-bold text-gray-900">TICs (Soporte Técnico)</p>
+                                    <p className="text-sm font-bold text-gray-900">{bien.ubicacion_actual.nombre}</p>
                                 </div>
+                            </div>
+
+                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                <p className="text-xs text-gray-500 mb-1">Estado</p>
+                                <p className="text-sm font-bold text-gray-900">{bien.estado.nombre}</p>
                             </div>
                         </div>
 
@@ -81,69 +92,49 @@ export default function Show() {
                             Registro de Movimientos (Log)
                         </h3>
 
+                        {movimientos.length === 0 && (
+                            <p className="text-sm text-gray-500">Este bien todavía no tiene movimientos registrados.</p>
+                        )}
+
                         <div className="space-y-6">
-                            
-                            {/* Movimiento 3 (El más reciente) */}
-                            <div className="flex gap-4">
-                                <div className="flex flex-col items-center">
-                                    <div className="w-8 h-8 bg-blue-50 rounded-full border border-blue-200 flex items-center justify-center text-institucional-primario shadow-sm z-10">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                            {movimientos.map((movimiento, index) => (
+                                <div key={movimiento.id} className="flex gap-4">
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-8 h-8 bg-blue-50 rounded-full border border-blue-200 flex items-center justify-center text-institucional-primario shadow-sm z-10">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                        </div>
+                                        {index < movimientos.length - 1 && (
+                                            <div className="w-px h-full bg-gray-200 mt-2"></div>
+                                        )}
                                     </div>
-                                    <div className="w-px h-full bg-gray-200 mt-2"></div>
-                                </div>
-                                <div className="pb-6">
-                                    <p className="text-xs text-gray-500 mb-1">11/07/2026 - 10:22 hs</p>
-                                    <div className="bg-gray-50 border border-gray-100 rounded-lg p-4">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <p className="text-sm font-bold text-gray-900">Traslado por Reparación</p>
-                                                <p className="text-sm text-gray-600 mt-1">De <span className="font-medium text-gray-800">Área Académica</span> a <span className="font-medium text-gray-800">TICs</span></p>
+                                    <div className="pb-6">
+                                        <p className="text-xs text-gray-500 mb-1">{formatFecha(movimiento.fecha_movimiento)}</p>
+                                        <div className="bg-gray-50 border border-gray-100 rounded-lg p-4">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p className="text-sm font-bold text-gray-900">{movimiento.tipo_movimiento.nombre}</p>
+                                                    <p className="text-sm text-gray-600 mt-1">
+                                                        De <span className="font-medium text-gray-800">{movimiento.area_origen.nombre}</span> a{' '}
+                                                        <span className="font-medium text-gray-800">{movimiento.area_destino.nombre}</span>
+                                                    </p>
+                                                </div>
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                    {movimiento.estado_movimiento.nombre}
+                                                </span>
                                             </div>
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                                Completado
-                                            </span>
+                                            <div className="mt-3 text-xs text-gray-500">
+                                                Vinculado al{' '}
+                                                <Link
+                                                    href={route('patrimonio.tickets.show', movimiento.id)}
+                                                    className="text-institucional-primario hover:underline font-medium"
+                                                >
+                                                    Ticket #TK-{movimiento.id}
+                                                </Link>
+                                            </div>
                                         </div>
-                                        <div className="mt-3 text-xs text-gray-500">
-                                            Vinculado al <a href="#" className="text-institucional-primario hover:underline font-medium">Ticket #TK-1042</a>
-                                        </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Movimiento 2 */}
-                            <div className="flex gap-4">
-                                <div className="flex flex-col items-center">
-                                    <div className="w-8 h-8 bg-gray-50 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 shadow-sm z-10">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                    </div>
-                                    <div className="w-px h-full bg-gray-200 mt-2"></div>
-                                </div>
-                                <div className="pb-6">
-                                    <p className="text-xs text-gray-500 mb-1">10/05/2024 - 09:15 hs</p>
-                                    <div className="bg-gray-50 border border-gray-100 rounded-lg p-4">
-                                        <p className="text-sm font-bold text-gray-900">Asignación Inicial</p>
-                                        <p className="text-sm text-gray-600 mt-1">El bien fue asignado permanentemente a <span className="font-medium text-gray-800">Área Académica</span>.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Movimiento 1 (Origen) */}
-                            <div className="flex gap-4">
-                                <div className="flex flex-col items-center">
-                                    <div className="w-8 h-8 bg-green-50 rounded-full border border-green-200 flex items-center justify-center text-green-600 shadow-sm z-10">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500 mb-1">15/03/2023 - 11:00 hs</p>
-                                    <div className="bg-gray-50 border border-gray-100 rounded-lg p-4">
-                                        <p className="text-sm font-bold text-gray-900">Alta en Patrimonio</p>
-                                        <p className="text-sm text-gray-600 mt-1">El bien ingresó al sistema. Ubicación inicial: <span className="font-medium text-gray-800">Depósito Central</span>.</p>
-                                        <p className="text-xs text-gray-500 mt-2">Registrado por: Admin Patrimonio</p>
-                                    </div>
-                                </div>
-                            </div>
-
+                            ))}
                         </div>
                     </div>
                 </div>

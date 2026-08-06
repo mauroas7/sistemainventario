@@ -1,8 +1,16 @@
 import React from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
 
-export default function Dashboard() {
+function formatFecha(iso) {
+    if (!iso) return '—';
+    const fecha = new Date(iso);
+    const dia = fecha.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
+    const hora = fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    return `${dia} ${hora}`;
+}
+
+export default function Dashboard({ kpis = { total: 0, pendientes: 0, recibidos: 0 }, ultimosTickets = [] }) {
     return (
         <SidebarLayout>
             <Head title="Control Patrimonial" />
@@ -10,7 +18,7 @@ export default function Dashboard() {
             <div className="max-w-7xl">
                 {/* Título de la vista */}
                 <h2 className="text-2xl font-bold text-institucional-primario mb-6">
-                    Control patrimonial (Silvana)
+                    Control patrimonial
                 </h2>
 
                 {/* Sección 1: Filtros del Dashboard */}
@@ -18,7 +26,7 @@ export default function Dashboard() {
                     <h3 className="text-lg font-bold text-institucional-primario mb-4">
                         Filtros del dashboard
                     </h3>
-                    
+
                     <form className="space-y-4">
                         {/* Fila 1: Sector y Estado */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -46,18 +54,18 @@ export default function Dashboard() {
                                 <label className="block text-sm font-medium text-gray-500 mb-1">
                                     Desde
                                 </label>
-                                <input 
-                                    type="date" 
-                                    className="w-full border-gray-300 rounded-lg shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm text-gray-500" 
+                                <input
+                                    type="date"
+                                    className="w-full border-gray-300 rounded-lg shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm text-gray-500"
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-500 mb-1">
                                     Hasta
                                 </label>
-                                <input 
-                                    type="date" 
-                                    className="w-full border-gray-300 rounded-lg shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm text-gray-500" 
+                                <input
+                                    type="date"
+                                    className="w-full border-gray-300 rounded-lg shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm text-gray-500"
                                 />
                             </div>
                         </div>
@@ -67,23 +75,23 @@ export default function Dashboard() {
                             <label className="block text-sm font-medium text-gray-500 mb-1">
                                 Bien (codigo o nombre)
                             </label>
-                            <input 
-                                type="text" 
-                                placeholder="Ej: 3242 o Notebook Dell" 
-                                className="w-full border-gray-300 rounded-lg shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm text-gray-700 placeholder-gray-400" 
+                            <input
+                                type="text"
+                                placeholder="Ej: NB001 o Notebook Dell"
+                                className="w-full border-gray-300 rounded-lg shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm text-gray-700 placeholder-gray-400"
                             />
                         </div>
 
                         {/* Fila 4: Botones */}
                         <div className="flex space-x-4 pt-2">
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className="px-6 py-2 bg-institucional-primario text-white rounded-lg font-medium text-sm hover:bg-blue-900 shadow-sm transition-colors"
                             >
                                 Aplicar filtros
                             </button>
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className="px-6 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium text-sm hover:bg-gray-50 shadow-sm transition-colors"
                             >
                                 Limpiar
@@ -95,16 +103,16 @@ export default function Dashboard() {
                 {/* Sección 2: Tarjetas de Resumen (KPIs) */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                        <h4 className="text-sm font-bold text-institucional-primario mb-4">Abiertos</h4>
-                        <p className="text-4xl font-bold text-institucional-primario">2</p>
+                        <h4 className="text-sm font-bold text-institucional-primario mb-4">Total de movimientos</h4>
+                        <p className="text-4xl font-bold text-institucional-primario">{kpis.total}</p>
                     </div>
                     <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                        <h4 className="text-sm font-bold text-institucional-primario mb-4">Pendientes recepcion</h4>
-                        <p className="text-4xl font-bold text-institucional-primario">1</p>
+                        <h4 className="text-sm font-bold text-institucional-primario mb-4">Pendientes de recepcion</h4>
+                        <p className="text-4xl font-bold text-institucional-primario">{kpis.pendientes}</p>
                     </div>
                     <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                        <h4 className="text-sm font-bold text-institucional-primario mb-4">Recibidos en destino</h4>
-                        <p className="text-4xl font-bold text-institucional-primario">1</p>
+                        <h4 className="text-sm font-bold text-institucional-primario mb-4">Recibidos</h4>
+                        <p className="text-4xl font-bold text-institucional-primario">{kpis.recibidos}</p>
                     </div>
                 </div>
 
@@ -113,7 +121,7 @@ export default function Dashboard() {
                     <h3 className="text-lg font-bold text-institucional-primario mb-4">
                         Ultimos tickets
                     </h3>
-                    
+
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
@@ -128,26 +136,34 @@ export default function Dashboard() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {/* Fila 1 */}
-                                <tr className="hover:bg-gray-50 transition-colors">
-                                    <td className="py-4 px-2 text-sm text-gray-600 font-medium">TK-1042</td>
-                                    <td className="py-4 px-2 text-sm text-gray-600">3242 - Notebook Dell Latitude</td>
-                                    <td className="py-4 px-2 text-sm text-gray-600">Area Academica</td>
-                                    <td className="py-4 px-2 text-sm text-gray-600">TICs</td>
-                                    <td className="py-4 px-2 text-sm text-gray-600">En traslado</td>
-                                    <td className="py-4 px-2 text-sm text-gray-600">Jefa Academica (hasta recepcion)</td>
-                                    <td className="py-4 px-2 text-sm text-gray-600">11/07 10:22</td>
-                                </tr>
-                                {/* Fila 2 */}
-                                <tr className="hover:bg-gray-50 transition-colors">
-                                    <td className="py-4 px-2 text-sm text-gray-600 font-medium">TK-1041</td>
-                                    <td className="py-4 px-2 text-sm text-gray-600">1988 - Balanza digital</td>
-                                    <td className="py-4 px-2 text-sm text-gray-600">Consultorio 10</td>
-                                    <td className="py-4 px-2 text-sm text-gray-600">Biomedica</td>
-                                    <td className="py-4 px-2 text-sm text-gray-600">Recibido en destino</td>
-                                    <td className="py-4 px-2 text-sm text-gray-600">Responsable de Biomedica</td>
-                                    <td className="py-4 px-2 text-sm text-gray-600">11/07 09:40</td>
-                                </tr>
+                                {ultimosTickets.length === 0 && (
+                                    <tr>
+                                        <td colSpan={7} className="py-6 px-2 text-sm text-gray-500 text-center">
+                                            Todavía no hay movimientos registrados.
+                                        </td>
+                                    </tr>
+                                )}
+
+                                {ultimosTickets.map((ticket) => (
+                                    <tr key={ticket.id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="py-4 px-2 text-sm text-gray-600 font-medium">
+                                            <Link
+                                                href={route('patrimonio.tickets.show', ticket.id)}
+                                                className="text-institucional-primario hover:underline"
+                                            >
+                                                TK-{ticket.id}
+                                            </Link>
+                                        </td>
+                                        <td className="py-4 px-2 text-sm text-gray-600">
+                                            {ticket.bien.codigo} - {ticket.bien.nombre}
+                                        </td>
+                                        <td className="py-4 px-2 text-sm text-gray-600">{ticket.area_origen.nombre}</td>
+                                        <td className="py-4 px-2 text-sm text-gray-600">{ticket.area_destino.nombre}</td>
+                                        <td className="py-4 px-2 text-sm text-gray-600">{ticket.estado_movimiento.nombre}</td>
+                                        <td className="py-4 px-2 text-sm text-gray-600">{ticket.creado_por.nombre}</td>
+                                        <td className="py-4 px-2 text-sm text-gray-600">{formatFecha(ticket.fecha_movimiento)}</td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>

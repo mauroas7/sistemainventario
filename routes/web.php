@@ -1,10 +1,10 @@
 <?php
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\InicioController;
+use App\Http\Controllers\PatrimonioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,21 +52,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('role:coordinador,admin')->group(function () {
 
-        Route::get('/patrimonio/dashboard', function () {
-            return Inertia::render('Patrimonio/Dashboard');
-        })->name('patrimonio.dashboard');
+        Route::get('/patrimonio/dashboard', [PatrimonioController::class, 'dashboard'])
+            ->name('patrimonio.dashboard');
 
-        Route::get('/patrimonio/bienes', function () {
-            return Inertia::render('Patrimonio/Bienes/Index');
-        })->name('patrimonio.bienes.index');
+        Route::get('/patrimonio/bienes', [PatrimonioController::class, 'bienesIndex'])
+            ->name('patrimonio.bienes.index');
 
-        Route::get('/patrimonio/bienes/show', function () {
-            return Inertia::render('Patrimonio/Bienes/Show');
-        })->name('patrimonio.bienes.show');
+        Route::get('/patrimonio/bienes/{bien}', [PatrimonioController::class, 'bienesShow'])
+            ->name('patrimonio.bienes.show');
 
-        Route::get('/patrimonio/tickets/show', function () {
-            return Inertia::render('Patrimonio/Tickets/Show');
-        })->name('patrimonio.tickets.show');
+        Route::get('/patrimonio/tickets/{movimiento}', [PatrimonioController::class, 'ticketsShow'])
+            ->name('patrimonio.tickets.show');
     });
 
 
@@ -78,9 +74,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('role:admin')->group(function () {
 
-        Route::get('/patrimonio/configuracion', function () {
-            return Inertia::render('Patrimonio/Configuracion/Index');
-        })->name('patrimonio.configuracion.index');
+        Route::get('/patrimonio/configuracion', [PatrimonioController::class, 'configuracionIndex'])
+            ->name('patrimonio.configuracion.index');
     });
 
 
