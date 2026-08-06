@@ -70,6 +70,15 @@ class MovimientoController extends Controller
 
         abort_unless($puedeVer, 403);
 
+        // El binding de ruta entrega el modelo pelado: sin este load, cada campo que
+        // arma MovimientoResource dispara su propia consulta. El historial de estados
+        // se incluye porque esta es una vista de detalle (en los listados no viaja).
+        $movimiento->load(array_merge(MovimientoService::RELACIONES, [
+            'historialEstados.estadoAnterior',
+            'historialEstados.estadoNuevo',
+            'historialEstados.usuario',
+        ]));
+
         return new MovimientoResource($movimiento);
     }
 
@@ -122,7 +131,24 @@ class MovimientoController extends Controller
             'fecha_recepcion' => ['nullable', 'date'],
         ]);
 
-        $movimiento = $this->movimientoService->actualizar($movimiento, $datos);
+        // El estado no se puede escribir como si fuera un campo más: cada transición
+        // arrastra efectos (quién y cuándo lo registró en Diaguita, la fecha de cierre,
+        // limpiar el acuse si se anula). Pasarlo por actualizarEstado() evita que la
+        // fila quede en un estado imposible, como "Cerrado" sin fecha de cierre.
+        $estadoPedido = $datos['estado_movimiento_id'] ?? null;
+        unset($datos['estado_movimiento_id']);
+
+        if (! empty($datos)) {
+            $movimiento = $this->movimientoService->actualizar($movimiento, $datos);
+        }
+
+        if ($estadoPedido && (int) $estadoPedido !== (int) $movimiento->estado_movimiento_id) {
+            $movimiento = $this->movimientoService->actualizarEstado(
+                $movimiento,
+                (int) $estadoPedido,
+                $request->user()
+            );
+        }
 
         return new MovimientoResource($movimiento);
     }

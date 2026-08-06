@@ -1,14 +1,33 @@
-import React, { useMemo, useState } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
+import React from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
 import { ClockIcon, CheckCircleIcon, ClipboardDocumentListIcon, XCircleIcon } from '@heroicons/react/20/solid';
 import { estadoMovimientoClase } from '@/utils/format';
+import axios from 'axios';
 
-export default function Bandeja({ movimientos: initialMovimientos = [] }) {
+const PESTANAS = [
+    { clave: 'informados', etiqueta: 'Informados' },
+    { clave: 'registrados', etiqueta: 'Registrados' },
+    { clave: 'todos', etiqueta: 'Todos' },
+];
+
+export default function Bandeja({
+    movimientos = [],
+    pestana = 'informados',
+    paginacion = { pagina: 1, ultima_pagina: 1, total: 0 },
+    resumen = { informados: 0, registrados: 0, cerrados: 0, anulados: 0, total: 0 },
+}) {
     const { auth } = usePage().props;
     const user = auth?.user || {};
-    const [movimientos] = useState(initialMovimientos);
-    const [filtro, setFiltro] = useState('informados');
+
+    // El filtrado y el conteo los hace la base: antes se traían todos los movimientos
+    // del hospital y se filtraban en el navegador.
+    function irA(clave, pagina = 1) {
+        router.get(route('recepcion.bandeja'), { estado: clave, page: pagina }, {
+            preserveScroll: true,
+            preserveState: false,
+        });
+    }
 
     function relacion(m) {
         if (user.rol === 'admin') return 'Admin';
@@ -40,70 +59,29 @@ export default function Bandeja({ movimientos: initialMovimientos = [] }) {
             && (user.rol === 'admin' || String(m.creado_por?.id) === String(user.id));
     }
 
+    // Estas acciones van por axios y no por fetch(): axios manda el token CSRF leyéndolo
+    // de la cookie XSRF-TOKEN, que el servidor mantiene al día. El <meta name="csrf-token">
+    // se renderiza una sola vez y queda viejo apenas el login rota la sesión, así que un
+    // fetch() que lo leyera terminaba siempre en 419. Se usa route() porque devuelve una
+    // URL absoluta y evita el baseURL '/api' que tiene axios configurado por defecto.
     function confirmarRecepcion(movimientoId) {
-        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-        fetch(`/recepcion/confirmar/${movimientoId}`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': token || '',
-            },
-            credentials: 'same-origin',
-        })
-            .then(async (response) => {
-                if (!response.ok) {
-                    const data = await response.json().catch(() => null);
-                    throw new Error(data?.message || 'No se pudo confirmar la recepción');
-                }
-
-                window.location.reload();
-            })
+        axios.post(route('recepcion.confirmar', { movimiento: movimientoId }))
+            .then(() => window.location.reload())
             .catch((error) => {
-                alert(error.message || 'No se pudo confirmar la recepción');
+                alert(error.response?.data?.message || 'No se pudo confirmar la recepción');
             });
     }
 
     function cancelarRecepcion(movimientoId) {
-        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-        fetch(`/recepcion/cancelar/${movimientoId}`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': token || '',
-            },
-            credentials: 'same-origin',
-        })
-            .then(async (response) => {
-                if (!response.ok) {
-                    const data = await response.json().catch(() => null);
-                    throw new Error(data?.message || 'No se pudo cancelar el ticket');
-                }
-
-                window.location.reload();
-            })
+        axios.post(route('recepcion.cancelar', { movimiento: movimientoId }))
+            .then(() => window.location.reload())
             .catch((error) => {
-                alert(error.message || 'No se pudo cancelar el ticket');
+                alert(error.response?.data?.message || 'No se pudo cancelar el ticket');
             });
     }
 
-    const visibles = movimientos.filter((m) => {
-        if (filtro === 'todos') return true;
-        if (filtro === 'registrados') return ['Registrado', 'Cerrado'].includes(m.estado_movimiento?.nombre);
-        return m.estado_movimiento?.nombre === 'Informado';
-    });
-
-    const resumen = useMemo(() => {
-        const contar = (...estados) => movimientos.filter(m => estados.includes(m.estado_movimiento?.nombre)).length;
-
-        return {
-            informados: contar('Informado'),
-            registrados: contar('Registrado', 'Cerrado'),
-            anulados: contar('Anulado'),
-            total: movimientos.length,
-        };
-    }, [movimientos]);
+    // La página ya viene filtrada del servidor.
+    const visibles = movimientos;
 
     return (
         <SidebarLayout>
@@ -133,7 +111,9 @@ export default function Bandeja({ movimientos: initialMovimientos = [] }) {
                             </span>
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-wider text-green-700">Registrados</p>
-                                <p className="mt-1 text-2xl font-bold text-green-700">{resumen.registrados}</p>
+                                {/* La tarjeta y la pestaña "Registrados" agrupan los dos
+                                    estados en que el trámite ya salió del circuito. */}
+                                <p className="mt-1 text-2xl font-bold text-green-700">{resumen.registrados + resumen.cerrados}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
@@ -159,25 +139,21 @@ export default function Bandeja({ movimientos: initialMovimientos = [] }) {
                     <div className="flex items-center gap-3 mb-6">
                         <button
                             type="button"
-                            onClick={() => setFiltro('informados')}
-                            className={`rounded-full px-4 py-2 text-sm font-medium ${filtro === 'informados' ? 'bg-blue-50 text-institucional-primario border border-blue-200' : 'bg-white text-gray-600 border border-gray-200'}`}
+                            onClick={() => irA(PESTANAS[0].clave)}
+                            className={`rounded-full px-4 py-2 text-sm font-medium ${pestana === PESTANAS[0].clave ? 'bg-blue-50 text-institucional-primario border border-blue-200' : 'bg-white text-gray-600 border border-gray-200'}`}
                         >
-                            Informados
+                            {PESTANAS[0].etiqueta}
                         </button>
-                        <button
-                            type="button"
-                            onClick={() => setFiltro('registrados')}
-                            className={`rounded-full px-4 py-2 text-sm font-medium ${filtro === 'registrados' ? 'bg-blue-50 text-institucional-primario border border-blue-200' : 'bg-white text-gray-600 border border-gray-200'}`}
-                        >
-                            Registrados
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setFiltro('todos')}
-                            className={`rounded-full px-4 py-2 text-sm font-medium ${filtro === 'todos' ? 'bg-blue-50 text-institucional-primario border border-blue-200' : 'bg-white text-gray-600 border border-gray-200'}`}
-                        >
-                            Todos
-                        </button>
+                        {PESTANAS.slice(1).map(({ clave, etiqueta }) => (
+                            <button
+                                key={clave}
+                                type="button"
+                                onClick={() => irA(clave)}
+                                className={`rounded-full px-4 py-2 text-sm font-medium ${pestana === clave ? 'bg-blue-50 text-institucional-primario border border-blue-200' : 'bg-white text-gray-600 border border-gray-200'}`}
+                            >
+                                {etiqueta}
+                            </button>
+                        ))}
                     </div>
 
                     <div className="overflow-x-auto">
@@ -267,6 +243,35 @@ export default function Bandeja({ movimientos: initialMovimientos = [] }) {
                             </tbody>
                         </table>
                     </div>
+
+                    {paginacion.ultima_pagina > 1 && (
+                        <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
+                            <p className="text-sm text-gray-500">
+                                Página <span className="font-medium text-gray-900">{paginacion.pagina}</span> de{' '}
+                                <span className="font-medium text-gray-900">{paginacion.ultima_pagina}</span>
+                                <span className="text-gray-400"> · {paginacion.total} movimientos</span>
+                            </p>
+
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    disabled={paginacion.pagina <= 1}
+                                    onClick={() => irA(pestana, paginacion.pagina - 1)}
+                                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                >
+                                    Anterior
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={paginacion.pagina >= paginacion.ultima_pagina}
+                                    onClick={() => irA(pestana, paginacion.pagina + 1)}
+                                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                >
+                                    Siguiente
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </SidebarLayout>

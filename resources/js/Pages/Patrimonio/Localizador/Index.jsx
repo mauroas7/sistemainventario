@@ -10,6 +10,25 @@ function normalizar(texto) {
     return String(texto ?? '').toLowerCase();
 }
 
+// El localizador necesita el último movimiento de CADA bien, así que precisa el
+// historial completo. La API pagina de a 20: quedarse con la primera página hacía que
+// la mayoría de los bienes se mostraran como "sin movimientos registrados" aunque
+// tuvieran. Se recorren todas las páginas usando el tope permitido por la API (100).
+async function traerTodosLosMovimientos() {
+    const primera = await axios.get('/movimientos', { params: { per_page: 100, page: 1 } });
+    const payload = primera.data || {};
+
+    let todos = payload.data || [];
+    const ultimaPagina = payload.meta?.last_page || 1;
+
+    for (let pagina = 2; pagina <= ultimaPagina; pagina++) {
+        const res = await axios.get('/movimientos', { params: { per_page: 100, page: pagina } });
+        todos = todos.concat(res.data?.data || []);
+    }
+
+    return todos;
+}
+
 export default function Index() {
     const [bienes, setBienes] = useState([]);
     const [movimientos, setMovimientos] = useState([]);
@@ -19,10 +38,13 @@ export default function Index() {
     useEffect(() => {
         Promise.all([
             axios.get('/bien'),
-            axios.get('/movimientos'),
-        ]).then(([bienRes, movRes]) => {
+            traerTodosLosMovimientos(),
+        ]).then(([bienRes, movs]) => {
             setBienes(bienRes.data.data || bienRes.data || []);
-            setMovimientos(movRes.data.data || movRes.data || []);
+            setMovimientos(movs);
+        }).catch(() => {
+            setBienes([]);
+            setMovimientos([]);
         }).finally(() => setCargando(false));
     }, []);
 

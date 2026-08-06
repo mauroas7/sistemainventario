@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import {
+    CheckCircleIcon,
+    ExclamationTriangleIcon,
     HomeIcon,
     PaperAirplaneIcon,
     InboxArrowDownIcon,
@@ -15,9 +17,21 @@ import {
 
 export default function SidebarLayout({ children, roleSelector }) {
     const { url } = usePage();
-    const { auth } = usePage().props; // Obtenemos el usuario logueado desde Inertia
+    const { auth, flash } = usePage().props; // Obtenemos el usuario logueado desde Inertia
     const role = auth?.user?.rol;
     const [menuAbierto, setMenuAbierto] = useState(false);
+
+    // El cartel vive acá porque lo comparte todo el sistema: los controladores mandan el
+    // mensaje con ->with('success', ...) y hasta ahora no lo mostraba nadie.
+    const [avisoOculto, setAvisoOculto] = useState(false);
+    const aviso = flash?.success
+        ? { texto: flash.success, tipo: 'success' }
+        : flash?.error
+            ? { texto: flash.error, tipo: 'error' }
+            : null;
+
+    // Un mensaje nuevo vuelve a mostrarse aunque se haya cerrado el anterior.
+    useEffect(() => setAvisoOculto(false), [flash?.success, flash?.error]);
 
     // Función auxiliar para determinar si un link está activo
     const isActive = (path) => url.startsWith(path);
@@ -170,6 +184,32 @@ export default function SidebarLayout({ children, roleSelector }) {
 
                 {/* 3. Área de Contenido Principal */}
                 <main className="flex-1 min-w-0 overflow-y-auto p-4 sm:p-8">
+                    {aviso && !avisoOculto && (
+                        <div
+                            role="status"
+                            className={`mb-6 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
+                                aviso.tipo === 'success'
+                                    ? 'border-green-200 bg-green-50 text-green-800'
+                                    : 'border-red-200 bg-red-50 text-red-700'
+                            }`}
+                        >
+                            {aviso.tipo === 'success'
+                                ? <CheckCircleIcon className="h-5 w-5 shrink-0 text-green-600" />
+                                : <ExclamationTriangleIcon className="h-5 w-5 shrink-0 text-red-600" />}
+
+                            <p className="flex-1">{aviso.texto}</p>
+
+                            <button
+                                type="button"
+                                onClick={() => setAvisoOculto(true)}
+                                aria-label="Cerrar aviso"
+                                className="shrink-0 rounded p-0.5 opacity-60 transition-opacity hover:opacity-100"
+                            >
+                                <XMarkIcon className="h-4 w-4" />
+                            </button>
+                        </div>
+                    )}
+
                     {children}
                 </main>
 

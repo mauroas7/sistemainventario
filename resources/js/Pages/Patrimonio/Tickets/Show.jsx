@@ -11,11 +11,21 @@ export default function Show() {
     const [cargando, setCargando] = useState(true);
 
     useEffect(() => {
-        axios.get('/movimientos').then(r => {
-            const list = r.data.data || r.data || [];
-            const selected = movimientoId ? list.find(item => String(item.id) === String(movimientoId)) : list[0];
-            setMovimiento(selected || null);
-        }).finally(() => setCargando(false));
+        // Sin ticket en la URL no hay nada que auditar. Antes se caía al primero de la
+        // lista y se mostraba con su número real, como si fuera el que se pidió.
+        if (!movimientoId) {
+            setCargando(false);
+            return;
+        }
+
+        // Se pide el movimiento puntual: traer la lista y buscarlo en el cliente fallaba
+        // apenas el ticket quedaba fuera de la primera página (la API pagina de a 20).
+        setCargando(true);
+
+        axios.get(`/movimientos/${movimientoId}`)
+            .then(r => setMovimiento(r.data.data || r.data || null))
+            .catch(() => setMovimiento(null))
+            .finally(() => setCargando(false));
     }, [movimientoId]);
 
     return (
@@ -121,6 +131,31 @@ export default function Show() {
                                     <p className="text-xs text-gray-500">Acuse de recibo</p>
                                     <p className="font-medium text-gray-900">{movimiento.fecha_recepcion ? formatFecha(movimiento.fecha_recepcion) : 'Sin acusar'}</p>
                                 </div>
+                            </div>
+
+                            <div className="mt-6 pt-4 border-t border-gray-100">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">
+                                    Historial de estados
+                                </p>
+
+                                {!movimiento.historial_estados?.length ? (
+                                    <p className="text-sm text-gray-500">Sin cambios de estado registrados.</p>
+                                ) : (
+                                    <ol className="space-y-3">
+                                        {movimiento.historial_estados.map((cambio) => (
+                                            <li key={cambio.id} className="border-l-2 border-gray-200 pl-3">
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    {cambio.estado_anterior
+                                                        ? `${cambio.estado_anterior} → ${cambio.estado_nuevo}`
+                                                        : `Alta como "${cambio.estado_nuevo}"`}
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    {formatFecha(cambio.fecha)} · {cambio.usuario || 'sin usuario registrado'}
+                                                </p>
+                                            </li>
+                                        ))}
+                                    </ol>
+                                )}
                             </div>
                         </div>
                     </div>

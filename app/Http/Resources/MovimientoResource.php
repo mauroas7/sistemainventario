@@ -91,6 +91,18 @@ class MovimientoResource extends JsonResource
 
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+
+            // Solo viaja si quien arma la respuesta lo cargó a propósito (las pantallas
+            // de detalle). En los listados sería una consulta por fila que nadie mira.
+            'historial_estados' => $this->whenLoaded('historialEstados', fn () => $this->historialEstados
+                ->map(fn ($cambio) => [
+                    'id' => $cambio->id,
+                    'estado_anterior' => $cambio->estadoAnterior?->nombre,
+                    'estado_nuevo' => $cambio->estadoNuevo?->nombre,
+                    'usuario' => $cambio->usuario?->name,
+                    'fecha' => $cambio->created_at,
+                ])
+                ->all()),
         ];
     }
 }

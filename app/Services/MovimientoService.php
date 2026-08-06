@@ -64,7 +64,11 @@ class MovimientoService
 
         foreach (['estado_movimiento_id', 'tipo_movimiento_id', 'motivo_id'] as $campo) {
             if (! empty($filtros[$campo])) {
-                $query->where($campo, $filtros[$campo]);
+                // Acepta un id suelto o una lista: la bandeja agrupa "Registrado" y
+                // "Cerrado" bajo una misma pestaña.
+                is_array($filtros[$campo])
+                    ? $query->whereIn($campo, $filtros[$campo])
+                    : $query->where($campo, $filtros[$campo]);
             }
         }
 

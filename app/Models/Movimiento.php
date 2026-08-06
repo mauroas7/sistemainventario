@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Movimiento extends Model
 {
@@ -40,6 +41,41 @@ class Movimiento extends Model
             'fecha_registro_diaguita' => 'datetime',
             'fecha_cierre' => 'datetime',
         ];
+    }
+
+    /**
+     * La bitácora de estados se arma acá, con los eventos del modelo, y no dentro del
+     * servicio: así ningún camino puede saltearla. Vale igual si el estado lo cambia el
+     * panel de Patrimonio, la API o un comando de consola.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (Movimiento $movimiento) {
+            // El alta no viene de ningún estado previo: el anterior queda en null.
+            $movimiento->anotarCambioDeEstado(null, $movimiento->estado_movimiento_id);
+        });
+
+        static::updated(function (Movimiento $movimiento) {
+            if (! $movimiento->wasChanged('estado_movimiento_id')) {
+                return;
+            }
+
+            $movimiento->anotarCambioDeEstado(
+                $movimiento->getOriginal('estado_movimiento_id'),
+                $movimiento->estado_movimiento_id
+            );
+        });
+    }
+
+    private function anotarCambioDeEstado(?int $anterior, int $nuevo): void
+    {
+        $this->historialEstados()->create([
+            'estado_anterior_id' => $anterior,
+            'estado_nuevo_id' => $nuevo,
+            // En consola o dentro de un job no hay sesión: la transición se guarda
+            // igual, sin autor. Perder el quién es aceptable; perder el qué, no.
+            'usuario_id' => auth()->id(),
+        ]);
     }
 
     /**
@@ -158,5 +194,15 @@ class Movimiento extends Model
             EstadoMovimiento::class,
             'estado_movimiento_id'
         );
+    }
+
+    /**
+     * Bitácora de cambios de estado, del más viejo al más nuevo. `estado_movimiento_id`
+     * guarda solo el estado actual; esto es cómo se llegó hasta él.
+     */
+    public function historialEstados(): HasMany
+    {
+        return $this->hasMany(HistorialEstadoMovimiento::class, 'movimiento_id')
+            ->orderBy('id');
     }
 }

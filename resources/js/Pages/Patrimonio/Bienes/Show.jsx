@@ -12,17 +12,41 @@ export default function Show() {
     const [cargando, setCargando] = useState(true);
 
     useEffect(() => {
-        Promise.all([
-            axios.get('/bien').then(r => {
-                const list = r.data.data || r.data || [];
-                const selected = bienId ? list.find(item => String(item.id) === String(bienId)) : list[0];
-                setBien(selected || null);
-            }),
-            axios.get('/movimientos').then(r => {
-                const list = r.data.data || r.data || [];
-                setMovimientos(list.filter(m => !bienId || String(m.bien?.id) === String(bienId)));
-            }),
-        ]).finally(() => setCargando(false));
+        // Sin bien en la URL no hay ficha que mostrar. Antes se caía al primero de la
+        // lista y se mostraba con su código real, como si fuera el que se pidió.
+        if (!bienId) {
+            setCargando(false);
+            return;
+        }
+
+        setCargando(true);
+
+        axios.get('/bien')
+            .then((r) => {
+                const lista = r.data.data || r.data || [];
+                const elegido = lista.find(item => String(item.id) === String(bienId)) || null;
+                setBien(elegido);
+
+                if (!elegido) {
+                    setMovimientos([]);
+                    return null;
+                }
+
+                // El historial se filtra por código en el servidor en vez de traer la
+                // lista completa y buscar en el cliente: la API pagina de a 20 y el
+                // registro del bien quedaba recortado. El filtro del backend es un LIKE,
+                // así que después se afina por id exacto.
+                return axios.get('/movimientos', { params: { bien: elegido.codigo, per_page: 100 } })
+                    .then((mr) => {
+                        const movs = mr.data.data || mr.data || [];
+                        setMovimientos(movs.filter(m => String(m.bien?.id) === String(bienId)));
+                    });
+            })
+            .catch(() => {
+                setBien(null);
+                setMovimientos([]);
+            })
+            .finally(() => setCargando(false));
     }, [bienId]);
 
     return (

@@ -15,9 +15,13 @@ class NotificacionMovimientoService
     /**
      * Dispara los avisos de un movimiento recién informado.
      *
-     * Nunca lanza excepción: si el SMTP está caído o mal configurado, el movimiento
-     * igual queda registrado y el fallo se anota en el log. Perder el aviso es malo,
-     * pero perder el registro del movimiento —que es el dato patrimonial— es peor.
+     * Nunca lanza excepción: el movimiento ya quedó registrado y perder el aviso es malo,
+     * pero perder el dato patrimonial es peor.
+     *
+     * Los Mailables son ShouldQueue, así que acá solo se encolan: el try/catch cubre el
+     * fallo al encolar, no el envío. Si el SMTP rechaza el correo, eso pasa después en el
+     * worker y termina en la tabla `failed_jobs`, donde se puede revisar y reintentar con
+     * `php artisan queue:retry`. Sin un worker corriendo, los avisos no salen.
      */
     public function notificarMovimientoInformado(Movimiento $movimiento): void
     {

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
 import { PhotoIcon, XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/20/solid';
 
@@ -151,50 +151,31 @@ export default function Create({ bienes = [], areas = [], tiposMovimiento = [], 
         setErrorGeneral('');
         setEnviando(true);
 
-        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-        const datos = new FormData();
-        datos.append('bien_id', form.bien_id);
-        datos.append('area_origen_id', form.area_origen_id);
-        datos.append('area_destino_id', form.area_destino_id);
-        datos.append('tipo_movimiento_id', form.tipo_movimiento_id);
-        datos.append('motivo_id', form.motivo_id);
-        if (form.responsable_nuevo_id) datos.append('responsable_nuevo_id', form.responsable_nuevo_id);
-        if (form.observaciones_salida) datos.append('observaciones_salida', form.observaciones_salida);
-        if (imagen) datos.append('imagen', imagen);
+        const datos = {
+            bien_id: form.bien_id,
+            area_origen_id: form.area_origen_id,
+            area_destino_id: form.area_destino_id,
+            tipo_movimiento_id: form.tipo_movimiento_id,
+            motivo_id: form.motivo_id,
+        };
+        if (form.responsable_nuevo_id) datos.responsable_nuevo_id = form.responsable_nuevo_id;
+        if (form.observaciones_salida) datos.observaciones_salida = form.observaciones_salida;
+        if (imagen) datos.imagen = imagen;
 
-        fetch('/envio/crear-ticket', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': token || '',
-            },
-            credentials: 'same-origin',
-            body: datos,
-        })
-            .then(async (response) => {
-                if (!response.ok) {
-                    const data = await response.json().catch(() => null);
-
-                    if (response.status === 422 && data?.errors) {
-                        const planos = {};
-                        Object.entries(data.errors).forEach(([campo, mensajes]) => {
-                            planos[campo] = Array.isArray(mensajes) ? mensajes[0] : mensajes;
-                        });
-                        setErrors(planos);
-                    } else {
-                        setErrorGeneral(data?.message || 'No se pudo crear el ticket.');
-                    }
-
-                    setEnviando(false);
-                    return;
+        // Va por el router de Inertia y no por fetch(): el token CSRF lo toma de la
+        // cookie XSRF-TOKEN, que el servidor mantiene al día. El <meta name="csrf-token">
+        // se renderiza una sola vez y queda viejo apenas el login rota la sesión, con lo
+        // que un fetch() manual terminaba siempre en 419. El backend ya responde a esto
+        // con un redirect a la bandeja.
+        router.post('/envio/crear-ticket', datos, {
+            onError: (erroresServidor) => {
+                setErrors(erroresServidor || {});
+                if (!erroresServidor || Object.keys(erroresServidor).length === 0) {
+                    setErrorGeneral('No se pudo crear el ticket.');
                 }
-
-                window.location.href = '/recepcion/bandeja';
-            })
-            .catch(() => {
-                setErrorGeneral('No se pudo conectar con el servidor. Intentá nuevamente.');
-                setEnviando(false);
-            });
+            },
+            onFinish: () => setEnviando(false),
+        });
     }
 
     function claseCampo(campo) {

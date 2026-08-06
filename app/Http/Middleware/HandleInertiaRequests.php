@@ -40,6 +40,12 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user,
             ],
+            // Los controladores vienen escribiendo ->with('success', ...) desde siempre,
+            // pero sin compartirlo acá el mensaje moría en la sesión y no lo veía nadie.
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
         ];
     }
 }

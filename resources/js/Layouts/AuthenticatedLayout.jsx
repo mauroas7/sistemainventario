@@ -2,13 +2,16 @@ import { useState } from 'react';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
-export default function AuthenticatedLayout({ user, header, children }) {
+export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
-    // Función auxiliar para saber si una ruta base está activa (útil antes de tener Ziggy configurado completo)
-    const isUrlActive = (url) => window.location.pathname.startsWith(url);
+    // El usuario se toma de las props compartidas por Inertia en vez de recibirlo como
+    // prop: antes dependía de que cada página se acordara de pasarlo, y Profile/Edit no
+    // lo hacía, así que la pantalla reventaba al leer user.name.
+    const { auth } = usePage().props;
+    const user = auth?.user || {};
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -28,15 +31,14 @@ export default function AuthenticatedLayout({ user, header, children }) {
 
                             {/* Enlaces de Escritorio */}
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                    Panel de Control
+                                <NavLink href={route('inicio')} active={route().current('inicio')}>
+                                    Inicio
                                 </NavLink>
-                                {/* Usamos rutas directas por ahora para evitar errores de compilación si las rutas con nombre aún no existen en web.php */}
-                                <NavLink href="/bienes/mis-bienes" active={isUrlActive('/bienes/mis-bienes')}>
-                                    Mis Bienes
-                                </NavLink>
-                                <NavLink href="/traslados/crear" active={isUrlActive('/traslados')}>
+                                <NavLink href={route('envio.crear')} active={route().current('envio.crear')}>
                                     Informar Traslado
+                                </NavLink>
+                                <NavLink href={route('recepcion.bandeja')} active={route().current('recepcion.bandeja')}>
+                                    Bandeja de recepción
                                 </NavLink>
                             </div>
                         </div>
@@ -110,14 +112,14 @@ export default function AuthenticatedLayout({ user, header, children }) {
                 {/* Menú Desplegable (Móviles) */}
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
                     <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                            Panel de Control
+                        <ResponsiveNavLink href={route('inicio')} active={route().current('inicio')}>
+                            Inicio
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink href="/bienes/mis-bienes" active={isUrlActive('/bienes/mis-bienes')}>
-                            Mis Bienes
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink href="/traslados/crear" active={isUrlActive('/traslados')}>
+                        <ResponsiveNavLink href={route('envio.crear')} active={route().current('envio.crear')}>
                             Informar Traslado
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('recepcion.bandeja')} active={route().current('recepcion.bandeja')}>
+                            Bandeja de recepción
                         </ResponsiveNavLink>
                     </div>
 

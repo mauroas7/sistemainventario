@@ -3,6 +3,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
 import { formatFecha } from '@/utils/format';
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid';
+import axios from 'axios';
 
 export default function Show({ movimiento, responsables = [] }) {
     const m = movimiento || {};
@@ -14,32 +15,22 @@ export default function Show({ movimiento, responsables = [] }) {
     const [nuevoResponsable, setNuevoResponsable] = useState('');
     const [asignando, setAsignando] = useState(false);
 
+    // Estas acciones van por axios y no por fetch(): axios manda el token CSRF leyéndolo
+    // de la cookie XSRF-TOKEN, que el servidor mantiene al día. El <meta name="csrf-token">
+    // se renderiza una sola vez y queda viejo apenas el login rota la sesión, así que un
+    // fetch() que lo leyera terminaba siempre en 419.
     function asignarResponsable(e) {
         e.preventDefault();
         if (!nuevoResponsable) return;
 
         setAsignando(true);
-        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-        fetch(route('patrimonio.movimientos.responsable', { movimiento: m.id }), {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': token || '',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ responsable_nuevo_id: nuevoResponsable }),
+        axios.patch(route('patrimonio.movimientos.responsable', { movimiento: m.id }), {
+            responsable_nuevo_id: nuevoResponsable,
         })
-            .then(async (response) => {
-                if (!response.ok) {
-                    const data = await response.json().catch(() => null);
-                    throw new Error(data?.message || 'No se pudo asignar el responsable');
-                }
-                window.location.reload();
-            })
+            .then(() => window.location.reload())
             .catch((error) => {
-                alert(error.message || 'No se pudo asignar el responsable');
+                alert(error.response?.data?.message || 'No se pudo asignar el responsable');
                 setAsignando(false);
             });
     }
@@ -53,26 +44,12 @@ export default function Show({ movimiento, responsables = [] }) {
     const puedeAnular = estaInformado && (user.rol === 'admin' || String(m.creado_por?.id) === String(user.id));
     const puedeActuar = puedeAcusar || puedeAnular;
 
+    // Recibe una URL absoluta armada con route(): así se evita el baseURL '/api' que
+    // axios tiene configurado por defecto para los endpoints de la API.
     function postAction(url) {
-        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': token || '',
-            },
-            credentials: 'same-origin',
-        })
-            .then(async (response) => {
-                if (!response.ok) {
-                    const data = await response.json().catch(() => null);
-                    throw new Error(data?.message || 'No se pudo completar la acción');
-                }
-
-                window.location.reload();
-            })
-            .catch((error) => alert(error.message || 'No se pudo completar la acción'));
+        axios.post(url)
+            .then(() => window.location.reload())
+            .catch((error) => alert(error.response?.data?.message || 'No se pudo completar la acción'));
     }
 
     return (
@@ -212,7 +189,7 @@ export default function Show({ movimiento, responsables = [] }) {
                                     {puedeAcusar && (
                                         <button
                                             type="button"
-                                            onClick={() => postAction(`/recepcion/confirmar/${m.id}`)}
+                                            onClick={() => postAction(route('recepcion.confirmar', { movimiento: m.id }))}
                                             className="rounded-lg bg-institucional-primario px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-900"
                                         >
                                             Acusar recibo
@@ -221,7 +198,7 @@ export default function Show({ movimiento, responsables = [] }) {
                                     {puedeAnular && (
                                         <button
                                             type="button"
-                                            onClick={() => postAction(`/recepcion/cancelar/${m.id}`)}
+                                            onClick={() => postAction(route('recepcion.cancelar', { movimiento: m.id }))}
                                             className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50"
                                         >
                                             Anular movimiento

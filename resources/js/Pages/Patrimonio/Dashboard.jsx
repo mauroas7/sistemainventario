@@ -173,32 +173,20 @@ export default function Dashboard() {
         setDrafts(prev => ({ ...prev, [id]: value }));
     }
 
+    // Va por axios y no por fetch(): axios manda el token CSRF leyéndolo de la cookie
+    // XSRF-TOKEN, que el servidor mantiene al día. El <meta name="csrf-token"> se
+    // renderiza una sola vez y queda viejo apenas el login rota la sesión, así que un
+    // fetch() que lo leyera terminaba siempre en 419. route() devuelve una URL absoluta,
+    // con lo que no se le aplica el baseURL '/api' que axios usa para la API.
     function guardarEstado(id) {
-        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         const estado_movimiento_id = drafts[id];
 
-        fetch(route('patrimonio.movimientos.estado', { movimiento: id }), {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': token || '',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ estado_movimiento_id }),
-        })
-            .then(async (response) => {
-                if (!response.ok) {
-                    const data = await response.json().catch(() => null);
-                    throw new Error(data?.message || 'No se pudo actualizar el estado');
-                }
-
-                // El cambio de estado puede afectar los totales del resumen y a qué
-                // página pertenece el movimiento (según los filtros activos), así que
-                // recargamos la vista en vez de parchear la fila localmente.
-                cargarMovimientos(aplicados, pagina);
-            })
-            .catch((error) => alert(error.message || 'No se pudo actualizar el estado'));
+        axios.patch(route('patrimonio.movimientos.estado', { movimiento: id }), { estado_movimiento_id })
+            // El cambio de estado puede afectar los totales del resumen y a qué página
+            // pertenece el movimiento (según los filtros activos), así que recargamos la
+            // vista en vez de parchear la fila localmente.
+            .then(() => cargarMovimientos(aplicados, pagina))
+            .catch((error) => alert(error.response?.data?.message || 'No se pudo actualizar el estado'));
     }
 
     const claseCampo = 'w-full rounded-lg border-gray-300 text-sm text-gray-700 shadow-sm focus:border-institucional-primario focus:ring-institucional-primario';

@@ -76,20 +76,50 @@ class TicketController extends Controller
         ]);
     }
 
-    public function inbox(): Response
+    /**
+     * Pestañas de la bandeja. Se resuelven contra los nombres de estado y no contra ids
+     * fijos para no atarse al orden en que se sembró la tabla.
+     */
+    private const ESTADOS_POR_PESTANA = [
+        'informados' => ['Informado'],
+        'registrados' => ['Registrado', 'Cerrado'],
+        'anulados' => ['Anulado'],
+        'todos' => null,
+    ];
+
+    public function inbox(Request $request): Response
     {
         $user = Auth::user();
+        $esAdmin = $user?->rol === 'admin';
 
-        $movimientos = $this->movimientoService->obtenerParaBandeja(
-            $user?->area_id,
-            $user?->rol === 'admin'
-        );
+        $pestana = $request->query('estado');
+        if (! array_key_exists($pestana, self::ESTADOS_POR_PESTANA)) {
+            $pestana = 'informados';
+        }
+
+        $filtros = [];
+        if ($nombres = self::ESTADOS_POR_PESTANA[$pestana]) {
+            $filtros['estado_movimiento_id'] = EstadoMovimiento::whereIn('nombre', $nombres)->pluck('id')->all();
+        }
+
+        // Paginado: para un admin esto traía todos los movimientos del hospital en cada
+        // carga, y las tarjetas de resumen se calculaban sobre ese array en el navegador.
+        $paginador = $this->movimientoService->obtenerParaBandeja($user?->area_id, $esAdmin, $filtros, 25);
 
         return Inertia::render('Recepcion/Index', [
             // Va por el Resource y no por los modelos crudos: el front espera esta forma
             // (creado_por / responsable_nuevo como objetos con "nombre"), no las columnas
             // FK que serializa Eloquent por defecto.
-            'movimientos' => \App\Http\Resources\MovimientoResource::collection($movimientos)->resolve(request()),
+            'movimientos' => \App\Http\Resources\MovimientoResource::collection($paginador->getCollection())->resolve($request),
+            'pestana' => $pestana,
+            'paginacion' => [
+                'pagina' => $paginador->currentPage(),
+                'ultima_pagina' => $paginador->lastPage(),
+                'total' => $paginador->total(),
+            ],
+            // Los totales se cuentan en la base sobre todo lo visible para el usuario, no
+            // sobre la página actual, así que no cambian al pasar de página ni de pestaña.
+            'resumen' => $this->movimientoService->obtenerResumen($user?->area_id, $esAdmin, []),
         ]);
     }
 
@@ -104,7 +134,11 @@ class TicketController extends Controller
 
         abort_unless($puedeVer, 403);
 
-        $movimiento->load(\App\Services\MovimientoService::RELACIONES);
+        $movimiento->load(array_merge(\App\Services\MovimientoService::RELACIONES, [
+            'historialEstados.estadoAnterior',
+            'historialEstados.estadoNuevo',
+            'historialEstados.usuario',
+        ]));
 
         return Inertia::render('Recepcion/Show', [
             'movimiento' => (new \App\Http\Resources\MovimientoResource($movimiento))->resolve(request()),
@@ -141,19 +175,16 @@ class TicketController extends Controller
         }
 
         if ($movimiento->recibido_por) {
-            return back()->with('success', 'El ticket ya tenía acuse de recibo.');
+            return $this->respuestaDeAccion($request, 'El ticket ya tenía acuse de recibo.', $movimiento);
         }
 
         $movimiento = $this->movimientoService->acusarRecibo($movimiento, $user);
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Recepción confirmada correctamente',
-                'data' => new \App\Http\Resources\MovimientoResource($movimiento),
-            ]);
-        }
-
-        return back()->with('success', 'Recepción confirmada correctamente');
+        return $this->respuestaDeAccion(
+            $request,
+            'Recepción confirmada correctamente',
+            $movimiento
+        );
     }
 
     /**
@@ -175,14 +206,11 @@ class TicketController extends Controller
 
         $movimiento = $this->movimientoService->anularMovimiento($movimiento);
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Movimiento anulado correctamente',
-                'data' => new \App\Http\Resources\MovimientoResource($movimiento),
-            ]);
-        }
-
-        return back()->with('success', 'Movimiento anulado correctamente');
+        return $this->respuestaDeAccion(
+            $request,
+            'Movimiento anulado correctamente',
+            $movimiento
+        );
     }
 
     /**
@@ -214,14 +242,11 @@ class TicketController extends Controller
             $validated['responsable_nuevo_id'] ?? null
         );
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Responsable actualizado correctamente',
-                'data' => new \App\Http\Resources\MovimientoResource($movimiento),
-            ]);
-        }
-
-        return back()->with('success', 'Responsable actualizado correctamente');
+        return $this->respuestaDeAccion(
+            $request,
+            'Responsable actualizado correctamente',
+            $movimiento
+        );
     }
 
     public function updateMovimientoEstado(Request $request, Movimiento $movimiento)
@@ -239,14 +264,33 @@ class TicketController extends Controller
             $user
         );
 
+        return $this->respuestaDeAccion(
+            $request,
+            'Estado actualizado correctamente',
+            $movimiento
+        );
+    }
+
+    /**
+     * Respuesta común de las acciones sobre un movimiento.
+     *
+     * El mensaje se deja en la sesión incluso cuando se responde JSON: el front hace
+     * estas acciones con axios (que pide JSON) y después recarga la página, así que sin
+     * esto el aviso de éxito no lo veía nadie. Al quedar flasheado, lo levanta el
+     * request siguiente —la recarga— y lo muestra el cartel del layout.
+     */
+    private function respuestaDeAccion(Request $request, string $mensaje, Movimiento $movimiento)
+    {
+        $request->session()->flash('success', $mensaje);
+
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Estado actualizado correctamente',
+                'message' => $mensaje,
                 'data' => new \App\Http\Resources\MovimientoResource($movimiento),
             ]);
         }
 
-        return back()->with('success', 'Estado actualizado correctamente');
+        return back();
     }
 
     public function store(Request $request)
