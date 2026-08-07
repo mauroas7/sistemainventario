@@ -72,6 +72,6 @@ Este proyecto fue desarrollado por:
 
 - **[Gianfranco Godoy]** — [https://www.linkedin.com/in/gianfranco-godoy-3b9808237/]()
 - **[Mauro Astudillo]** — [https://www.linkedin.com/in/mauroastudillo/]()
-- **[Nombre integrante 3]** — [LinkedIn]()
+- **[Franco Josue Osorio Scheggia]**(https://www.linkedin.com/in/franco-josu%C3%A9-osorio-scheggia/)
 - **[Nombre integrante 4]** — [LinkedIn]()
 - **[Nombre integrante 5]** — [LinkedIn]()
