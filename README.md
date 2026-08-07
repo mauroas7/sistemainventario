@@ -73,5 +73,5 @@ Este proyecto fue desarrollado por:
 - **[Gianfranco Godoy]** - [LinkedIn](https://www.linkedin.com/in/gianfranco-godoy-3b9808237/)
 - **[Mauro Astudillo]** - [LinkedIn](https://www.linkedin.com/in/mauroastudillo/)
 - **[Franco Josue Osorio Scheggia]** - [LinkedIn](https://www.linkedin.com/in/franco-josu%C3%A9-osorio-scheggia/)
-- **[Felipe Lemir Mercado]** — [LinkedIn](https://github.com/FelipeLemir04)
+- **[Felipe Lemir Mercado]** — [LinkedIn](https://www.linkedin.com/in/felipe-lemir/)
 - **[Nombre integrante 5]** — [LinkedIn]()
