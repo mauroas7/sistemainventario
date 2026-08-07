@@ -70,8 +70,8 @@ composer run dev
 
 Este proyecto fue desarrollado por:
 
-- **[Gianfranco Godoy]** — [https://www.linkedin.com/in/gianfranco-godoy-3b9808237/]()
-- **[Mauro Astudillo]** — [https://www.linkedin.com/in/mauroastudillo/]()
+- **[Gianfranco Godoy](https://www.linkedin.com/in/gianfranco-godoy-3b9808237/)**
+- **[Mauro Astudillo](https://www.linkedin.com/in/mauroastudillo/)**
 - **[Franco Josue Osorio Scheggia](https://www.linkedin.com/in/franco-josu%C3%A9-osorio-scheggia/)**
 - **[Nombre integrante 4]** — [LinkedIn]()
 - **[Nombre integrante 5]** — [LinkedIn]()
