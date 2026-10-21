@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
-import { formatFecha } from '@/utils/format';
+import { formatFecha } from '@/utils/formato';
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid';
 import axios from 'axios';
 

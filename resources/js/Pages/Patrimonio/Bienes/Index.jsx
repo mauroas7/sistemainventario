@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
-import LoadingState from '@/Components/LoadingState';
-import { estadoBienClase } from '@/utils/format';
+import Cargando from '@/Components/Cargando';
+import { estadoBienClase } from '@/utils/formato';
 import axios from 'axios';
 
 export default function Index() {
@@ -27,7 +27,7 @@ export default function Index() {
                     </div>
                 </div>
 
-                {cargando ? <LoadingState mensaje="Cargando bienes..." /> : (
+                {cargando ? <Cargando mensaje="Cargando bienes..." /> : (
                 <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">

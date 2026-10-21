@@ -35,7 +35,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     // --- RUTAS DE PATRIMONIO ---
-    Route::middleware([\App\Http\Middleware\RequireRole::class . ':admin'])->group(function () {
+    Route::middleware([\App\Http\Middleware\RequerirRol::class . ':admin'])->group(function () {
         Route::get('/patrimonio/dashboard', function () {
             return Inertia::render('Patrimonio/Dashboard');
         })->name('patrimonio.dashboard');

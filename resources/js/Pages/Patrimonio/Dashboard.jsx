@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
-import LoadingState from '@/Components/LoadingState';
-import { formatFecha, estadoMovimientoClase } from '@/utils/format';
+import Cargando from '@/Components/Cargando';
+import { formatFecha, estadoMovimientoClase } from '@/utils/formato';
 import {
     ClipboardDocumentListIcon,
     ClockIcon,
@@ -335,7 +335,7 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {cargando ? <LoadingState mensaje="Cargando movimientos..." /> : (
+                {cargando ? <Cargando mensaje="Cargando movimientos..." /> : (
                 <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-max text-left border-collapse">

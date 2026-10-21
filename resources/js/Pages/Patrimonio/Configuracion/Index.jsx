@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
-import LoadingState from '@/Components/LoadingState';
+import Cargando from '@/Components/Cargando';
 import {
     BuildingOffice2Icon,
     UsersIcon,
@@ -174,7 +174,7 @@ export default function Index() {
                     <p className="text-sm text-gray-500 mt-1">Áreas y cuentas de acceso al portal.</p>
                 </div>
 
-                {cargando ? <LoadingState mensaje="Cargando configuración..." /> : (
+                {cargando ? <Cargando mensaje="Cargando configuración..." /> : (
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
                     {/* Áreas */}

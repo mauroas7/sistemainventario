@@ -40,7 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Escritura directa por API: reservada a administradores (la creación y recepción
     // normales de tickets se hacen vía las rutas web de TicketController).
-    Route::middleware(\App\Http\Middleware\RequireRole::class . ':admin')->group(function () {
+    Route::middleware(\App\Http\Middleware\RequerirRol::class . ':admin')->group(function () {
         Route::post('/movimientos', [MovimientoController::class, 'store']);
         Route::put('/movimientos/{movimiento}', [MovimientoController::class, 'update']);
         Route::patch('/movimientos/{movimiento}', [MovimientoController::class, 'update']);
@@ -50,20 +50,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // <------- Rutas para usuario ------->
     // Gestión de usuarios limitada a administradores (role: admin)
     Route::get('/users', [UserController::class, 'index'])
-        ->middleware(\App\Http\Middleware\RequireRole::class . ':admin');
+        ->middleware(\App\Http\Middleware\RequerirRol::class . ':admin');
 
     Route::post('/users', [UserController::class, 'store'])
-        ->middleware(\App\Http\Middleware\RequireRole::class . ':admin');
+        ->middleware(\App\Http\Middleware\RequerirRol::class . ':admin');
 
     Route::get('/users/{user}', [UserController::class, 'show'])
-        ->middleware(\App\Http\Middleware\RequireRole::class . ':admin');
+        ->middleware(\App\Http\Middleware\RequerirRol::class . ':admin');
 
     Route::put('/users/{user}', [UserController::class, 'update'])
-        ->middleware(\App\Http\Middleware\RequireRole::class . ':admin');
+        ->middleware(\App\Http\Middleware\RequerirRol::class . ':admin');
 
     Route::patch('/users/{user}', [UserController::class, 'update'])
-        ->middleware(\App\Http\Middleware\RequireRole::class . ':admin');
+        ->middleware(\App\Http\Middleware\RequerirRol::class . ':admin');
 
     Route::delete('/users/{user}', [UserController::class, 'destroy'])
-        ->middleware(\App\Http\Middleware\RequireRole::class . ':admin');
+        ->middleware(\App\Http\Middleware\RequerirRol::class . ':admin');
 });

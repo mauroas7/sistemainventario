@@ -2,7 +2,7 @@ import React from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
 import { ClockIcon, CheckCircleIcon, ClipboardDocumentListIcon, XCircleIcon } from '@heroicons/react/20/solid';
-import { estadoMovimientoClase } from '@/utils/format';
+import { estadoMovimientoClase } from '@/utils/formato';
 import axios from 'axios';
 
 const PESTANAS = [

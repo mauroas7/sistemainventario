@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
-import LoadingState from '@/Components/LoadingState';
-import { formatFecha } from '@/utils/format';
+import Cargando from '@/Components/Cargando';
+import { formatFecha } from '@/utils/formato';
 import axios from 'axios';
 
 export default function Show() {
@@ -46,7 +46,7 @@ export default function Show() {
                 </div>
 
                 {cargando ? (
-                    <LoadingState mensaje="Cargando ticket..." />
+                    <Cargando mensaje="Cargando ticket..." />
                 ) : !movimiento ? (
                     <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm text-sm text-gray-500">
                         No hay un ticket seleccionado.

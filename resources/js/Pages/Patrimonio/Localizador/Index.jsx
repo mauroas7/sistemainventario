@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
-import LoadingState from '@/Components/LoadingState';
-import { formatFecha, estadoBienClase } from '@/utils/format';
+import Cargando from '@/Components/Cargando';
+import { formatFecha, estadoBienClase } from '@/utils/formato';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import axios from 'axios';
 
@@ -106,7 +106,7 @@ export default function Index() {
                 </div>
 
                 <div className="space-y-4">
-                    {cargando && <LoadingState mensaje="Cargando bienes..." />}
+                    {cargando && <Cargando mensaje="Cargando bienes..." />}
 
                     {!cargando && resultados.length === 0 && (
                         <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm text-center text-sm text-gray-500">

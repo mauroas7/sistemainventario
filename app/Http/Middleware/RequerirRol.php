@@ -5,11 +5,11 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
-class RequireRole
+class RequerirRol
 {
     /**
      * Handle an incoming request.
-     * Usage in route: ->middleware(\App\Http\Middleware\RequireRole::class . ':admin')
+     * Usage in route: ->middleware(\App\Http\Middleware\RequerirRol::class . ':admin')
      * Multiple roles can be passed comma-separated: 'admin,coordinator'
      */
     public function handle(Request $request, Closure $next, ?string $roles = null)
