@@ -6,40 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('bienes', function (Blueprint $table) {
             $table->id();
-
+            // Número de inventario interno del hospital.
             $table->string('codigo')->unique();
+            // Nullable: hay bienes del hospital que todavía no están cargados en Diaguita.
+            $table->string('numero_diaguita')->nullable()->unique();
             $table->string('nombre');
             $table->text('descripcion')->nullable();
-
-            // Área responsable del bien
-            $table->foreignId('area_id')
-                ->constrained('areas')
-                ->restrictOnDelete();
-
-            // Ubicación física actual del bien
-            $table->foreignId('ubicacion_actual_id')
-                ->constrained('areas')
-                ->restrictOnDelete();
-
-            // Estado actual del bien
-            $table->foreignId('estado_id')
-                ->constrained('estados_bien')
-                ->restrictOnDelete();
-
+            $table->foreignId('area_id')->constrained('areas')->restrictOnDelete();
+            $table->foreignId('ubicacion_actual_id')->constrained('areas')->restrictOnDelete();
+            // Quien firma la ficha de inventario. Null mientras Patrimonio no lo defina.
+            $table->foreignId('responsable_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('estado_id')->constrained('estados_bien')->restrictOnDelete();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('bienes');

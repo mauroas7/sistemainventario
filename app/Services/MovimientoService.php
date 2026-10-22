@@ -249,8 +249,6 @@ class MovimientoService
                 'estado_movimiento_id' => $estadoAnuladoId,
                 'recibido_por' => null,
                 'fecha_recepcion' => null,
-                'condicion_al_recibir' => null,
-                'observaciones_recepcion' => null,
             ]);
 
             $this->sincronizarUbicacionBien($movimiento->bien_id);
@@ -338,8 +336,6 @@ class MovimientoService
                 case 'Anulado':
                     $update['recibido_por'] = null;
                     $update['fecha_recepcion'] = null;
-                    $update['condicion_al_recibir'] = null;
-                    $update['observaciones_recepcion'] = null;
                     $update['fecha_cierre'] = null;
                     break;
             }

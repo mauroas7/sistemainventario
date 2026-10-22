@@ -5,15 +5,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Bitácora de los cambios de estado de un movimiento.
- *
- * La tabla `movimientos` guarda solo el estado actual: si Patrimonio cierra un trámite
- * por error y lo vuelve atrás, no queda rastro de que pasó. Para un circuito que termina
- * en una ficha de inventario firmada hay que poder responder quién cambió qué y cuándo,
- * así que acá se anota cada transición.
- *
- * Es de solo agregar: nunca se actualiza ni se borra una fila. Por eso lleva únicamente
- * created_at y no el par de timestamps habitual.
+ * Bitácora de los cambios de estado de un movimiento: quién cambió qué y cuándo.
+ * Sólo se agregan filas, nunca se editan; por eso lleva `created_at` y no `updated_at`.
  */
 return new class extends Migration
 {

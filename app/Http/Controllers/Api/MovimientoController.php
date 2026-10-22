@@ -101,9 +101,6 @@ class MovimientoController extends Controller
         $datos = $validated;
         $datos['creado_por'] = $user?->id;
         $datos['recibido_por'] = null;
-        $datos['condicion_al_salir'] = null;
-        $datos['condicion_al_recibir'] = null;
-        $datos['observaciones_recepcion'] = null;
         $datos['fecha_recepcion'] = null;
         $datos['fecha_movimiento'] = $datos['fecha_movimiento'] ?? now();
 
@@ -123,10 +120,7 @@ class MovimientoController extends Controller
             'tipo_movimiento_id' => ['sometimes', 'exists:tipos_movimiento,id'],
             'motivo_id' => ['sometimes', 'exists:motivos,id'],
             'estado_movimiento_id' => ['sometimes', 'exists:estados_movimiento,id'],
-            'condicion_al_salir' => ['nullable', 'string'],
-            'condicion_al_recibir' => ['nullable', 'string'],
             'observaciones_salida' => ['nullable', 'string'],
-            'observaciones_recepcion' => ['nullable', 'string'],
             'fecha_movimiento' => ['sometimes', 'date'],
             'fecha_recepcion' => ['nullable', 'date'],
         ]);

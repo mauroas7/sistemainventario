@@ -8,6 +8,8 @@ use App\Models\Motivo;
 use App\Models\Movimiento;
 use App\Models\TipoMovimiento;
 use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\Demo\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -23,7 +25,7 @@ class MovimientosTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed();
+        $this->seed([DatabaseSeeder::class, DemoSeeder::class]);
     }
 
     private function usuario(string $email): User

@@ -129,7 +129,7 @@ class UserController extends Controller
 
         return User::query()
             ->where('rol', 'admin')
-            ->where('activo', true)
+            ->activos()
             ->whereKeyNot($user->id)
             ->doesntExist();
     }

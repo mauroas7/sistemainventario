@@ -4,11 +4,12 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
@@ -21,13 +22,14 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-    'name',
-    'email',
-    'password',
-    'rol',
-    'activo',
-    'area_id',
-];
+        'name',
+        'email',
+        'password',
+        'rol',
+        'activo',
+        'area_id',
+    ];
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -43,13 +45,26 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    protected $appends = ['activo'];
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'activo' => 'boolean',
+            'fecha_baja' => 'datetime',
         ];
+    }
+
+    /** Sin baja. Dar de baja una cuenta que ya la tenía conserva la fecha original. */
+    protected function activo(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($valor, array $atributos) => ($atributos['fecha_baja'] ?? null) === null,
+            set: fn ($activo, array $atributos) => [
+                'fecha_baja' => $activo ? null : ($atributos['fecha_baja'] ?? now()),
+            ],
+        );
     }
 
     /**
@@ -57,7 +72,7 @@ class User extends Authenticatable
      */
     public function scopeActivos($query)
     {
-        return $query->where('activo', true);
+        return $query->whereNull('fecha_baja');
     }
 
     /**

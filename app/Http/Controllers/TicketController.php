@@ -359,11 +359,8 @@ class TicketController extends Controller
             'area_destino_id' => $validated['area_destino_id'],
             'tipo_movimiento_id' => $validated['tipo_movimiento_id'],
             'motivo_id' => $validated['motivo_id'],
-            'condicion_al_salir' => null,
-            'condicion_al_recibir' => null,
             'observaciones_salida' => $validated['observaciones_salida'] ?? null,
             'imagen_salida' => $rutaImagen,
-            'observaciones_recepcion' => null,
             'fecha_recepcion' => null,
         ]);
 
