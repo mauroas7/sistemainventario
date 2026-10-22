@@ -30,7 +30,7 @@ class MovimientoController extends Controller
             'historialEstados.usuario',
         ]));
 
-        return Inertia::render('Patrimonio/Tickets/Show', [
+        return Inertia::render('Patrimonio/Movimientos/Show', [
             'movimiento' => (new MovimientoResource($movimiento))->resolve($request),
         ]);
     }

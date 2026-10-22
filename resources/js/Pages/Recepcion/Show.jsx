@@ -44,7 +44,7 @@ export default function Show({ movimiento: m, responsables = [] }) {
             titulo: `Anular el ticket TK-${m.id}`,
             detalle: 'El bien vuelve a su ubicación y responsable anteriores. El ticket queda en el historial como anulado.',
             textoAceptar: 'Anular',
-            accion: (r) => r.post(route('recepcion.cancelar', { movimiento: m.id }), {}, {
+            accion: (r) => r.post(route('recepcion.anular', { movimiento: m.id }), {}, {
                 preserveScroll: true,
                 onError: avisoDeError('No se pudo completar la acción'),
             }),

@@ -159,7 +159,7 @@ class MovimientosTest extends TestCase
 
         // Lo anula quien lo informó.
         $this->actingAs($juan)
-            ->post("/recepcion/cancelar/{$movimiento->id}")
+            ->post("/recepcion/movimientos/{$movimiento->id}/anular")
             ->assertRedirect();
 
         $bien->refresh();

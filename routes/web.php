@@ -1,12 +1,12 @@
 <?php
 
+use App\Http\Controllers\CuentaController;
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\Patrimonio\BienController;
 use App\Http\Controllers\Patrimonio\DashboardController;
 use App\Http\Controllers\Patrimonio\LocalizadorController;
 use App\Http\Controllers\Patrimonio\MovimientoController;
 use App\Http\Controllers\Patrimonio\UsuarioController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,16 +25,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/envio/crear-ticket', [TicketController::class, 'store'])
         ->name('envio.store');
 
-    Route::get('/recepcion/bandeja', [TicketController::class, 'inbox'])
+    Route::get('/recepcion/bandeja', [TicketController::class, 'index'])
         ->name('recepcion.bandeja');
-    Route::get('/recepcion/movimientos/{movimiento}', [TicketController::class, 'showReception'])
+    Route::get('/recepcion/movimientos/{movimiento}', [TicketController::class, 'show'])
         ->name('recepcion.show');
     Route::get('/recepcion/movimientos/{movimiento}/foto', [TicketController::class, 'foto'])
         ->name('recepcion.movimientos.foto');
-    Route::post('/recepcion/confirmar/{movimiento}', [TicketController::class, 'confirmReception'])
+    Route::post('/recepcion/movimientos/{movimiento}/confirmar', [TicketController::class, 'confirmar'])
         ->name('recepcion.confirmar');
-    Route::post('/recepcion/cancelar/{movimiento}', [TicketController::class, 'cancelReception'])
-        ->name('recepcion.cancelar');
+    Route::post('/recepcion/movimientos/{movimiento}/anular', [TicketController::class, 'anular'])
+        ->name('recepcion.anular');
 
     Route::middleware('rol:admin')->prefix('patrimonio')->name('patrimonio.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -56,8 +56,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
     });
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/mi-cuenta', [CuentaController::class, 'show'])->name('cuenta');
+    Route::patch('/mi-cuenta', [CuentaController::class, 'actualizar'])->name('cuenta.actualizar');
+    Route::put('/mi-cuenta/clave', [CuentaController::class, 'actualizarClave'])->name('cuenta.clave');
 });
 
 require __DIR__.'/auth.php';

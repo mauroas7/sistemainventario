@@ -47,7 +47,7 @@ export default function MenuDeUsuario({ usuario }) {
 
                 <div className="border-b border-brandText-soft/40 py-1 dark:border-gray-800">
                     <MenuItem>
-                        <Link href={route('profile.edit')} className={ITEM}>
+                        <Link href={route('cuenta')} className={ITEM}>
                             <Icono nombre="manage_accounts" className="text-xl text-secondary-dark dark:text-secondary" />
                             Mi cuenta
                         </Link>

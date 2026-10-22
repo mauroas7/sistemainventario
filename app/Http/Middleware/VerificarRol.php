@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Restringe una ruta a uno o más roles: `->middleware('rol:admin')`.
  * Acepta slugs y etiquetas de `App\Enums\Rol`.
  */
-class RequerirRol
+class VerificarRol
 {
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {

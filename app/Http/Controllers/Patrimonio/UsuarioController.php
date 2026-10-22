@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Patrimonio;
 
 use App\Enums\Rol;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\ActualizarUsuarioRequest;
+use App\Http\Requests\GuardarUsuarioRequest;
 use App\Models\Area;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -38,14 +38,14 @@ class UsuarioController extends Controller
         ]);
     }
 
-    public function store(StoreUserRequest $request): RedirectResponse
+    public function store(GuardarUsuarioRequest $request): RedirectResponse
     {
         User::create($request->validated());
 
         return back()->with('exito', 'Usuario creado correctamente');
     }
 
-    public function update(UpdateUserRequest $request, User $usuario): RedirectResponse
+    public function update(ActualizarUsuarioRequest $request, User $usuario): RedirectResponse
     {
         $datos = $request->validated();
 

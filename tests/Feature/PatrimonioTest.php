@@ -63,7 +63,7 @@ test('las pantallas de patrimonio llegan con sus datos y sin api', function () {
         ->where("ultimosMovimientos.{$bien->id}.id", $movimiento->id));
 
     $this->get(route('patrimonio.movimientos.show', $movimiento))->assertInertia(fn (AssertableInertia $pagina) => $pagina
-        ->component('Patrimonio/Tickets/Show')
+        ->component('Patrimonio/Movimientos/Show')
         ->where('movimiento.id', $movimiento->id)
         ->has('movimiento.historial_estados', 1));
 
@@ -153,7 +153,7 @@ test('la foto del movimiento es privada y la ve sólo quien puede ver el movimie
 test('un movimiento anulado no admite acuse de recibo', function () {
     $movimiento = informarTraslado();
 
-    $this->actingAs($this->juan)->post(route('recepcion.cancelar', $movimiento))->assertSessionHasNoErrors();
+    $this->actingAs($this->juan)->post(route('recepcion.anular', $movimiento))->assertSessionHasNoErrors();
 
     $this->actingAs($this->patrimonio)
         ->post(route('recepcion.confirmar', $movimiento))

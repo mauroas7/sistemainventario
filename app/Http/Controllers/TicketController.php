@@ -122,7 +122,7 @@ class TicketController extends Controller
             ->with('exito', 'Movimiento informado correctamente');
     }
 
-    public function inbox(Request $request): Response
+    public function index(Request $request): Response
     {
         $user = $request->user();
         $esAdmin = $user->tieneRol(Rol::Admin);
@@ -148,7 +148,7 @@ class TicketController extends Controller
         ]);
     }
 
-    public function showReception(Request $request, Movimiento $movimiento): Response
+    public function show(Request $request, Movimiento $movimiento): Response
     {
         $user = $request->user();
         abort_unless($this->movimientoService->puedeVer($user, $movimiento), 403);
@@ -186,7 +186,7 @@ class TicketController extends Controller
      * Acuse de recibo del nuevo responsable. Es opcional: el bien ya cambió de manos
      * cuando se informó el movimiento, esto sólo deja constancia de que está al tanto.
      */
-    public function confirmReception(Request $request, Movimiento $movimiento): RedirectResponse
+    public function confirmar(Request $request, Movimiento $movimiento): RedirectResponse
     {
         $user = $request->user();
 
@@ -212,7 +212,7 @@ class TicketController extends Controller
      * Anular un movimiento informado por error. Sólo Patrimonio o quien lo informó,
      * y únicamente mientras no se haya volcado a Diaguita.
      */
-    public function cancelReception(Request $request, Movimiento $movimiento): RedirectResponse
+    public function anular(Request $request, Movimiento $movimiento): RedirectResponse
     {
         $user = $request->user();
 

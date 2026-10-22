@@ -3,7 +3,7 @@ import { Boton, Campo, claseControl, descritoPor, Input, PasswordInput, Tarjeta 
 import AppLayout from '@/Components/UI/AppLayout';
 
 /** Los datos y la clave de la propia cuenta. */
-export default function Edit() {
+export default function Cuenta() {
     const usuario = usePage().props.auth.usuario;
 
     const datos = useForm({ name: usuario.nombre, email: usuario.email });
@@ -11,12 +11,12 @@ export default function Edit() {
 
     const guardarDatos = (e) => {
         e.preventDefault();
-        datos.patch(route('profile.update'), { preserveScroll: true });
+        datos.patch(route('cuenta.actualizar'), { preserveScroll: true });
     };
 
     const guardarClave = (e) => {
         e.preventDefault();
-        clave.put(route('password.update'), {
+        clave.put(route('cuenta.clave'), {
             preserveScroll: true,
             onSuccess: () => clave.reset(),
             onError: () => clave.reset('current_password', 'password', 'password_confirmation'),
