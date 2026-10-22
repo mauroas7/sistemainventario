@@ -5,6 +5,8 @@
 .env.production
 .phpactor.json
 .phpunit.result.cache
+/.codex
+/.cursor/
 /.fleet
 /.idea
 /.nova
@@ -12,13 +14,19 @@
 /.vscode
 /.zed
 /auth.json
+/database/*.sqlite
 /node_modules
 /public/build
 /public/hot
 /public/storage
 /storage/*.key
-/storage/pail
 /vendor
+_ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Configuración personal de cada quien para Claude Code; la documentación va en docs/
+CLAUDE.md
+CLAUDE.local.md
+.claude/
