@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Rol;
 use App\Models\Bien;
 use App\Models\EstadoMovimiento;
 use App\Models\Movimiento;
@@ -27,12 +28,12 @@ class MovimientoService
         'estadoMovimiento',
     ];
 
-    // Obtener todos los movimientos.
-    public function obtenerTodos()
+    /** Patrimonio ve todo; el resto, lo que sale de su área o llega a ella. */
+    public function puedeVer(User $usuario, Movimiento $movimiento): bool
     {
-        return Movimiento::with(self::RELACIONES)
-            ->orderByDesc('fecha_movimiento')
-            ->get();
+        return $usuario->tieneRol(Rol::Admin)
+            || (int) $usuario->area_id === (int) $movimiento->area_origen_id
+            || (int) $usuario->area_id === (int) $movimiento->area_destino_id;
     }
 
     /**
@@ -155,16 +156,6 @@ class MovimientoService
 
             return $movimiento->fresh(self::RELACIONES);
         });
-    }
-
-    // Actualizar un movimiento.
-    public function actualizar(Movimiento $movimiento, array $datos)
-    {
-        $movimiento->update($datos);
-
-        $this->sincronizarUbicacionBien($movimiento->bien_id);
-
-        return $movimiento->fresh(self::RELACIONES);
     }
 
     /**

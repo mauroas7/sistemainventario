@@ -1,32 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
-import Cargando from '@/Components/Cargando';
 import { formatFecha } from '@/utils/formato';
-import axios from 'axios';
 
-export default function Show() {
-    const movimientoId = useMemo(() => new URLSearchParams(window.location.search).get('movimiento'), []);
-    const [movimiento, setMovimiento] = useState(null);
-    const [cargando, setCargando] = useState(true);
-
-    useEffect(() => {
-        // Sin ticket en la URL no hay nada que auditar: caer al primero mostraría otro como si fuera el pedido.
-        if (!movimientoId) {
-            setCargando(false);
-            return;
-        }
-
-        // Se pide el movimiento puntual: traer la lista y buscarlo en el cliente fallaba
-        // apenas el ticket quedaba fuera de la primera página (la API pagina de a 20).
-        setCargando(true);
-
-        axios.get(`/movimientos/${movimientoId}`)
-            .then(r => setMovimiento(r.data.data || r.data || null))
-            .catch(() => setMovimiento(null))
-            .finally(() => setCargando(false));
-    }, [movimientoId]);
-
+export default function Show({ movimiento }) {
     return (
         <SidebarLayout>
             <Head title="Auditoría de Ticket" />
@@ -36,21 +13,15 @@ export default function Show() {
                     <div>
                         <h2 className="text-2xl font-bold text-institucional-primario">Auditoría de Movimiento</h2>
                         <p className="text-sm text-gray-500 mt-1">
-                            Ticket <span className="font-bold text-gray-700">{movimiento ? `#TK-${movimiento.id}` : 'sin seleccionar'}</span>
+                            Ticket <span className="font-bold text-gray-700">{`#TK-${movimiento.id}`}</span>
                         </p>
                     </div>
-                    <Link href="/patrimonio/dashboard" className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium text-sm hover:bg-gray-50 shadow-sm transition-colors">
+                    <Link href={route('patrimonio.dashboard')} className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium text-sm hover:bg-gray-50 shadow-sm transition-colors">
                         Volver al Dashboard
                     </Link>
                 </div>
 
-                {cargando ? (
-                    <Cargando mensaje="Cargando ticket..." />
-                ) : !movimiento ? (
-                    <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm text-sm text-gray-500">
-                        No hay un ticket seleccionado.
-                    </div>
-                ) : (
+                {(
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2 space-y-6">
                             <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">

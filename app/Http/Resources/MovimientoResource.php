@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class MovimientoResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
+     * Las fechas viajan en ISO 8601 con huso: el formato lo decide la pantalla.
      *
      * @return array<string, mixed>
      */
@@ -76,17 +76,15 @@ class MovimientoResource extends JsonResource
             ],
 
             'observaciones_salida' => $this->observaciones_salida,
-            // Ruta relativa a propósito (no Storage::url(), que arma una URL absoluta con
-            // APP_URL): así la imagen carga sin importar si se accede por dominio o IP de LAN.
-            'imagen_salida_url' => $this->imagen_salida ? '/storage/'.$this->imagen_salida : null,
+            'imagen_salida_url' => $this->imagen_salida ? route('recepcion.movimientos.foto', $this->resource) : null,
 
-            'fecha_movimiento' => $this->fecha_movimiento,
-            'fecha_recepcion' => $this->fecha_recepcion,
-            'fecha_registro_diaguita' => $this->fecha_registro_diaguita,
-            'fecha_cierre' => $this->fecha_cierre,
+            'fecha_movimiento' => $this->fecha_movimiento?->toIso8601String(),
+            'fecha_recepcion' => $this->fecha_recepcion?->toIso8601String(),
+            'fecha_registro_diaguita' => $this->fecha_registro_diaguita?->toIso8601String(),
+            'fecha_cierre' => $this->fecha_cierre?->toIso8601String(),
 
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'created_at' => $this->created_at?->toIso8601String(),
+            'updated_at' => $this->updated_at?->toIso8601String(),
 
             // Solo viaja si quien arma la respuesta lo cargó a propósito (las pantallas
             // de detalle). En los listados sería una consulta por fila que nadie mira.
@@ -96,7 +94,7 @@ class MovimientoResource extends JsonResource
                     'estado_anterior' => $cambio->estadoAnterior?->nombre,
                     'estado_nuevo' => $cambio->estadoNuevo?->nombre,
                     'usuario' => $cambio->usuario?->name,
-                    'fecha' => $cambio->created_at,
+                    'fecha' => $cambio->created_at?->toIso8601String(),
                 ])
                 ->all()),
         ];

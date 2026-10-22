@@ -1,10 +1,14 @@
 <?php
 
 use App\Http\Controllers\InicioController;
+use App\Http\Controllers\Patrimonio\BienController;
+use App\Http\Controllers\Patrimonio\DashboardController;
+use App\Http\Controllers\Patrimonio\LocalizadorController;
+use App\Http\Controllers\Patrimonio\MovimientoController;
+use App\Http\Controllers\Patrimonio\UsuarioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::get('/', function () {
     // Si el usuario tiene sesión activa, va al sistema. Si no, al login.
@@ -25,46 +29,31 @@ Route::middleware('auth')->group(function () {
         ->name('recepcion.bandeja');
     Route::get('/recepcion/movimientos/{movimiento}', [TicketController::class, 'showReception'])
         ->name('recepcion.show');
+    Route::get('/recepcion/movimientos/{movimiento}/foto', [TicketController::class, 'foto'])
+        ->name('recepcion.movimientos.foto');
     Route::post('/recepcion/confirmar/{movimiento}', [TicketController::class, 'confirmReception'])
         ->name('recepcion.confirmar');
     Route::post('/recepcion/cancelar/{movimiento}', [TicketController::class, 'cancelReception'])
         ->name('recepcion.cancelar');
 
-    Route::middleware('rol:admin')->group(function () {
-        Route::get('/patrimonio/dashboard', function () {
-            return Inertia::render('Patrimonio/Dashboard');
-        })->name('patrimonio.dashboard');
-        Route::get('/patrimonio/dashboard/exportar', [TicketController::class, 'exportarMovimientos'])
-            ->name('patrimonio.dashboard.exportar');
-        Route::patch('/patrimonio/movimientos/{movimiento}/estado', [TicketController::class, 'updateMovimientoEstado'])
-            ->name('patrimonio.movimientos.estado');
-        Route::patch('/patrimonio/movimientos/{movimiento}/responsable', [TicketController::class, 'updateMovimientoResponsable'])
-            ->name('patrimonio.movimientos.responsable');
+    Route::middleware('rol:admin')->prefix('patrimonio')->name('patrimonio.')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/exportar', [DashboardController::class, 'exportar'])->name('dashboard.exportar');
 
-        // Localizador de Bienes
-        Route::get('/patrimonio/localizador', function () {
-            return Inertia::render('Patrimonio/Localizador/Index');
-        })->name('patrimonio.localizador.index');
+        Route::get('/movimientos/{movimiento}', [MovimientoController::class, 'show'])->name('movimientos.show');
+        Route::patch('/movimientos/{movimiento}/estado', [MovimientoController::class, 'actualizarEstado'])
+            ->name('movimientos.estado');
+        Route::patch('/movimientos/{movimiento}/responsable', [MovimientoController::class, 'asignarResponsable'])
+            ->name('movimientos.responsable');
 
-        // Directorio de Bienes
-        Route::get('/patrimonio/bienes', function () {
-            return Inertia::render('Patrimonio/Bienes/Index');
-        })->name('patrimonio.bienes.index');
+        Route::get('/localizador', [LocalizadorController::class, 'index'])->name('localizador.index');
 
-        // Historial de un Bien (Ficha)
-        Route::get('/patrimonio/bienes/show', function () {
-            return Inertia::render('Patrimonio/Bienes/Show');
-        })->name('patrimonio.bienes.show');
+        Route::get('/bienes', [BienController::class, 'index'])->name('bienes.index');
+        Route::get('/bienes/{bien}', [BienController::class, 'show'])->name('bienes.show');
 
-        // Auditoría de un Ticket
-        Route::get('/patrimonio/tickets/show', function () {
-            return Inertia::render('Patrimonio/Tickets/Show');
-        })->name('patrimonio.tickets.show');
-
-        // Panel de Configuración
-        Route::get('/patrimonio/configuracion', function () {
-            return Inertia::render('Patrimonio/Configuracion/Index');
-        })->name('patrimonio.configuracion.index');
+        Route::get('/configuracion', [UsuarioController::class, 'index'])->name('configuracion.index');
+        Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+        Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -1,64 +1,15 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
-import Cargando from '@/Components/Cargando';
 import { formatFecha, estadoBienClase } from '@/utils/formato';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
-import axios from 'axios';
 
 function normalizar(texto) {
     return String(texto ?? '').toLowerCase();
 }
 
-// El localizador necesita el último movimiento de cada bien, así que recorre todas las
-// páginas de la API con su tope (100): con la primera sola, casi todos los bienes
-// figuran "sin movimientos registrados" aunque los tengan.
-async function traerTodosLosMovimientos() {
-    const primera = await axios.get('/movimientos', { params: { per_page: 100, page: 1 } });
-    const payload = primera.data || {};
-
-    let todos = payload.data || [];
-    const ultimaPagina = payload.meta?.last_page || 1;
-
-    for (let pagina = 2; pagina <= ultimaPagina; pagina++) {
-        const res = await axios.get('/movimientos', { params: { per_page: 100, page: pagina } });
-        todos = todos.concat(res.data?.data || []);
-    }
-
-    return todos;
-}
-
-export default function Index() {
-    const [bienes, setBienes] = useState([]);
-    const [movimientos, setMovimientos] = useState([]);
+export default function Index({ bienes = [], ultimosMovimientos = {} }) {
     const [query, setQuery] = useState('');
-    const [cargando, setCargando] = useState(true);
-
-    useEffect(() => {
-        Promise.all([
-            axios.get('/bien'),
-            traerTodosLosMovimientos(),
-        ]).then(([bienRes, movs]) => {
-            setBienes(bienRes.data.data || bienRes.data || []);
-            setMovimientos(movs);
-        }).catch(() => {
-            setBienes([]);
-            setMovimientos([]);
-        }).finally(() => setCargando(false));
-    }, []);
-
-    const ultimoMovimientoPorBien = useMemo(() => {
-        const mapa = {};
-        movimientos.forEach((m) => {
-            const bienId = m.bien?.id;
-            if (!bienId) return;
-            const actual = mapa[bienId];
-            if (!actual || new Date(m.fecha_movimiento) > new Date(actual.fecha_movimiento)) {
-                mapa[bienId] = m;
-            }
-        });
-        return mapa;
-    }, [movimientos]);
 
     const resultados = useMemo(() => {
         const q = normalizar(query.trim());
@@ -105,16 +56,15 @@ export default function Index() {
                 </div>
 
                 <div className="space-y-4">
-                    {cargando && <Cargando mensaje="Cargando bienes..." />}
-
-                    {!cargando && resultados.length === 0 && (
+                    
+                    {resultados.length === 0 && (
                         <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm text-center text-sm text-gray-500">
                             No se encontraron bienes para "{query}".
                         </div>
                     )}
 
-                    {!cargando && resultados.map((bien) => {
-                        const ultimo = ultimoMovimientoPorBien[bien.id];
+                    {resultados.map((bien) => {
+                        const ultimo = ultimosMovimientos[bien.id];
 
                         return (
                             <div key={bien.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
@@ -132,7 +82,7 @@ export default function Index() {
                                         )}
                                     </div>
                                     <Link
-                                        href={`/patrimonio/bienes/show?bien=${bien.id}`}
+                                        href={route('patrimonio.bienes.show', { bien: bien.id })}
                                         className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 whitespace-nowrap"
                                     >
                                         Ver historial completo

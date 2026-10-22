@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
 import { formatFecha } from '@/utils/formato';
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid';
-import axios from 'axios';
 
 export default function Show({ movimiento, responsables = [] }) {
     const m = movimiento || {};
@@ -15,22 +14,19 @@ export default function Show({ movimiento, responsables = [] }) {
     const [nuevoResponsable, setNuevoResponsable] = useState('');
     const [asignando, setAsignando] = useState(false);
 
-    // Por axios y no por fetch(): toma el token CSRF de la cookie XSRF-TOKEN, y el
-    // <meta name="csrf-token"> queda viejo cuando el login rota la sesión.
     function asignarResponsable(e) {
         e.preventDefault();
         if (!nuevoResponsable) return;
 
         setAsignando(true);
 
-        axios.patch(route('patrimonio.movimientos.responsable', { movimiento: m.id }), {
+        router.patch(route('patrimonio.movimientos.responsable', { movimiento: m.id }), {
             responsable_nuevo_id: nuevoResponsable,
-        })
-            .then(() => window.location.reload())
-            .catch((error) => {
-                alert(error.response?.data?.message || 'No se pudo asignar el responsable');
-                setAsignando(false);
-            });
+        }, {
+            preserveScroll: true,
+            onError: (errores) => alert(Object.values(errores)[0] || 'No se pudo asignar el responsable'),
+            onFinish: () => setAsignando(false),
+        });
     }
 
     const estaInformado = m.estado_movimiento?.nombre === 'Informado';
@@ -42,12 +38,11 @@ export default function Show({ movimiento, responsables = [] }) {
     const puedeAnular = estaInformado && (usuario.rol === 'admin' || String(m.creado_por?.id) === String(usuario.id));
     const puedeActuar = puedeAcusar || puedeAnular;
 
-    // Recibe una URL absoluta armada con route(): así se evita el baseURL '/api' que
-    // axios tiene configurado por defecto para los endpoints de la API.
     function postAction(url) {
-        axios.post(url)
-            .then(() => window.location.reload())
-            .catch((error) => alert(error.response?.data?.message || 'No se pudo completar la acción'));
+        router.post(url, {}, {
+            preserveScroll: true,
+            onError: (errores) => alert(Object.values(errores)[0] || 'No se pudo completar la acción'),
+        });
     }
 
     return (

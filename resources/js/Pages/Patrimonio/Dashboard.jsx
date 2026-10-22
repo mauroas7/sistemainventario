@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Head, router, usePage } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
 import Cargando from '@/Components/Cargando';
 import { formatFecha, estadoMovimientoClase } from '@/utils/formato';
@@ -13,7 +13,6 @@ import {
     ChevronLeftIcon,
     ChevronRightIcon,
 } from '@heroicons/react/20/solid';
-import axios from 'axios';
 
 const FILTROS_VACIOS = {
     area_id: '',
@@ -24,116 +23,44 @@ const FILTROS_VACIOS = {
     bien: '',
 };
 
-const RESUMEN_VACIO = { total: 0, informados: 0, registrados: 0, cerrados: 0, anulados: 0 };
-
-const POR_PAGINA = 20;
-
-// Lee filtros y página desde el query string, para poder compartir/recargar una
-// vista filtrada sin perderla (ej: "todo lo pendiente de Farmacia").
-function leerDesdeUrl() {
-    if (typeof window === 'undefined') return { filtros: FILTROS_VACIOS, pagina: 1 };
-
-    const params = new URLSearchParams(window.location.search);
-    const filtros = { ...FILTROS_VACIOS };
-    Object.keys(FILTROS_VACIOS).forEach((clave) => {
-        if (params.has(clave)) filtros[clave] = params.get(clave);
-    });
-
-    const paginaParam = parseInt(params.get('page'), 10);
-    const pagina = Number.isInteger(paginaParam) && paginaParam > 0 ? paginaParam : 1;
-
-    return { filtros, pagina };
+function soloConValor(filtros) {
+    return Object.fromEntries(
+        Object.entries(filtros).filter(([, valor]) => valor !== '' && valor !== null && valor !== undefined)
+    );
 }
 
-function escribirEnUrl(filtros, pagina) {
-    const params = new URLSearchParams();
-    Object.entries(filtros).forEach(([clave, valor]) => {
-        if (valor !== '' && valor !== null && valor !== undefined) params.set(clave, valor);
-    });
-    if (pagina > 1) params.set('page', String(pagina));
-
-    const query = params.toString();
-    window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`);
-}
-
-export default function Dashboard() {
-    const { auth } = usePage().props;
-    const [movimientos, setMovimientos] = useState([]);
-    const [meta, setMeta] = useState(null);
-    const [resumen, setResumen] = useState(RESUMEN_VACIO);
-    const [estados, setEstados] = useState([]);
-    const [areas, setAreas] = useState([]);
-    const [motivos, setMotivos] = useState([]);
-    const [drafts, setDrafts] = useState({});
-    const [cargando, setCargando] = useState(true);
-
-    const inicial = leerDesdeUrl();
+export default function Dashboard({
+    movimientos = [],
+    paginacion = { pagina: 1, ultima_pagina: 1, total: 0, desde: null, hasta: null },
+    resumen = { total: 0, informados: 0, registrados: 0, cerrados: 0, anulados: 0 },
+    filtros: filtrosDelServidor = {},
+    estados = [],
+    areas = [],
+    motivos = [],
+}) {
+    const { auth, errors } = usePage().props;
+    const aplicados = Object.fromEntries(
+        Object.entries({ ...FILTROS_VACIOS, ...filtrosDelServidor }).map(([clave, valor]) => [clave, valor ?? ''])
+    );
     // `filtros` es lo que el usuario está tipeando; `aplicados` es lo que ya se consultó.
-    const [filtros, setFiltros] = useState(inicial.filtros);
-    const [aplicados, setAplicados] = useState(inicial.filtros);
-    const [pagina, setPagina] = useState(inicial.pagina);
-    const [errorFiltros, setErrorFiltros] = useState('');
+    const [filtros, setFiltros] = useState(aplicados);
+    const [drafts, setDrafts] = useState({});
+    const [cargando, setCargando] = useState(false);
+    const pagina = paginacion.pagina;
+    const errorFiltros = Object.keys(FILTROS_VACIOS).map((clave) => errors?.[clave]).filter(Boolean).join(' ');
 
-    const cargarMovimientos = useCallback((params, paginaSolicitada) => {
-        setCargando(true);
-        setErrorFiltros('');
+    // Filtros y página viajan en la URL: una vista filtrada se puede recargar o compartir.
+    function visitar(params, paginaSolicitada) {
+        const query = soloConValor(params);
+        if (paginaSolicitada > 1) query.page = paginaSolicitada;
 
-        const query = Object.fromEntries(
-            Object.entries(params).filter(([, valor]) => valor !== '' && valor !== null)
-        );
-        query.page = paginaSolicitada;
-        query.per_page = POR_PAGINA;
-
-        return axios.get('/movimientos', { params: query })
-            .then((res) => {
-                const payload = res.data || {};
-                const data = payload.data || [];
-
-                setMovimientos(data);
-                setMeta(payload.meta || null);
-                setResumen(payload.resumen || RESUMEN_VACIO);
-
-                const nuevosDrafts = {};
-                data.forEach((m) => {
-                    nuevosDrafts[m.id] = m.estado_movimiento?.id || '';
-                });
-                setDrafts(nuevosDrafts);
-
-                escribirEnUrl(params, paginaSolicitada);
-            })
-            .catch((error) => {
-                const errores = error.response?.data?.errors;
-                setErrorFiltros(
-                    errores
-                        ? Object.values(errores).flat().join(' ')
-                        : 'No se pudieron cargar los movimientos.'
-                );
-                setMovimientos([]);
-                setMeta(null);
-                setResumen(RESUMEN_VACIO);
-            })
-            .finally(() => setCargando(false));
-    }, []);
-
-    useEffect(() => {
-        Promise.all([
-            axios.get('/estadoMovimiento'),
-            axios.get('/areas'),
-            axios.get('/motivo'),
-        ]).then(([estRes, areaRes, motRes]) => {
-            setEstados(estRes.data.data || estRes.data || []);
-            setAreas(areaRes.data.data || areaRes.data || []);
-            setMotivos(motRes.data.data || motRes.data || []);
-        }).catch(() => {
-            setEstados([]);
-            setAreas([]);
-            setMotivos([]);
+        router.get(route('patrimonio.dashboard'), query, {
+            preserveState: true,
+            preserveScroll: true,
+            onStart: () => setCargando(true),
+            onFinish: () => setCargando(false),
         });
-
-        cargarMovimientos(aplicados, pagina);
-        // Solo al montar: los cambios posteriores de filtros/página se disparan a mano.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [cargarMovimientos]);
+    }
 
     const hayFiltrosActivos = Object.values(aplicados).some(v => v !== '');
 
@@ -144,47 +71,41 @@ export default function Dashboard() {
 
     function aplicarFiltros(e) {
         e.preventDefault();
-        setAplicados(filtros);
-        setPagina(1);
-        cargarMovimientos(filtros, 1);
+        visitar(filtros, 1);
     }
 
     function limpiarFiltros() {
         setFiltros(FILTROS_VACIOS);
-        setAplicados(FILTROS_VACIOS);
-        setPagina(1);
-        cargarMovimientos(FILTROS_VACIOS, 1);
+        visitar(FILTROS_VACIOS, 1);
     }
 
     function irAPagina(nueva) {
-        if (!meta || nueva < 1 || nueva > meta.last_page || nueva === pagina || cargando) return;
-        setPagina(nueva);
-        cargarMovimientos(aplicados, nueva);
+        if (nueva < 1 || nueva > paginacion.ultima_pagina || nueva === pagina || cargando) return;
+        visitar(aplicados, nueva);
     }
 
     function exportarCsv() {
-        const query = Object.fromEntries(
-            Object.entries(aplicados).filter(([, valor]) => valor !== '' && valor !== null)
-        );
-        window.location.href = route('patrimonio.dashboard.exportar', query);
+        window.location.href = route('patrimonio.dashboard.exportar', soloConValor(aplicados));
+    }
+
+    function estadoElegido(m) {
+        return drafts[m.id] ?? m.estado_movimiento?.id ?? '';
     }
 
     function setEstadoDraft(id, value) {
         setDrafts(prev => ({ ...prev, [id]: value }));
     }
 
-    // Por axios y no por fetch(): toma el token CSRF de la cookie XSRF-TOKEN, y el
-    // <meta name="csrf-token"> queda viejo cuando el login rota la sesión. route()
-    // da una URL absoluta, así no se le aplica el baseURL '/api' de axios.
-    function guardarEstado(id) {
-        const estado_movimiento_id = drafts[id];
-
-        axios.patch(route('patrimonio.movimientos.estado', { movimiento: id }), { estado_movimiento_id })
-            // El cambio de estado puede afectar los totales del resumen y a qué página
-            // pertenece el movimiento (según los filtros activos), así que recargamos la
-            // vista en vez de parchear la fila localmente.
-            .then(() => cargarMovimientos(aplicados, pagina))
-            .catch((error) => alert(error.response?.data?.message || 'No se pudo actualizar el estado'));
+    // El cambio de estado puede mover los totales y la página del movimiento: vuelve
+    // la vista entera en vez de parchear la fila.
+    function guardarEstado(m) {
+        router.patch(route('patrimonio.movimientos.estado', { movimiento: m.id }), {
+            estado_movimiento_id: estadoElegido(m),
+        }, {
+            preserveScroll: true,
+            onSuccess: () => setDrafts({}),
+            onError: (errores) => alert(Object.values(errores)[0] || 'No se pudo actualizar el estado'),
+        });
     }
 
     const claseCampo = 'w-full rounded-lg border-gray-300 text-sm text-gray-700 shadow-sm focus:border-institucional-primario focus:ring-institucional-primario';
@@ -382,7 +303,7 @@ export default function Dashboard() {
                                         </td>
                                         <td className="py-3 px-4 whitespace-nowrap">
                                             <select
-                                                value={drafts[m.id] || ''}
+                                                value={estadoElegido(m)}
                                                 onChange={(e) => setEstadoDraft(m.id, e.target.value)}
                                                 className="w-full rounded-lg border-gray-300 text-sm focus:border-institucional-primario focus:ring-institucional-primario"
                                             >
@@ -397,7 +318,7 @@ export default function Dashboard() {
                                         <td className="py-3 px-4 text-right whitespace-nowrap">
                                             <button
                                                 type="button"
-                                                onClick={() => guardarEstado(m.id)}
+                                                onClick={() => guardarEstado(m)}
                                                 className="rounded-lg bg-institucional-primario px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-blue-900"
                                             >
                                                 Guardar
@@ -419,10 +340,10 @@ export default function Dashboard() {
                         </table>
                     </div>
 
-                    {meta && meta.total > 0 && (
+                    {paginacion.total > 0 && (
                         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 px-4 py-3">
                             <p className="text-xs text-gray-500">
-                                Mostrando {meta.from}–{meta.to} de {meta.total}
+                                Mostrando {paginacion.desde}–{paginacion.hasta} de {paginacion.total}
                             </p>
                             <div className="flex items-center gap-2">
                                 <button
@@ -435,12 +356,12 @@ export default function Dashboard() {
                                     Anterior
                                 </button>
                                 <span className="text-xs font-medium text-gray-600">
-                                    Página {meta.current_page} de {meta.last_page}
+                                    Página {paginacion.pagina} de {paginacion.ultima_pagina}
                                 </span>
                                 <button
                                     type="button"
                                     onClick={() => irAPagina(pagina + 1)}
-                                    disabled={pagina >= meta.last_page}
+                                    disabled={pagina >= paginacion.ultima_pagina}
                                     className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                                 >
                                     Siguiente

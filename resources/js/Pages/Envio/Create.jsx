@@ -162,10 +162,7 @@ export default function Create({ bienes = [], areas = [], tiposMovimiento = [], 
         if (form.observaciones_salida) datos.observaciones_salida = form.observaciones_salida;
         if (imagen) datos.imagen = imagen;
 
-        // Por el router de Inertia y no por fetch(): toma el token CSRF de la cookie
-        // XSRF-TOKEN. El <meta name="csrf-token"> queda viejo cuando el login rota la
-        // sesión, y un fetch() que lo leyera termina en 419.
-        router.post('/envio/crear-ticket', datos, {
+        router.post(route('envio.store'), datos, {
             onError: (erroresServidor) => {
                 setErrors(erroresServidor || {});
                 if (!erroresServidor || Object.keys(erroresServidor).length === 0) {
@@ -350,7 +347,7 @@ export default function Create({ bienes = [], areas = [], tiposMovimiento = [], 
                             </div>
 
                             <div className="flex items-center space-x-4 pt-4">
-                                <Link href="/inicio" className="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">Cancelar</Link>
+                                <Link href={route('inicio')} className="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">Cancelar</Link>
                                 <button
                                     type="submit"
                                     disabled={enviando}

@@ -7,9 +7,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class BienResource extends JsonResource
 {
+    /** Lo que hay que precargar: sin esto, cada bien del listado dispara sus consultas. */
+    public const RELACIONES = ['area', 'ubicacionActual', 'estado', 'responsable'];
+
     /**
-     * Transform the resource into an array.
-     *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array

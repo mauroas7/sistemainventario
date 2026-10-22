@@ -3,7 +3,6 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
 import { ClockIcon, CheckCircleIcon, ClipboardDocumentListIcon, XCircleIcon } from '@heroicons/react/20/solid';
 import { estadoMovimientoClase } from '@/utils/formato';
-import axios from 'axios';
 
 const PESTANAS = [
     { clave: 'informados', etiqueta: 'Informados' },
@@ -58,23 +57,18 @@ export default function Bandeja({
             && (usuario.rol === 'admin' || String(m.creado_por?.id) === String(usuario.id));
     }
 
-    // Por axios y no por fetch(): toma el token CSRF de la cookie XSRF-TOKEN, y el
-    // <meta name="csrf-token"> queda viejo cuando el login rota la sesión. route()
-    // da una URL absoluta, así no se le aplica el baseURL '/api' de axios.
     function confirmarRecepcion(movimientoId) {
-        axios.post(route('recepcion.confirmar', { movimiento: movimientoId }))
-            .then(() => window.location.reload())
-            .catch((error) => {
-                alert(error.response?.data?.message || 'No se pudo confirmar la recepción');
-            });
+        router.post(route('recepcion.confirmar', { movimiento: movimientoId }), {}, {
+            preserveScroll: true,
+            onError: (errores) => alert(Object.values(errores)[0] || 'No se pudo confirmar la recepción'),
+        });
     }
 
     function cancelarRecepcion(movimientoId) {
-        axios.post(route('recepcion.cancelar', { movimiento: movimientoId }))
-            .then(() => window.location.reload())
-            .catch((error) => {
-                alert(error.response?.data?.message || 'No se pudo cancelar el ticket');
-            });
+        router.post(route('recepcion.cancelar', { movimiento: movimientoId }), {}, {
+            preserveScroll: true,
+            onError: (errores) => alert(Object.values(errores)[0] || 'No se pudo cancelar el ticket'),
+        });
     }
 
     // La página ya viene filtrada del servidor.

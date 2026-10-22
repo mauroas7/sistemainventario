@@ -1,20 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
-import Cargando from '@/Components/Cargando';
 import { estadoBienClase } from '@/utils/formato';
-import axios from 'axios';
 
-export default function Index() {
-    const [bienes, setBienes] = useState([]);
-    const [cargando, setCargando] = useState(true);
-
-    useEffect(() => {
-        axios.get('/bien')
-            .then(r => setBienes(r.data.data || r.data || []))
-            .finally(() => setCargando(false));
-    }, []);
-
+export default function Index({ bienes = [] }) {
     return (
         <SidebarLayout>
             <Head title="Directorio de Bienes" />
@@ -27,7 +16,7 @@ export default function Index() {
                     </div>
                 </div>
 
-                {cargando ? <Cargando mensaje="Cargando bienes..." /> : (
+                {(
                 <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
@@ -65,7 +54,7 @@ export default function Index() {
                                         </td>
                                         <td className="py-3 px-4 text-right">
                                             <Link
-                                                href={`/patrimonio/bienes/show?bien=${bien.id}`}
+                                                href={route('patrimonio.bienes.show', { bien: bien.id })}
                                                 className="text-institucional-primario hover:text-blue-700 font-medium text-xs hover:underline"
                                             >
                                                 Ver historial

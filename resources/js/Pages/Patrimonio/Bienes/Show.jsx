@@ -1,53 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
-import Cargando from '@/Components/Cargando';
 import { formatFecha } from '@/utils/formato';
-import axios from 'axios';
 
-export default function Show() {
-    const bienId = useMemo(() => new URLSearchParams(window.location.search).get('bien'), []);
-    const [bien, setBien] = useState(null);
-    const [movimientos, setMovimientos] = useState([]);
-    const [cargando, setCargando] = useState(true);
-
-    useEffect(() => {
-        // Sin bien en la URL no hay ficha: caer al primero mostraría otro bien como si fuera el pedido.
-        if (!bienId) {
-            setCargando(false);
-            return;
-        }
-
-        setCargando(true);
-
-        axios.get('/bien')
-            .then((r) => {
-                const lista = r.data.data || r.data || [];
-                const elegido = lista.find(item => String(item.id) === String(bienId)) || null;
-                setBien(elegido);
-
-                if (!elegido) {
-                    setMovimientos([]);
-                    return null;
-                }
-
-                // El historial se filtra por código en el servidor en vez de traer la
-                // lista completa y buscar en el cliente: la API pagina de a 20 y el
-                // registro del bien quedaba recortado. El filtro del backend es un LIKE,
-                // así que después se afina por id exacto.
-                return axios.get('/movimientos', { params: { bien: elegido.codigo, per_page: 100 } })
-                    .then((mr) => {
-                        const movs = mr.data.data || mr.data || [];
-                        setMovimientos(movs.filter(m => String(m.bien?.id) === String(bienId)));
-                    });
-            })
-            .catch(() => {
-                setBien(null);
-                setMovimientos([]);
-            })
-            .finally(() => setCargando(false));
-    }, [bienId]);
-
+export default function Show({ bien, movimientos = [] }) {
     return (
         <SidebarLayout>
             <Head title="Historial del Bien" />
@@ -57,21 +13,15 @@ export default function Show() {
                     <div>
                         <h2 className="text-2xl font-bold text-institucional-primario">Ficha y Registro Histórico</h2>
                         <p className="text-sm text-gray-500 mt-1">
-                            Bien <span className="font-bold text-gray-700">{bien ? `#${bien.codigo} - ${bien.nombre}` : 'sin seleccionar'}</span>
+                            Bien <span className="font-bold text-gray-700">{`#${bien.codigo} - ${bien.nombre}`}</span>
                         </p>
                     </div>
-                    <Link href="/patrimonio/bienes" className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium text-sm hover:bg-gray-50 shadow-sm transition-colors">
+                    <Link href={route('patrimonio.bienes.index')} className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium text-sm hover:bg-gray-50 shadow-sm transition-colors">
                         Volver al Directorio
                     </Link>
                 </div>
 
-                {cargando ? (
-                    <Cargando mensaje="Cargando ficha del bien..." />
-                ) : !bien ? (
-                    <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm text-sm text-gray-500">
-                        No hay un bien seleccionado.
-                    </div>
-                ) : (
+                {(
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="space-y-6">
                             <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">

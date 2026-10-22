@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import React, { useMemo, useState } from 'react';
+import { Head, router, usePage } from '@inertiajs/react';
 import SidebarLayout from '@/Layouts/SidebarLayout';
-import Cargando from '@/Components/Cargando';
 import {
     BuildingOffice2Icon,
     UsersIcon,
@@ -11,7 +10,6 @@ import {
     NoSymbolIcon,
     ArrowPathIcon,
 } from '@heroicons/react/20/solid';
-import axios from 'axios';
 
 const ROL_CLASES = {
     admin: 'bg-institucional-primario/10 text-institucional-primario border-institucional-primario/20',
@@ -27,38 +25,15 @@ const ROLES = [
 
 const FORM_VACIO = { name: '', email: '', password: '', rol: 'coordinador', area_id: '' };
 
-export default function Index() {
+export default function Index({ areas = [], usuarios = [] }) {
     const { auth } = usePage().props;
     const usuarioActualId = auth?.usuario?.id;
-
-    const [areas, setAreas] = useState([]);
-    const [usuarios, setUsuarios] = useState([]);
-    const [cargando, setCargando] = useState(true);
 
     const [editando, setEditando] = useState(null); // null | 'nuevo' | id
     const [form, setForm] = useState(FORM_VACIO);
     const [errors, setErrors] = useState({});
     const [errorGeneral, setErrorGeneral] = useState('');
     const [guardando, setGuardando] = useState(false);
-
-    function cargarUsuarios() {
-        return axios.get('/users').then((res) => {
-            setUsuarios(res.data.data || res.data || []);
-        });
-    }
-
-    useEffect(() => {
-        Promise.all([
-            axios.get('/areas'),
-            axios.get('/users'),
-        ]).then(([areasRes, usersRes]) => {
-            setAreas(areasRes.data.data || areasRes.data || []);
-            setUsuarios(usersRes.data.data || usersRes.data || []);
-        }).catch(() => {
-            setAreas([]);
-            setUsuarios([]);
-        }).finally(() => setCargando(false));
-    }, []);
 
     // Una cuenta sin área no ve ningún bien: hay que poder detectarlas de un vistazo.
     const sinArea = useMemo(
@@ -119,26 +94,21 @@ export default function Index() {
         // Patrimonio ve todo el hospital, no se le asigna un área operativa.
         if (datos.rol === 'admin') delete datos.area_id;
 
-        const peticion = esNuevo
-            ? axios.post('/users', datos)
-            : axios.put(`/users/${editando}`, datos);
+        const opciones = {
+            preserveScroll: true,
+            onSuccess: () => cerrarFormulario(),
+            onError: ({ general, ...campos }) => {
+                setErrors(campos);
+                setErrorGeneral(general || '');
+            },
+            onFinish: () => setGuardando(false),
+        };
 
-        peticion
-            .then(() => cargarUsuarios())
-            .then(() => cerrarFormulario())
-            .catch((error) => {
-                const data = error.response?.data;
-                if (error.response?.status === 422 && data?.errors) {
-                    const planos = {};
-                    Object.entries(data.errors).forEach(([campo, mensajes]) => {
-                        planos[campo] = Array.isArray(mensajes) ? mensajes[0] : mensajes;
-                    });
-                    setErrors(planos);
-                } else {
-                    setErrorGeneral(data?.message || 'No se pudo guardar el usuario.');
-                }
-            })
-            .finally(() => setGuardando(false));
+        if (esNuevo) {
+            router.post(route('patrimonio.usuarios.store'), datos, opciones);
+        } else {
+            router.put(route('patrimonio.usuarios.update', { usuario: editando }), datos, opciones);
+        }
     }
 
     function cambiarEstado(usuario) {
@@ -149,11 +119,10 @@ export default function Index() {
 
         if (!window.confirm(mensaje)) return;
 
-        axios.put(`/users/${usuario.id}`, { activo: !desactivando })
-            .then(() => cargarUsuarios())
-            .catch((error) => {
-                window.alert(error.response?.data?.message || 'No se pudo cambiar el estado del usuario.');
-            });
+        router.put(route('patrimonio.usuarios.update', { usuario: usuario.id }), { activo: !desactivando }, {
+            preserveScroll: true,
+            onError: (errores) => window.alert(errores.general || Object.values(errores)[0] || 'No se pudo cambiar el estado del usuario.'),
+        });
     }
 
     const claseCampo = (campo) => `w-full rounded-lg text-sm text-gray-700 shadow-sm ${
@@ -174,7 +143,7 @@ export default function Index() {
                     <p className="text-sm text-gray-500 mt-1">Áreas y cuentas de acceso al portal.</p>
                 </div>
 
-                {cargando ? <Cargando mensaje="Cargando configuración..." /> : (
+                {(
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
                     {/* Áreas */}

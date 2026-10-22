@@ -138,7 +138,7 @@ class MovimientosTest extends TestCase
 
         $this->actingAs($juan)
             ->post('/envio/crear-ticket', $this->datosDeMovimiento($bien, $laboratorio, $ana))
-            ->assertStatus(422);
+            ->assertSessionHasErrors('responsable_nuevo_id');
 
         $this->assertSame(0, Movimiento::count());
     }
