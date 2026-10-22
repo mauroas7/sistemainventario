@@ -12,8 +12,7 @@ export default function Show() {
     const [cargando, setCargando] = useState(true);
 
     useEffect(() => {
-        // Sin bien en la URL no hay ficha que mostrar. Antes se caía al primero de la
-        // lista y se mostraba con su código real, como si fuera el que se pidió.
+        // Sin bien en la URL no hay ficha: caer al primero mostraría otro bien como si fuera el pedido.
         if (!bienId) {
             setCargando(false);
             return;

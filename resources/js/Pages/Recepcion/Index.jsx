@@ -20,8 +20,7 @@ export default function Bandeja({
     const { auth } = usePage().props;
     const user = auth?.user || {};
 
-    // El filtrado y el conteo los hace la base: antes se traían todos los movimientos
-    // del hospital y se filtraban en el navegador.
+    // El filtrado y el conteo los hace la base: cada pestaña y página es una visita.
     function irA(clave, pagina = 1) {
         router.get(route('recepcion.bandeja'), { estado: clave, page: pagina }, {
             preserveScroll: true,
@@ -59,11 +58,9 @@ export default function Bandeja({
             && (user.rol === 'admin' || String(m.creado_por?.id) === String(user.id));
     }
 
-    // Estas acciones van por axios y no por fetch(): axios manda el token CSRF leyéndolo
-    // de la cookie XSRF-TOKEN, que el servidor mantiene al día. El <meta name="csrf-token">
-    // se renderiza una sola vez y queda viejo apenas el login rota la sesión, así que un
-    // fetch() que lo leyera terminaba siempre en 419. Se usa route() porque devuelve una
-    // URL absoluta y evita el baseURL '/api' que tiene axios configurado por defecto.
+    // Por axios y no por fetch(): toma el token CSRF de la cookie XSRF-TOKEN, y el
+    // <meta name="csrf-token"> queda viejo cuando el login rota la sesión. route()
+    // da una URL absoluta, así no se le aplica el baseURL '/api' de axios.
     function confirmarRecepcion(movimientoId) {
         axios.post(route('recepcion.confirmar', { movimiento: movimientoId }))
             .then(() => window.location.reload())

@@ -162,11 +162,9 @@ export default function Create({ bienes = [], areas = [], tiposMovimiento = [], 
         if (form.observaciones_salida) datos.observaciones_salida = form.observaciones_salida;
         if (imagen) datos.imagen = imagen;
 
-        // Va por el router de Inertia y no por fetch(): el token CSRF lo toma de la
-        // cookie XSRF-TOKEN, que el servidor mantiene al día. El <meta name="csrf-token">
-        // se renderiza una sola vez y queda viejo apenas el login rota la sesión, con lo
-        // que un fetch() manual terminaba siempre en 419. El backend ya responde a esto
-        // con un redirect a la bandeja.
+        // Por el router de Inertia y no por fetch(): toma el token CSRF de la cookie
+        // XSRF-TOKEN. El <meta name="csrf-token"> queda viejo cuando el login rota la
+        // sesión, y un fetch() que lo leyera termina en 419.
         router.post('/envio/crear-ticket', datos, {
             onError: (erroresServidor) => {
                 setErrors(erroresServidor || {});

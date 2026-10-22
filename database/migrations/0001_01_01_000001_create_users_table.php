@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('rol', 20)->default('usuario')->index();
             // Sin área, la cuenta no ve ningún bien. Sólo un admin, que ve todo, puede no tenerla.

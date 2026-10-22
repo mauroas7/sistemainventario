@@ -2,23 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\MovimientoResource;
 use App\Models\Area;
 use App\Models\Bien;
+use App\Models\EstadoMovimiento;
 use App\Models\Motivo;
 use App\Models\Movimiento;
-use App\Models\EstadoMovimiento;
 use App\Models\TipoMovimiento;
+use App\Models\User;
+use App\Services\MovimientoService;
+use App\Services\NotificacionMovimientoService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TicketController extends Controller
 {
     public function __construct(
-        private \App\Services\MovimientoService $movimientoService,
-        private \App\Services\NotificacionMovimientoService $notificaciones
+        private MovimientoService $movimientoService,
+        private NotificacionMovimientoService $notificaciones
     ) {}
 
     public function create(): Response
@@ -61,7 +65,7 @@ class TicketController extends Controller
         // Desplegable de "a quién se la lleva": Patrimonio pidió que el nuevo
         // responsable se elija de una lista, no que se escriba a mano. Las cuentas
         // dadas de baja no pueden recibir bienes nuevos.
-        $responsables = \App\Models\User::query()
+        $responsables = User::query()
             ->activos()
             ->with('area:id,nombre')
             ->orderBy('name')
@@ -102,15 +106,14 @@ class TicketController extends Controller
             $filtros['estado_movimiento_id'] = EstadoMovimiento::whereIn('nombre', $nombres)->pluck('id')->all();
         }
 
-        // Paginado: para un admin esto traía todos los movimientos del hospital en cada
-        // carga, y las tarjetas de resumen se calculaban sobre ese array en el navegador.
+        // Paginado: para Patrimonio son todos los movimientos del hospital.
         $paginador = $this->movimientoService->obtenerParaBandeja($user?->area_id, $esAdmin, $filtros, 25);
 
         return Inertia::render('Recepcion/Index', [
             // Va por el Resource y no por los modelos crudos: el front espera esta forma
             // (creado_por / responsable_nuevo como objetos con "nombre"), no las columnas
             // FK que serializa Eloquent por defecto.
-            'movimientos' => \App\Http\Resources\MovimientoResource::collection($paginador->getCollection())->resolve($request),
+            'movimientos' => MovimientoResource::collection($paginador->getCollection())->resolve($request),
             'pestana' => $pestana,
             'paginacion' => [
                 'pagina' => $paginador->currentPage(),
@@ -134,18 +137,18 @@ class TicketController extends Controller
 
         abort_unless($puedeVer, 403);
 
-        $movimiento->load(array_merge(\App\Services\MovimientoService::RELACIONES, [
+        $movimiento->load(array_merge(MovimientoService::RELACIONES, [
             'historialEstados.estadoAnterior',
             'historialEstados.estadoNuevo',
             'historialEstados.usuario',
         ]));
 
         return Inertia::render('Recepcion/Show', [
-            'movimiento' => (new \App\Http\Resources\MovimientoResource($movimiento))->resolve(request()),
+            'movimiento' => (new MovimientoResource($movimiento))->resolve(request()),
             // Solo Patrimonio puede definir el responsable de un movimiento que se
             // informó sin uno, y solo entre el personal del área que recibió el bien.
             'responsables' => $user->rol === 'admin'
-                ? \App\Models\User::query()
+                ? User::query()
                     ->activos()
                     ->where('area_id', $movimiento->area_destino_id)
                     ->orderBy('name')
@@ -230,7 +233,7 @@ class TicketController extends Controller
         // Mismo criterio que al informar el movimiento: el responsable pertenece al
         // área que recibió el bien.
         if (! empty($validated['responsable_nuevo_id'])) {
-            $responsable = \App\Models\User::findOrFail($validated['responsable_nuevo_id']);
+            $responsable = User::findOrFail($validated['responsable_nuevo_id']);
 
             if ((int) $responsable->area_id !== (int) $movimiento->area_destino_id) {
                 abort(422, 'El responsable seleccionado no pertenece al área de destino.');
@@ -272,12 +275,9 @@ class TicketController extends Controller
     }
 
     /**
-     * Respuesta común de las acciones sobre un movimiento.
-     *
-     * El mensaje se deja en la sesión incluso cuando se responde JSON: el front hace
-     * estas acciones con axios (que pide JSON) y después recarga la página, así que sin
-     * esto el aviso de éxito no lo veía nadie. Al quedar flasheado, lo levanta el
-     * request siguiente —la recarga— y lo muestra el cartel del layout.
+     * Respuesta común de las acciones sobre un movimiento. El mensaje queda en la
+     * sesión también cuando se responde JSON: el front recarga la página después de
+     * la acción, y el aviso lo muestra el cartel del layout en esa recarga.
      */
     private function respuestaDeAccion(Request $request, string $mensaje, Movimiento $movimiento)
     {
@@ -286,7 +286,7 @@ class TicketController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => $mensaje,
-                'data' => new \App\Http\Resources\MovimientoResource($movimiento),
+                'data' => new MovimientoResource($movimiento),
             ]);
         }
 
@@ -305,11 +305,8 @@ class TicketController extends Controller
             'area_destino_id' => ['required', 'exists:areas,id', 'different:area_origen_id'],
             'tipo_movimiento_id' => ['required', 'exists:tipos_movimiento,id'],
             'motivo_id' => ['required', 'exists:motivos,id'],
-            // Opcional a propósito: quien informa el traslado no siempre sabe qué
-            // persona del área destino lo va a recibir (ej. mandar algo a reparar a
-            // Mantenimiento). Obligarlo llevaría a elegir a cualquiera, y un
-            // responsable falso es peor que uno pendiente de definir. Si queda vacío,
-            // el movimiento entra a la cola de Patrimonio para asignarlo.
+            // Opcional a propósito: quien informa no siempre sabe quién lo recibe, y un
+            // responsable falso es peor que uno pendiente. Vacío, lo asigna Patrimonio.
             'responsable_nuevo_id' => ['nullable', 'exists:users,id'],
             'observaciones_salida' => ['nullable', 'string'],
             'imagen' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
@@ -337,7 +334,7 @@ class TicketController extends Controller
 
         // Quien queda a cargo tiene que pertenecer al área que recibe el bien.
         if (! empty($validated['responsable_nuevo_id'])) {
-            $responsable = \App\Models\User::findOrFail($validated['responsable_nuevo_id']);
+            $responsable = User::findOrFail($validated['responsable_nuevo_id']);
 
             if ((int) $responsable->area_id !== (int) $validated['area_destino_id']) {
                 abort(422, 'El responsable seleccionado no pertenece al área de destino.');
@@ -371,7 +368,7 @@ class TicketController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => 'Movimiento informado correctamente',
-                'data' => new \App\Http\Resources\MovimientoResource($movimiento),
+                'data' => new MovimientoResource($movimiento),
             ], 201);
         }
 
@@ -399,7 +396,7 @@ class TicketController extends Controller
 
         $movimientos = $this->movimientoService->obtenerParaBandeja(null, true, $filtros);
 
-        $nombreArchivo = 'movimientos_' . now()->format('Y-m-d_His') . '.csv';
+        $nombreArchivo = 'movimientos_'.now()->format('Y-m-d_His').'.csv';
 
         return response()->streamDownload(function () use ($movimientos) {
             $salida = fopen('php://output', 'w');

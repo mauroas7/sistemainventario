@@ -3,39 +3,35 @@
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
+use App\Http\Middleware\RequerirRol;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-/* Ruta Raíz Inteligente */
+
 Route::get('/', function () {
     // Si el usuario tiene sesión activa, va al sistema. Si no, al login.
     return auth()->check() ? redirect()->route('inicio') : redirect()->route('login');
 });
 
-/* Rutas del Sistema (Requieren Autenticación) */
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware('auth')->group(function () {
 
-    // --- RUTAS OPERATIVAS ---
+    Route::get('/inicio', [InicioController::class, 'index'])
+        ->name('inicio');
 
-   Route::get('/inicio', [InicioController::class, 'index'])
-       ->name('inicio');
+    Route::get('/envio/crear-ticket', [TicketController::class, 'create'])
+        ->name('envio.crear');
+    Route::post('/envio/crear-ticket', [TicketController::class, 'store'])
+        ->name('envio.store');
 
-   Route::get('/envio/crear-ticket', [TicketController::class, 'create'])
-       ->name('envio.crear');
-   Route::post('/envio/crear-ticket', [TicketController::class, 'store'])
-       ->name('envio.store');
+    Route::get('/recepcion/bandeja', [TicketController::class, 'inbox'])
+        ->name('recepcion.bandeja');
+    Route::get('/recepcion/movimientos/{movimiento}', [TicketController::class, 'showReception'])
+        ->name('recepcion.show');
+    Route::post('/recepcion/confirmar/{movimiento}', [TicketController::class, 'confirmReception'])
+        ->name('recepcion.confirmar');
+    Route::post('/recepcion/cancelar/{movimiento}', [TicketController::class, 'cancelReception'])
+        ->name('recepcion.cancelar');
 
-   Route::get('/recepcion/bandeja', [TicketController::class, 'inbox'])
-       ->name('recepcion.bandeja');
-   Route::get('/recepcion/movimientos/{movimiento}', [TicketController::class, 'showReception'])
-       ->name('recepcion.show');
-   Route::post('/recepcion/confirmar/{movimiento}', [TicketController::class, 'confirmReception'])
-       ->name('recepcion.confirmar');
-   Route::post('/recepcion/cancelar/{movimiento}', [TicketController::class, 'cancelReception'])
-       ->name('recepcion.cancelar');
-
-
-    // --- RUTAS DE PATRIMONIO ---
-    Route::middleware([\App\Http\Middleware\RequerirRol::class . ':admin'])->group(function () {
+    Route::middleware([RequerirRol::class.':admin'])->group(function () {
         Route::get('/patrimonio/dashboard', function () {
             return Inertia::render('Patrimonio/Dashboard');
         })->name('patrimonio.dashboard');
@@ -72,11 +68,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         })->name('patrimonio.configuracion.index');
     });
 
-
-    // --- RUTAS DE PERFIL (BREEZE) ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 require __DIR__.'/auth.php';

@@ -45,7 +45,12 @@ return [
             'port' => env('MAIL_PORT', 2525),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
-            'timeout' => null,
+            // El mail sale dentro del pedido de quien informa el movimiento:
+            // con el relay caído, que espere esto y no el minuto de PHP.
+            'timeout' => (int) env('MAIL_TIMEOUT', 10),
+            // portal-hospital la apaga contra el relay del hospital: si ofrece
+            // STARTTLS con un certificado no reconocido, Symfony corta la conexión.
+            'verify_peer' => (bool) env('MAIL_VERIFY_PEER', true),
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 

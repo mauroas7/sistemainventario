@@ -15,10 +15,8 @@ export default function Show({ movimiento, responsables = [] }) {
     const [nuevoResponsable, setNuevoResponsable] = useState('');
     const [asignando, setAsignando] = useState(false);
 
-    // Estas acciones van por axios y no por fetch(): axios manda el token CSRF leyéndolo
-    // de la cookie XSRF-TOKEN, que el servidor mantiene al día. El <meta name="csrf-token">
-    // se renderiza una sola vez y queda viejo apenas el login rota la sesión, así que un
-    // fetch() que lo leyera terminaba siempre en 419.
+    // Por axios y no por fetch(): toma el token CSRF de la cookie XSRF-TOKEN, y el
+    // <meta name="csrf-token"> queda viejo cuando el login rota la sesión.
     function asignarResponsable(e) {
         e.preventDefault();
         if (!nuevoResponsable) return;

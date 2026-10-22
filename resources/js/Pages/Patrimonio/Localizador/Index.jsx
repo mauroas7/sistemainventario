@@ -10,10 +10,9 @@ function normalizar(texto) {
     return String(texto ?? '').toLowerCase();
 }
 
-// El localizador necesita el último movimiento de CADA bien, así que precisa el
-// historial completo. La API pagina de a 20: quedarse con la primera página hacía que
-// la mayoría de los bienes se mostraran como "sin movimientos registrados" aunque
-// tuvieran. Se recorren todas las páginas usando el tope permitido por la API (100).
+// El localizador necesita el último movimiento de cada bien, así que recorre todas las
+// páginas de la API con su tope (100): con la primera sola, casi todos los bienes
+// figuran "sin movimientos registrados" aunque los tengan.
 async function traerTodosLosMovimientos() {
     const primera = await axios.get('/movimientos', { params: { per_page: 100, page: 1 } });
     const payload = primera.data || {};

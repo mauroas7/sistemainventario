@@ -11,8 +11,7 @@ export default function Show() {
     const [cargando, setCargando] = useState(true);
 
     useEffect(() => {
-        // Sin ticket en la URL no hay nada que auditar. Antes se caía al primero de la
-        // lista y se mostraba con su número real, como si fuera el que se pidió.
+        // Sin ticket en la URL no hay nada que auditar: caer al primero mostraría otro como si fuera el pedido.
         if (!movimientoId) {
             setCargando(false);
             return;

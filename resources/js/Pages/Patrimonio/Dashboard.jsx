@@ -173,11 +173,9 @@ export default function Dashboard() {
         setDrafts(prev => ({ ...prev, [id]: value }));
     }
 
-    // Va por axios y no por fetch(): axios manda el token CSRF leyéndolo de la cookie
-    // XSRF-TOKEN, que el servidor mantiene al día. El <meta name="csrf-token"> se
-    // renderiza una sola vez y queda viejo apenas el login rota la sesión, así que un
-    // fetch() que lo leyera terminaba siempre en 419. route() devuelve una URL absoluta,
-    // con lo que no se le aplica el baseURL '/api' que axios usa para la API.
+    // Por axios y no por fetch(): toma el token CSRF de la cookie XSRF-TOKEN, y el
+    // <meta name="csrf-token"> queda viejo cuando el login rota la sesión. route()
+    // da una URL absoluta, así no se le aplica el baseURL '/api' de axios.
     function guardarEstado(id) {
         const estado_movimiento_id = drafts[id];
 

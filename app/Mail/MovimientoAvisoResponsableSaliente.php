@@ -4,22 +4,17 @@ namespace App\Mail;
 
 use App\Models\Movimiento;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Aviso a quien tenía el bien a cargo cuando lo movió otra persona.
- *
- * Cubre el caso que hoy genera los conflictos: un área intermediaria retira un equipo
- * y el responsable patrimonial se entera después (o nunca). Si el movimiento lo informó
- * el propio responsable saliente, este correo no se envía.
- *
- * Se encola (ShouldQueue) para no hacer esperar al usuario mientras se habla con el SMTP.
+ * Aviso a quien tenía el bien a cargo cuando lo movió otra persona, por ejemplo
+ * un área intermediaria que retira un equipo. Si lo informó el propio responsable
+ * saliente, no se envía.
  */
-class MovimientoAvisoResponsableSaliente extends Mailable implements ShouldQueue
+class MovimientoAvisoResponsableSaliente extends Mailable
 {
     use Queueable, SerializesModels;
 

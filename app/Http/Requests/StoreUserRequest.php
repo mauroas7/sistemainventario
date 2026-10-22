@@ -20,48 +20,48 @@ class StoreUserRequest extends FormRequest
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
-   public function rules(): array
-{
-    return [
-        'name' => [
-            'required',
-            'string',
-            'max:255',
-        ],
+    public function rules(): array
+    {
+        return [
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
 
-        'email' => [
-            'required',
-            'email',
-            'max:255',
-            'unique:users,email',
-        ],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                'unique:users,email',
+            ],
 
-        'password' => [
-            'required',
-            'string',
-            'min:8',
-        ],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+            ],
 
-        'rol' => [
-            'required',
-            'in:admin,coordinador,usuario',
-        ],
+            'rol' => [
+                'required',
+                'in:admin,coordinador,usuario',
+            ],
 
-        // El área define qué bienes ve la persona: sin ella la cuenta queda ciega.
-        // Solo Patrimonio (admin), que ve todo, puede quedar sin área asignada.
-        'area_id' => [
-            'exclude_if:rol,admin',
-            'required',
-            'integer',
-            'exists:areas,id',
-        ],
+            // El área define qué bienes ve la persona: sin ella la cuenta queda ciega.
+            // Solo Patrimonio (admin), que ve todo, puede quedar sin área asignada.
+            'area_id' => [
+                'exclude_if:rol,admin',
+                'required',
+                'integer',
+                'exists:areas,id',
+            ],
 
-        'activo' => [
-            'sometimes',
-            'boolean',
-        ],
-    ];
-}
+            'activo' => [
+                'sometimes',
+                'boolean',
+            ],
+        ];
+    }
 
     public function messages(): array
     {

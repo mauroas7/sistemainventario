@@ -78,7 +78,7 @@ class MovimientoResource extends JsonResource
             'observaciones_salida' => $this->observaciones_salida,
             // Ruta relativa a propósito (no Storage::url(), que arma una URL absoluta con
             // APP_URL): así la imagen carga sin importar si se accede por dominio o IP de LAN.
-            'imagen_salida_url' => $this->imagen_salida ? '/storage/' . $this->imagen_salida : null,
+            'imagen_salida_url' => $this->imagen_salida ? '/storage/'.$this->imagen_salida : null,
 
             'fecha_movimiento' => $this->fecha_movimiento,
             'fecha_recepcion' => $this->fecha_recepcion,

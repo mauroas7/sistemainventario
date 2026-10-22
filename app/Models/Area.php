@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Area extends Model
 {
     protected $table = 'areas';
-    
+
     protected $fillable = [
         'nombre',
     ];

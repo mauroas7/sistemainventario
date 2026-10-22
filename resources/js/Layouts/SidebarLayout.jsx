@@ -21,8 +21,7 @@ export default function SidebarLayout({ children, roleSelector }) {
     const role = auth?.user?.rol;
     const [menuAbierto, setMenuAbierto] = useState(false);
 
-    // El cartel vive acá porque lo comparte todo el sistema: los controladores mandan el
-    // mensaje con ->with('success', ...) y hasta ahora no lo mostraba nadie.
+    // El cartel de los mensajes que dejan los controladores con ->with('success', ...).
     const [avisoOculto, setAvisoOculto] = useState(false);
     const aviso = flash?.success
         ? { texto: flash.success, tipo: 'success' }

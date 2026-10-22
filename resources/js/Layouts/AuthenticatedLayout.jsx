@@ -7,9 +7,6 @@ import { Link, usePage } from '@inertiajs/react';
 export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
-    // El usuario se toma de las props compartidas por Inertia en vez de recibirlo como
-    // prop: antes dependía de que cada página se acordara de pasarlo, y Profile/Edit no
-    // lo hacía, así que la pantalla reventaba al leer user.name.
     const { auth } = usePage().props;
     const user = auth?.user || {};
 

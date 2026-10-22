@@ -13,33 +13,27 @@ use Illuminate\Support\Facades\Mail;
 class NotificacionMovimientoService
 {
     /**
-     * Dispara los avisos de un movimiento recién informado.
-     *
-     * Nunca lanza excepción: el movimiento ya quedó registrado y perder el aviso es malo,
-     * pero perder el dato patrimonial es peor.
-     *
-     * Los Mailables son ShouldQueue, así que acá solo se encolan: el try/catch cubre el
-     * fallo al encolar, no el envío. Si el SMTP rechaza el correo, eso pasa después en el
-     * worker y termina en la tabla `failed_jobs`, donde se puede revisar y reintentar con
-     * `php artisan queue:retry`. Sin un worker corriendo, los avisos no salen.
+     * Manda los avisos de un movimiento recién informado, en el momento y sin cola.
+     * Nunca lanza excepción: el movimiento ya quedó registrado, y un correo que no
+     * sale queda en el log.
      */
     public function notificarMovimientoInformado(Movimiento $movimiento): void
     {
         $movimiento->loadMissing(MovimientoService::RELACIONES);
 
-        // 1. Gestión de Bienes: es quien tiene que volcarlo a Diaguita.
+        // Gestión de Bienes: es quien tiene que volcarlo a Diaguita.
         $this->enviar(
             $this->destinatariosPatrimonio(),
             new MovimientoInformadoPatrimonio($movimiento),
             "aviso a Patrimonio del movimiento {$movimiento->id}"
         );
 
-        // 2. Acuse a quien informó: su constancia de que avisó.
+        // Acuse a quien informó: su constancia de que avisó.
         if ($correo = $movimiento->creador?->email) {
             $this->enviar([$correo], new MovimientoAcuseCreador($movimiento), "acuse al creador del movimiento {$movimiento->id}");
         }
 
-        // 3. Responsable saliente, salvo que sea la misma persona que informó.
+        // Responsable saliente, salvo que sea la misma persona que informó.
         $saliente = $movimiento->responsableAnterior;
 
         if ($saliente?->email && (int) $saliente->id !== (int) $movimiento->creado_por) {
@@ -79,14 +73,15 @@ class NotificacionMovimientoService
         $destinatarios = array_filter($destinatarios);
 
         if (empty($destinatarios)) {
-            Log::warning("No hay destinatarios para el {$contexto}.");
+            Log::warning("NotificacionMovimientoService@enviar - sin destinatarios: {$contexto}");
+
             return;
         }
 
         try {
             Mail::to($destinatarios)->send($mailable);
         } catch (\Throwable $e) {
-            Log::error("Falló el envío del {$contexto}: {$e->getMessage()}");
+            Log::error("NotificacionMovimientoService@enviar - no salió el {$contexto}", ['error' => $e->getMessage()]);
         }
     }
 }

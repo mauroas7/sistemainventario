@@ -36,12 +36,9 @@ class MovimientoService
     }
 
     /**
-     * Query base de movimientos visibles para un usuario, con los mismos filtros que
-     * usan tanto el listado paginado como el resumen agregado y la exportación, para
-     * que las tres vistas siempre cuenten exactamente lo mismo.
-     *
-     * Filtros soportados: area_id (origen o destino), estado_movimiento_id,
-     * tipo_movimiento_id, motivo_id, desde, hasta y bien (código o nombre).
+     * Movimientos visibles para un usuario. La comparten el listado, el resumen y la
+     * exportación, así cuentan lo mismo. Filtros: area_id (origen o destino),
+     * estado_movimiento_id, tipo_movimiento_id, motivo_id, desde, hasta y bien.
      */
     private function consultaBase(?int $areaId, bool $esAdmin, array $filtros)
     {
@@ -50,7 +47,7 @@ class MovimientoService
         if (! $esAdmin && $areaId) {
             $query->where(function ($q) use ($areaId) {
                 $q->where('area_origen_id', $areaId)
-                  ->orWhere('area_destino_id', $areaId);
+                    ->orWhere('area_destino_id', $areaId);
             });
         }
 
@@ -58,7 +55,7 @@ class MovimientoService
         if (! empty($filtros['area_id'])) {
             $query->where(function ($q) use ($filtros) {
                 $q->where('area_origen_id', $filtros['area_id'])
-                  ->orWhere('area_destino_id', $filtros['area_id']);
+                    ->orWhere('area_destino_id', $filtros['area_id']);
             });
         }
 
@@ -84,9 +81,9 @@ class MovimientoService
             $texto = trim($filtros['bien']);
             $query->whereHas('bien', function ($q) use ($texto) {
                 $q->where('codigo', 'like', "%{$texto}%")
-                  ->orWhere('numero_diaguita', 'like', "%{$texto}%")
-                  ->orWhere('nombre', 'like', "%{$texto}%")
-                  ->orWhere('descripcion', 'like', "%{$texto}%");
+                    ->orWhere('numero_diaguita', 'like', "%{$texto}%")
+                    ->orWhere('nombre', 'like', "%{$texto}%")
+                    ->orWhere('descripcion', 'like', "%{$texto}%");
             });
         }
 
@@ -135,12 +132,9 @@ class MovimientoService
     }
 
     /**
-     * Registra un movimiento informado por un responsable.
-     *
-     * A diferencia del modelo anterior, el traslado es efectivo en el acto: el bien
-     * cambia de ubicación y de responsable apenas se informa, sin esperar que nadie
-     * lo confirme del otro lado. El circuito que queda abierto es el administrativo
-     * de Patrimonio (volcarlo a Diaguita y hacer firmar la ficha), no el físico.
+     * Registra un movimiento informado. El traslado es efectivo en el acto: el bien
+     * cambia de ubicación y de responsable sin esperar confirmación. Lo que queda
+     * abierto es el trámite de Patrimonio: volcarlo a Diaguita y hacer firmar la ficha.
      */
     public function registrarMovimiento(array $datos): Movimiento
     {
@@ -189,8 +183,7 @@ class MovimientoService
 
     /**
      * Define quién queda a cargo del bien en un movimiento que se informó sin
-     * responsable. Es el paso que hoy Patrimonio hace por teléfono antes de mandar a
-     * firmar la ficha; acá queda registrado.
+     * responsable, antes de mandar a firmar la ficha.
      */
     public function asignarResponsable(Movimiento $movimiento, ?int $responsableId): Movimiento
     {

@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Resources\MovimientoResource;
-use App\Services\MovimientoService;
 use App\Models\Movimiento;
-use App\Models\EstadoMovimiento;
+use App\Services\MovimientoService;
+use Illuminate\Http\Request;
 
 class MovimientoController extends Controller
 {

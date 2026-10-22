@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Motivo extends Model
 {
     protected $table = 'motivos';
+
     protected $fillable = [
         'nombre',
     ];

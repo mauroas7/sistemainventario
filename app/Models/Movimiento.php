@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Movimiento extends Model
 {
     protected $table = 'movimientos';
-    
+
     protected $fillable = [
         'bien_id',
         'creado_por',

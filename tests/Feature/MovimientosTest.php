@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Area;
 use App\Models\Bien;
+use App\Models\EstadoMovimiento;
 use App\Models\Motivo;
 use App\Models\Movimiento;
 use App\Models\TipoMovimiento;
@@ -218,7 +219,7 @@ class MovimientosTest extends TestCase
         $this->assertSame($juan->id, $alta->usuario_id);
 
         // Patrimonio lo marca como registrado en Diaguita.
-        $registrado = \App\Models\EstadoMovimiento::where('nombre', 'Registrado')->firstOrFail();
+        $registrado = EstadoMovimiento::where('nombre', 'Registrado')->firstOrFail();
 
         $this->actingAs($patrimonio)
             ->patch("/patrimonio/movimientos/{$movimiento->id}/estado", [
