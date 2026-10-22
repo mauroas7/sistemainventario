@@ -1,94 +1,64 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
+import { Boton, Campo, claseControl, descritoPor, Input, PasswordInput } from 'hu-kit/componentes';
+import PanelDeIngreso from '@/Components/UI/PanelDeIngreso';
 
 export default function ResetPassword({ token, email }) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        token: token,
-        email: email,
+        token,
+        email,
         password: '',
         password_confirmation: '',
     });
 
-    const submit = (e) => {
+    const enviar = (e) => {
         e.preventDefault();
-
-        post(route('password.store'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
+        post(route('password.store'), { onFinish: () => reset('password', 'password_confirmation') });
     };
 
+    const campoClave = (id, etiqueta) => (
+        <Campo id={id} etiqueta={etiqueta} error={errors[id]} variante="ingreso">
+            <PasswordInput
+                id={id}
+                variante="ingreso"
+                value={data[id]}
+                onChange={(e) => setData(id, e.target.value)}
+                required
+                autoComplete="new-password"
+                aria-invalid={errors[id] ? 'true' : undefined}
+                aria-describedby={descritoPor(id, errors[id])}
+                className={claseControl(!!errors[id], 'ingreso')}
+            />
+        </Campo>
+    );
+
     return (
-        <GuestLayout>
-            <Head title="Reset Password" />
-
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
+        <PanelDeIngreso
+            tituloPestana="Nueva contraseña"
+            titulo="Nueva contraseña"
+            subtitulo="Elegí la contraseña con la que vas a ingresar."
+        >
+            <form onSubmit={enviar}>
+                <div className="mb-8 space-y-5">
+                    <Input
+                        nombre="email"
+                        variante="ingreso"
+                        etiqueta="Correo institucional"
+                        tipo="email"
+                        valor={data.email}
                         onChange={(e) => setData('email', e.target.value)}
+                        error={errors.email}
+                        required
+                        autoComplete="username"
                     />
 
-                    <InputError message={errors.email} className="mt-2" />
+                    {campoClave('password', 'Contraseña nueva')}
+                    {campoClave('password_confirmation', 'Repetí la contraseña')}
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        isFocused={true}
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
-
-                    <TextInput
-                        type="password"
-                        id="password_confirmation"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                    />
-
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Reset Password
-                    </PrimaryButton>
-                </div>
+                <Boton tamano="ingreso" disabled={processing} className="w-full">
+                    {processing ? 'Guardando…' : 'Guardar la contraseña'}
+                </Boton>
             </form>
-        </GuestLayout>
+        </PanelDeIngreso>
     );
 }

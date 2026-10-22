@@ -43,7 +43,7 @@ class MovimientoController extends Controller
 
         $this->movimientoService->actualizarEstado($movimiento, (int) $validado['estado_movimiento_id'], $request->user());
 
-        return back()->with('success', 'Estado actualizado correctamente');
+        return back()->with('exito', 'Estado actualizado correctamente');
     }
 
     /** Define el responsable de un movimiento que se informó sin uno. */
@@ -66,6 +66,6 @@ class MovimientoController extends Controller
 
         $this->movimientoService->asignarResponsable($movimiento, $responsable?->id);
 
-        return back()->with('success', 'Responsable actualizado correctamente');
+        return back()->with('exito', 'Responsable actualizado correctamente');
     }
 }

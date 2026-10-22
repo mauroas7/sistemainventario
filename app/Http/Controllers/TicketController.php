@@ -119,7 +119,7 @@ class TicketController extends Controller
 
         return redirect()
             ->route('recepcion.bandeja')
-            ->with('success', 'Movimiento informado correctamente');
+            ->with('exito', 'Movimiento informado correctamente');
     }
 
     public function inbox(Request $request): Response
@@ -141,13 +141,8 @@ class TicketController extends Controller
         $paginador = $this->movimientoService->obtenerParaBandeja($user->area_id, $esAdmin, $filtros, 25);
 
         return Inertia::render('Recepcion/Index', [
-            'movimientos' => MovimientoResource::collection($paginador->getCollection())->resolve($request),
+            'movimientos' => $paginador->through(fn (Movimiento $m) => (new MovimientoResource($m))->resolve($request)),
             'pestana' => $pestana,
-            'paginacion' => [
-                'pagina' => $paginador->currentPage(),
-                'ultima_pagina' => $paginador->lastPage(),
-                'total' => $paginador->total(),
-            ],
             // Sobre todo lo visible para el usuario, no sobre la página: no cambian al paginar.
             'resumen' => $this->movimientoService->obtenerResumen($user->area_id, $esAdmin, []),
         ]);
@@ -205,12 +200,12 @@ class TicketController extends Controller
         abort_unless($user->tieneRol(Rol::Admin) || $esNuevoResponsable || $esAreaDestino, 403);
 
         if ($movimiento->recibido_por) {
-            return back()->with('success', 'El ticket ya tenía acuse de recibo.');
+            return back()->with('exito', 'El ticket ya tenía acuse de recibo.');
         }
 
         $this->movimientoService->acusarRecibo($movimiento, $user);
 
-        return back()->with('success', 'Recepción confirmada correctamente');
+        return back()->with('exito', 'Recepción confirmada correctamente');
     }
 
     /**
@@ -235,6 +230,6 @@ class TicketController extends Controller
 
         $this->movimientoService->anularMovimiento($movimiento);
 
-        return back()->with('success', 'Movimiento anulado correctamente');
+        return back()->with('exito', 'Movimiento anulado correctamente');
     }
 }

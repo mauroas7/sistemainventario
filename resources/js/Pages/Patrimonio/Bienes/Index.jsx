@@ -1,81 +1,58 @@
-import React from 'react';
-import { Head, Link } from '@inertiajs/react';
-import SidebarLayout from '@/Layouts/SidebarLayout';
-import { estadoBienClase } from '@/utils/formato';
+import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, renglonTabla, Tarjeta } from 'hu-kit/componentes';
+import AppLayout from '@/Components/UI/AppLayout';
+import { tonoEstadoBien } from '@/utils/estados';
+
+const ATENUADO = 'text-xs italic text-brandText-muted dark:text-brandText-mutedDark';
 
 export default function Index({ bienes = [] }) {
     return (
-        <SidebarLayout>
-            <Head title="Directorio de Bienes" />
-
-            <div className="max-w-7xl">
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 className="text-2xl font-bold text-institucional-primario">Directorio de Bienes</h2>
-                        <p className="text-sm text-gray-500 mt-1">Consulta del inventario general.</p>
-                    </div>
-                </div>
-
-                {(
-                <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-gray-50/50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500 font-bold">
-                                    <th className="py-3 px-4">N° Inventario</th>
-                                    <th className="py-3 px-4">N° Diaguita</th>
-                                    <th className="py-3 px-4">Descripción</th>
-                                    <th className="py-3 px-4">Área</th>
-                                    <th className="py-3 px-4">Ubicación</th>
-                                    <th className="py-3 px-4">Responsable</th>
-                                    <th className="py-3 px-4 text-center">Estado</th>
-                                    <th className="py-3 px-4 text-right">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100 text-sm">
-                                {bienes.map((bien) => (
-                                    <tr key={bien.id} className="hover:bg-blue-50/50 transition-colors">
-                                        <td className="py-3 px-4 font-bold text-institucional-primario">{bien.codigo}</td>
-                                        <td className="py-3 px-4">
-                                            {bien.numero_diaguita
-                                                ? <span className="text-gray-600">{bien.numero_diaguita}</span>
-                                                : <span className="italic text-gray-400 text-xs">sin cargar</span>}
+        <AppLayout titulo="Directorio de bienes" subtitulo="Consulta del inventario general.">
+            <Tarjeta titulo="Bienes" icono="inventory_2" contador={bienes.length}>
+                <div className="-mx-5 overflow-x-auto">
+                    <table className="w-full min-w-[56rem] text-sm">
+                        <thead>
+                            <tr className={encabezadoTabla}>
+                                <th className="px-5 pb-2 font-semibold">N° Inventario</th>
+                                <th className="px-3 pb-2 font-semibold">N° Diaguita</th>
+                                <th className="px-3 pb-2 font-semibold">Descripción</th>
+                                <th className="px-3 pb-2 font-semibold">Área</th>
+                                <th className="px-3 pb-2 font-semibold">Ubicación</th>
+                                <th className="px-3 pb-2 font-semibold">Responsable</th>
+                                <th className="px-3 pb-2 font-semibold">Estado</th>
+                                <th className="w-px px-5 pb-2 font-semibold">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody className={cuerpoTabla}>
+                            {bienes.length > 0 ? (
+                                bienes.map((bien) => (
+                                    <tr key={bien.id} className={renglonTabla}>
+                                        <td className="px-5 py-3 font-semibold text-primary dark:text-gray-100">{bien.codigo}</td>
+                                        <td className="px-3 py-3">{bien.numero_diaguita || <span className={ATENUADO}>sin cargar</span>}</td>
+                                        <td className="px-3 py-3 font-semibold">{bien.nombre}</td>
+                                        <td className="px-3 py-3">{bien.area?.nombre || '—'}</td>
+                                        <td className="px-3 py-3">{bien.ubicacion_actual?.nombre || '—'}</td>
+                                        <td className="px-3 py-3">{bien.responsable?.nombre || <span className={ATENUADO}>sin asignar</span>}</td>
+                                        <td className="px-3 py-3">
+                                            <Estado tono={tonoEstadoBien(bien.estado?.nombre)}>{bien.estado?.nombre || '—'}</Estado>
                                         </td>
-                                        <td className="py-3 px-4 text-gray-800 font-medium">{bien.nombre}</td>
-                                        <td className="py-3 px-4 text-gray-500">{bien.area?.nombre || '—'}</td>
-                                        <td className="py-3 px-4 text-gray-600">{bien.ubicacion_actual?.nombre || '—'}</td>
-                                        <td className="py-3 px-4 text-gray-600">
-                                            {bien.responsable?.nombre || <span className="italic text-gray-400 text-xs">sin asignar</span>}
-                                        </td>
-                                        <td className="py-3 px-4 text-center">
-                                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${estadoBienClase(bien.estado?.nombre)}`}>
-                                                {bien.estado?.nombre || '—'}
-                                            </span>
-                                        </td>
-                                        <td className="py-3 px-4 text-right">
-                                            <Link
-                                                href={route('patrimonio.bienes.show', { bien: bien.id })}
-                                                className="text-institucional-primario hover:text-blue-700 font-medium text-xs hover:underline"
-                                            >
+                                        <td className="px-5 py-3">
+                                            <Boton variante="fantasma" forma="grupo" icono="history" href={route('patrimonio.bienes.show', { bien: bien.id })}>
                                                 Ver historial
-                                            </Link>
+                                            </Boton>
                                         </td>
                                     </tr>
-                                ))}
-
-                                {bienes.length === 0 && (
-                                    <tr>
-                                        <td colSpan={8} className="py-8 text-center text-sm text-gray-500">
-                                            No hay bienes para mostrar.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={8}>
+                                        <EstadoVacio enTarjeta icono="inventory_2">No hay bienes para mostrar.</EstadoVacio>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
-                )}
-            </div>
-        </SidebarLayout>
+            </Tarjeta>
+        </AppLayout>
     );
 }

@@ -7,6 +7,7 @@ use App\Http\Resources\MovimientoResource;
 use App\Models\Area;
 use App\Models\EstadoMovimiento;
 use App\Models\Motivo;
+use App\Models\Movimiento;
 use App\Services\MovimientoService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -26,14 +27,7 @@ class DashboardController extends Controller
         $paginador = $this->movimientoService->obtenerParaBandeja(null, true, $filtros, self::POR_PAGINA);
 
         return Inertia::render('Patrimonio/Dashboard', [
-            'movimientos' => MovimientoResource::collection($paginador->getCollection())->resolve($request),
-            'paginacion' => [
-                'pagina' => $paginador->currentPage(),
-                'ultima_pagina' => $paginador->lastPage(),
-                'total' => $paginador->total(),
-                'desde' => $paginador->firstItem(),
-                'hasta' => $paginador->lastItem(),
-            ],
+            'movimientos' => $paginador->through(fn (Movimiento $m) => (new MovimientoResource($m))->resolve($request)),
             // Sobre todo lo que matchea el filtro, no sobre la página actual.
             'resumen' => $this->movimientoService->obtenerResumen(null, true, $filtros),
             'filtros' => $filtros,

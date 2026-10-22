@@ -188,14 +188,14 @@ class MovimientosTest extends TestCase
             ->get('/recepcion/bandeja')
             ->assertInertia(fn ($page) => $page
                 ->component('Recepcion/Index')
-                ->has('movimientos', 0));
+                ->has('movimientos.data', 0));
 
         // Juan sí, porque salió de su área.
         $this->actingAs($juan)
             ->get('/recepcion/bandeja')
             ->assertInertia(fn ($page) => $page
                 ->component('Recepcion/Index')
-                ->has('movimientos', 1));
+                ->has('movimientos.data', 1));
     }
 
     public function test_cada_cambio_de_estado_queda_registrado_con_su_autor(): void

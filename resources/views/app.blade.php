@@ -1,25 +1,21 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <link rel="icon" type="image/png" href="/img/favicon_color.png">
+    <link rel="icon" href="{{ asset('img/favicon_color.png') }}" type="image/png">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+    <title inertia>{{ config('app.name') }}</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    {{-- Montserrat y Material Symbols viajan en el bundle: ver resources/css/app.css. --}}
 
-        <!-- Scripts -->
-        @routes
-        @viteReactRefresh
-        @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
-        @inertiaHead
-    </head>
-    <body class="font-sans antialiased">
-        @inertia
-    </body>
+    @routes
+    @viteReactRefresh
+    @vite('resources/js/app.jsx')
+    @inertiaHead
+</head>
+<body class="min-h-full bg-canvas font-sans text-brandText antialiased transition-colors duration-300 dark:bg-canvas-dark dark:text-brandText-dark">
+    @inertia
+</body>
 </html>

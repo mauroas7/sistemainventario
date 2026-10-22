@@ -43,10 +43,10 @@ class HandleInertiaRequests extends Middleware
                     'area' => $usuario->area?->only(['id', 'nombre']),
                 ] : null,
             ],
-            // Lo que los controladores dejan con ->with('success' | 'error', ...).
+            // Los mensajes de un solo uso, que dibuja `Components/UI/Flash`.
             'flash' => [
-                'success' => $request->session()->get('success'),
-                'error' => $request->session()->get('error'),
+                'exito' => fn () => $request->session()->get('exito'),
+                'error' => fn () => $request->session()->get('error'),
             ],
         ];
     }

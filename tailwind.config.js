@@ -1,30 +1,19 @@
-import defaultTheme from 'tailwindcss/defaultTheme';
-import forms from '@tailwindcss/forms';
+import huKit from 'hu-kit/tailwind';
 
+/*
+ * La marca —colores, tipografía, capas, movimiento y el plugin de formularios—
+ * viene del preset de `hu-kit`, compartido con los otros sistemas del
+ * hospital. Acá va sólo lo propio de este sistema. Prohibido el color
+ * arbitrario en JSX (bg-[#...]).
+ */
 /** @type {import('tailwindcss').Config} */
 export default {
+    presets: [huKit],
+    // Sin los componentes de `hu-kit`, Tailwind no genera las clases que usan.
     content: [
-        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
-        './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
         './resources/js/**/*.jsx',
         './resources/js/**/*.js',
+        './node_modules/hu-kit/componentes/**/*.{js,jsx}',
     ],
-
-    theme: {
-        extend: {
-            fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-            },
-            colors: {
-                institucional: {
-                    primario: '#003764', // Azul oscuro
-                    secundario: '#C7A36E', // Dorado/Arena
-                    fondo: '#F4F7F9', // Gris azulado claro para el fondo (basado en el prototipo)
-                }
-            }
-        },
-    },
-
-    plugins: [forms],
 };

@@ -44,8 +44,8 @@ test('las pantallas de patrimonio llegan con sus datos y sin api', function () {
 
     $this->get(route('patrimonio.dashboard'))->assertInertia(fn (AssertableInertia $pagina) => $pagina
         ->component('Patrimonio/Dashboard')
-        ->has('movimientos', 1)
-        ->where('paginacion.total', 1)
+        ->has('movimientos.data', 1)
+        ->where('movimientos.total', 1)
         ->where('resumen.informados', 1)
         ->has('estados', 4));
 
@@ -81,7 +81,7 @@ test('el dashboard filtra en el servidor', function () {
     $this->actingAs($this->patrimonio)
         ->get(route('patrimonio.dashboard', ['bien' => 'no-existe']))
         ->assertInertia(fn (AssertableInertia $pagina) => $pagina
-            ->has('movimientos', 0)
+            ->has('movimientos.data', 0)
             ->where('filtros.bien', 'no-existe'));
 });
 

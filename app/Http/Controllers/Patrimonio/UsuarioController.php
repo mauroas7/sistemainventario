@@ -23,12 +23,14 @@ class UsuarioController extends Controller
     {
         return Inertia::render('Patrimonio/Configuracion/Index', [
             'areas' => Area::orderBy('nombre')->get(['id', 'nombre']),
+            'roles' => collect(Rol::cases())->map(fn (Rol $rol) => [$rol->value, $rol->etiqueta()]),
             'usuarios' => User::with('area:id,nombre')->orderBy('name')->get()
                 ->map(fn (User $usuario) => [
                     'id' => $usuario->id,
                     'name' => $usuario->name,
                     'email' => $usuario->email,
                     'rol' => $usuario->rol?->value,
+                    'rolEtiqueta' => $usuario->rol?->etiqueta(),
                     'area_id' => $usuario->area_id,
                     'area' => $usuario->area?->only(['id', 'nombre']),
                     'activo' => $usuario->activo,
@@ -40,7 +42,7 @@ class UsuarioController extends Controller
     {
         User::create($request->validated());
 
-        return back()->with('success', 'Usuario creado correctamente');
+        return back()->with('exito', 'Usuario creado correctamente');
     }
 
     public function update(UpdateUserRequest $request, User $usuario): RedirectResponse
@@ -69,7 +71,7 @@ class UsuarioController extends Controller
 
         $usuario->update($datos);
 
-        return back()->with('success', 'Usuario actualizado correctamente');
+        return back()->with('exito', 'Usuario actualizado correctamente');
     }
 
     private function dejariaSinAdmin(User $usuario, array $cambios): bool

@@ -1,9 +1,6 @@
-import { useEffect } from 'react';
-import Checkbox from '@/Components/Checkbox';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import TextInput from '@/Components/TextInput';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
+import { Alerta, Boton, Campo, Checkbox, claseControl, descritoPor, Input, PasswordInput } from 'hu-kit/componentes';
+import PanelDeIngreso from '@/Components/UI/PanelDeIngreso';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -12,129 +9,72 @@ export default function Login({ status, canResetPassword }) {
         remember: false,
     });
 
-    useEffect(() => {
-        return () => {
-            reset('password');
-        };
-    }, []);
-
-    const submit = (e) => {
+    const enviar = (e) => {
         e.preventDefault();
-        post(route('login'));
+        post(route('login'), { onFinish: () => reset('password') });
     };
 
     return (
-        <div className="min-h-screen flex bg-white">
-            <Head title="Iniciar Sesión" />
+        <PanelDeIngreso tituloPestana="Ingresar" titulo="Iniciar sesión" subtitulo="Accedé con tu correo institucional.">
+            {status && <Alerta tipo="exito" className="mb-6">{status}</Alerta>}
 
-            {/* Panel Izquierdo: Institucional (Oculto en móviles) */}
-            <div className="hidden lg:flex lg:w-1/2 bg-institucional-primario items-center justify-center relative overflow-hidden">
-                {/* Patrón de fondo sutil para que no quede un color sólido aburrido */}
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                
-                <div className="relative z-10 text-white text-center px-12">
-                    <img
-                        src="/img/Logo HU Blanco.png"
-                        alt="Hospital Universitario Dra. María Victoria Gómez de Erice"
-                        className="h-20 w-auto mx-auto mb-8"
+            <form onSubmit={enviar}>
+                <div className="mb-8 space-y-5">
+                    {/* `required` y no `requerido`: el ingreso no marca los campos con asterisco. */}
+                    <Input
+                        nombre="email"
+                        variante="ingreso"
+                        etiqueta="Correo institucional"
+                        tipo="email"
+                        valor={data.email}
+                        onChange={(e) => setData('email', e.target.value)}
+                        error={errors.email}
+                        required
+                        autoFocus
+                        autoComplete="username"
                     />
-                    <h1 className="text-4xl font-bold mb-4 tracking-tight">Sistema de Gestión de Bienes</h1>
-                    <p className="text-blue-100 text-lg font-medium">Portal Hospitalario</p>
-                    <p className="text-blue-200/80 text-sm mt-8 max-w-md mx-auto">
-                        Acceso restringido para personal autorizado. Toda transacción en este sistema está sujeta a auditoría patrimonial.
-                    </p>
-                </div>
 
-                <img
-                    src="/img/logo acreditacion.png"
-                    alt="Acreditaciones Hospital Universitario"
-                    className="absolute bottom-8 left-1/2 -translate-x-1/2 h-9 w-auto opacity-90"
-                />
-            </div>
+                    <Campo id="password" etiqueta="Contraseña" error={errors.password} variante="ingreso">
+                        <PasswordInput
+                            id="password"
+                            variante="ingreso"
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            required
+                            autoComplete="current-password"
+                            aria-invalid={errors.password ? 'true' : undefined}
+                            aria-describedby={descritoPor('password', errors.password)}
+                            className={claseControl(!!errors.password, 'ingreso')}
+                        />
+                    </Campo>
 
-            {/* Panel Derecho: Formulario de Login */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12">
-                <div className="w-full max-w-md">
-                    
-                    <div className="mb-10 text-center lg:text-left">
-                        <h2 className="text-3xl font-bold text-gray-900">Bienvenido/a</h2>
-                        <p className="text-sm text-gray-500 mt-2">Ingrese sus credenciales institucionales para continuar.</p>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <Checkbox
+                            nombre="remember"
+                            etiqueta="Mantener la sesión iniciada"
+                            valor={data.remember}
+                            onChange={(e) => setData('remember', e.target.checked)}
+                        />
+
+                        {canResetPassword && (
+                            <Link
+                                href={route('password.request')}
+                                className="text-sm font-semibold text-secondary-dark hover:underline dark:text-secondary"
+                            >
+                                ¿Olvidaste tu contraseña?
+                            </Link>
+                        )}
                     </div>
-
-                    {status && <div className="mb-4 font-medium text-sm text-green-600 p-3 bg-green-50 rounded-lg border border-green-200">{status}</div>}
-
-                    <form onSubmit={submit} className="space-y-6">
-                        <div>
-                            <InputLabel htmlFor="email" value="Correo Electrónico Institucional" className="text-gray-700 font-medium" />
-                            <TextInput
-                                id="email"
-                                type="email"
-                                name="email"
-                                value={data.email}
-                                className="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm px-4 py-2.5"
-                                autoComplete="username"
-                                isFocused={true}
-                                onChange={(e) => setData('email', e.target.value)}
-                            />
-                            <InputError message={errors.email} className="mt-2" />
-                        </div>
-
-                        <div>
-                            <div className="flex items-center justify-between">
-                                <InputLabel htmlFor="password" value="Contraseña" className="text-gray-700 font-medium" />
-                                {canResetPassword && (
-                                    <Link
-                                        href={route('password.request')}
-                                        className="text-sm font-medium text-institucional-primario hover:text-blue-800 transition-colors"
-                                    >
-                                        ¿Olvidó su contraseña?
-                                    </Link>
-                                )}
-                            </div>
-                            <TextInput
-                                id="password"
-                                type="password"
-                                name="password"
-                                value={data.password}
-                                className="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:border-institucional-primario focus:ring-institucional-primario sm:text-sm px-4 py-2.5"
-                                autoComplete="current-password"
-                                onChange={(e) => setData('password', e.target.value)}
-                            />
-                            <InputError message={errors.password} className="mt-2" />
-                        </div>
-
-                        <div className="block">
-                            <label className="flex items-center w-fit cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    name="remember"
-                                    checked={data.remember}
-                                    onChange={(e) => setData('remember', e.target.checked)}
-                                    className="w-4 h-4 text-institucional-primario focus:ring-institucional-primario border-gray-300 rounded cursor-pointer"
-                                />
-                                <span className="ms-2 text-sm text-gray-600 select-none">
-                                    Mantener sesión iniciada
-                                </span>
-                            </label>
-                        </div>
-
-                        <button 
-                            type="submit" 
-                            disabled={processing}
-                            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-institucional-primario hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-institucional-primario transition-colors disabled:opacity-50"
-                        >
-                            Ingresar al sistema
-                        </button>
-                        
-                        <div className="text-center mt-6">
-                            <p className="text-sm text-gray-500">
-                                ¿No tiene cuenta? Las altas las gestiona{' '}
-                                <span className="font-medium text-institucional-primario">Gestión de Bienes e Insumos</span>.
-                            </p>
-                        </div>
-                    </form>
                 </div>
-            </div>
-        </div>
+
+                <Boton tamano="ingreso" disabled={processing} className="w-full">
+                    {processing ? 'Ingresando…' : 'Ingresar'}
+                </Boton>
+
+                <p className="mt-6 text-center text-sm font-semibold text-brandText dark:text-brandText-dark">
+                    ¿No tenés cuenta? Las altas las hace Gestión de Bienes e Insumos.
+                </p>
+            </form>
+        </PanelDeIngreso>
     );
 }

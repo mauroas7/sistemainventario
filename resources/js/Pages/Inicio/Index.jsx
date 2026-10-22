@@ -1,115 +1,77 @@
-import React from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
-import SidebarLayout from '@/Layouts/SidebarLayout';
-import {
-    PaperAirplaneIcon,
-    InboxArrowDownIcon,
-    ChartBarIcon,
-    ArrowRightIcon,
-} from '@heroicons/react/20/solid';
+import { Link, usePage } from '@inertiajs/react';
+import { Icono, marcoTarjeta, Tarjeta } from 'hu-kit/componentes';
+import AppLayout from '@/Components/UI/AppLayout';
 
-const ICONOS = {
-    '/envio/crear-ticket': PaperAirplaneIcon,
-    '/recepcion/bandeja': InboxArrowDownIcon,
-    '/patrimonio/dashboard': ChartBarIcon,
-};
+const ACCESOS = [
+    {
+        etiqueta: 'Crear ticket de envío',
+        ruta: 'envio.crear',
+        icono: 'send',
+        descripcion: 'Registrá el traslado de un bien hacia otro sector.',
+        roles: [],
+    },
+    {
+        etiqueta: 'Bandeja de recepción',
+        ruta: 'recepcion.bandeja',
+        icono: 'move_to_inbox',
+        descripcion: 'Confirmá o rechazá los movimientos que llegan a tu sector.',
+        roles: [],
+    },
+    {
+        etiqueta: 'Control patrimonial',
+        ruta: 'patrimonio.dashboard',
+        icono: 'monitoring',
+        descripcion: 'Consultá y filtrá el historial completo de movimientos.',
+        roles: ['admin'],
+    },
+];
+
+const PASOS = [
+    'Abrí la sección que corresponde a tu rol.',
+    'Creá o recibí un movimiento desde las vistas operativas.',
+    'Si sos admin, revisá el control patrimonial.',
+];
 
 export default function Index() {
-    const { auth } = usePage().props;
-    const role = auth?.usuario?.rol;
-
-    const actions = [
-        {
-            label: 'Crear ticket de envío',
-            href: '/envio/crear-ticket',
-            descripcion: 'Registrá el traslado de un bien hacia otro sector.',
-            roles: ['admin', 'coordinador', 'usuario'],
-            destacado: true,
-        },
-        {
-            label: 'Bandeja de recepción',
-            href: '/recepcion/bandeja',
-            descripcion: 'Confirmá o rechazá los movimientos que llegan a tu sector.',
-            roles: ['admin', 'coordinador', 'usuario'],
-        },
-        {
-            label: 'Control patrimonial',
-            href: '/patrimonio/dashboard',
-            descripcion: 'Consultá y filtrá el historial completo de movimientos.',
-            roles: ['admin'],
-        },
-    ].filter(item => item.roles.includes(role));
-
-    const pasos = [
-        { numero: '1', texto: 'Abrí la sección que corresponde a tu rol.' },
-        { numero: '2', texto: 'Creá o recibí un movimiento desde las vistas operativas.' },
-        { numero: '3', texto: 'Si sos admin, revisá el control patrimonial.' },
-    ];
+    const usuario = usePage().props.auth.usuario;
+    const accesos = ACCESOS.filter((acceso) => acceso.roles.length === 0 || acceso.roles.includes(usuario.rol));
 
     return (
-        <SidebarLayout>
-            <Head title="Inicio" />
-
-            <div className="max-w-full">
-                <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-institucional-primario">Inicio</h2>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Bienvenido/a, {auth?.usuario?.nombre || 'usuario'}. Accesos rápidos para operar movimientos de bienes.
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                    {actions.map((action) => {
-                        const Icono = ICONOS[action.href];
-                        return (
-                            <Link
-                                key={action.href}
-                                href={action.href}
-                                className={`group flex flex-col justify-between rounded-2xl border p-6 shadow-sm transition-colors ${
-                                    action.destacado
-                                        ? 'border-institucional-primario/20 bg-institucional-primario text-white hover:bg-blue-900'
-                                        : 'border-gray-200 bg-white text-gray-900 hover:border-institucional-primario/40 hover:bg-blue-50/40'
-                                }`}
-                            >
-                                <div>
-                                    <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${
-                                        action.destacado ? 'bg-white/15 text-white' : 'bg-institucional-primario/10 text-institucional-primario'
-                                    }`}>
-                                        {Icono && <Icono className="h-5 w-5" />}
-                                    </span>
-                                    <h3 className={`mt-4 text-base font-bold ${action.destacado ? 'text-white' : 'text-gray-900'}`}>{action.label}</h3>
-                                    <p className={`mt-1 text-sm ${action.destacado ? 'text-blue-100' : 'text-gray-500'}`}>
-                                        {action.descripcion}
-                                    </p>
-                                </div>
-                                <div className={`mt-5 inline-flex items-center gap-1.5 text-xs font-semibold ${
-                                    action.destacado ? 'text-white' : 'text-institucional-primario'
-                                }`}>
-                                    Ir ahora
-                                    <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                                </div>
-                            </Link>
-                        );
-                    })}
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-sm font-bold text-institucional-primario uppercase tracking-wider mb-5">
-                        Flujo de envío
-                    </h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {pasos.map((paso) => (
-                            <div key={paso.numero} className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-4">
-                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-institucional-secundario text-xs font-bold text-institucional-primario">
-                                    {paso.numero}
-                                </span>
-                                <p className="text-sm text-gray-700">{paso.texto}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+        <AppLayout titulo="Inicio" subtitulo={`Hola, ${usuario.nombre}. Accesos rápidos para operar movimientos de bienes.`}>
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {accesos.map((acceso) => (
+                    <Link
+                        key={acceso.ruta}
+                        href={route(acceso.ruta)}
+                        className={`group flex flex-col justify-between p-6 transition duration-200 hover:-translate-y-0.5 hover:border-secondary ${marcoTarjeta}`}
+                    >
+                        <div>
+                            <span className="flex size-11 items-center justify-center rounded-xl bg-primary-faint text-primary dark:bg-primary/20 dark:text-gray-100">
+                                <Icono nombre={acceso.icono} className="text-2xl" />
+                            </span>
+                            <h2 className="mt-4 text-base font-semibold text-primary dark:text-gray-100">{acceso.etiqueta}</h2>
+                            <p className="mt-1 text-sm text-brandText-muted dark:text-brandText-mutedDark">{acceso.descripcion}</p>
+                        </div>
+                        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-secondary-dark dark:text-secondary">
+                            Ir ahora
+                            <Icono nombre="arrow_forward" className="text-base transition-transform group-hover:translate-x-0.5" />
+                        </span>
+                    </Link>
+                ))}
             </div>
-        </SidebarLayout>
+
+            <Tarjeta titulo="Flujo de envío" icono="route">
+                <ol className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {PASOS.map((paso, indice) => (
+                        <li key={paso} className="flex items-start gap-3 rounded-xl bg-canvas p-4 dark:bg-white/5">
+                            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-black text-primary">
+                                {indice + 1}
+                            </span>
+                            <p className="text-sm text-brandText dark:text-brandText-dark">{paso}</p>
+                        </li>
+                    ))}
+                </ol>
+            </Tarjeta>
+        </AppLayout>
     );
 }
