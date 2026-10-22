@@ -197,7 +197,7 @@ export default function Dashboard() {
                 <div className="mb-6">
                     <h2 className="text-2xl font-bold text-institucional-primario">Control patrimonial</h2>
                     <p className="text-sm text-gray-500 mt-1">
-                        Usuario actual: {auth?.user?.name} ({auth?.user?.rol})
+                        Usuario actual: {auth?.usuario?.nombre} ({auth?.usuario?.rol})
                     </p>
                 </div>
 

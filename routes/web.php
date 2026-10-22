@@ -3,7 +3,6 @@
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
-use App\Http\Middleware\RequerirRol;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -31,7 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/recepcion/cancelar/{movimiento}', [TicketController::class, 'cancelReception'])
         ->name('recepcion.cancelar');
 
-    Route::middleware([RequerirRol::class.':admin'])->group(function () {
+    Route::middleware('rol:admin')->group(function () {
         Route::get('/patrimonio/dashboard', function () {
             return Inertia::render('Patrimonio/Dashboard');
         })->name('patrimonio.dashboard');

@@ -29,16 +29,19 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $user = $request->user();
-
-        if ($user) {
-            $user->loadMissing('area');
-        }
+        $usuario = $request->user()?->loadMissing('area');
 
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $user,
+                'usuario' => $usuario ? [
+                    'id' => $usuario->id,
+                    'nombre' => $usuario->name,
+                    'email' => $usuario->email,
+                    'rol' => $usuario->rol?->value,
+                    'rolEtiqueta' => $usuario->rol?->etiqueta(),
+                    'area' => $usuario->area?->only(['id', 'nombre']),
+                ] : null,
             ],
             // Lo que los controladores dejan con ->with('success' | 'error', ...).
             'flash' => [

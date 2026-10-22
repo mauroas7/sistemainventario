@@ -8,9 +8,9 @@ import axios from 'axios';
 export default function Show({ movimiento, responsables = [] }) {
     const m = movimiento || {};
     const { auth } = usePage().props;
-    const user = auth?.user || {};
+    const usuario = auth?.usuario || {};
 
-    const esAdmin = user.rol === 'admin';
+    const esAdmin = usuario.rol === 'admin';
     const sinResponsable = !m.responsable_nuevo;
     const [nuevoResponsable, setNuevoResponsable] = useState('');
     const [asignando, setAsignando] = useState(false);
@@ -36,10 +36,10 @@ export default function Show({ movimiento, responsables = [] }) {
     const estaInformado = m.estado_movimiento?.nombre === 'Informado';
     // El acuse lo da quien quedo a cargo (o su area); anular, solo quien informo o Patrimonio.
     const puedeAcusar = m.estado_movimiento?.nombre !== 'Anulado' && !m.recibido_por
-        && (user.rol === 'admin'
-            || String(m.responsable_nuevo?.id) === String(user.id)
-            || String(m.area_destino?.id) === String(user.area_id));
-    const puedeAnular = estaInformado && (user.rol === 'admin' || String(m.creado_por?.id) === String(user.id));
+        && (usuario.rol === 'admin'
+            || String(m.responsable_nuevo?.id) === String(usuario.id)
+            || String(m.area_destino?.id) === String(usuario.area?.id));
+    const puedeAnular = estaInformado && (usuario.rol === 'admin' || String(m.creado_por?.id) === String(usuario.id));
     const puedeActuar = puedeAcusar || puedeAnular;
 
     // Recibe una URL absoluta armada con route(): así se evita el baseURL '/api' que
@@ -81,11 +81,11 @@ export default function Show({ movimiento, responsables = [] }) {
                             <div>
                                 <p className="text-gray-500">Relación</p>
                                 <p className="font-medium">
-                                    {user.rol === 'admin'
+                                    {usuario.rol === 'admin'
                                         ? 'Admin'
-                                        : String(m.area_origen?.id) === String(user.area_id)
+                                        : String(m.area_origen?.id) === String(usuario.area?.id)
                                             ? 'Enviado'
-                                            : String(m.area_destino?.id) === String(user.area_id)
+                                            : String(m.area_destino?.id) === String(usuario.area?.id)
                                                 ? 'A recibir'
                                                 : '—'}
                                 </p>

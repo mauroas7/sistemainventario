@@ -18,7 +18,7 @@ import {
 export default function SidebarLayout({ children, roleSelector }) {
     const { url } = usePage();
     const { auth, flash } = usePage().props; // Obtenemos el usuario logueado desde Inertia
-    const role = auth?.user?.rol;
+    const role = auth?.usuario?.rol;
     const [menuAbierto, setMenuAbierto] = useState(false);
 
     // El cartel de los mensajes que dejan los controladores con ->with('success', ...).
@@ -35,7 +35,7 @@ export default function SidebarLayout({ children, roleSelector }) {
     // Función auxiliar para determinar si un link está activo
     const isActive = (path) => url.startsWith(path);
 
-    const iniciales = (auth?.user?.name || 'U')
+    const iniciales = (auth?.usuario?.nombre || 'U')
         .split(' ')
         .filter(Boolean)
         .slice(0, 2)
@@ -134,10 +134,10 @@ export default function SidebarLayout({ children, roleSelector }) {
                         </div>
                         <div className="text-right hidden sm:block">
                             <div className="text-sm font-medium leading-4">
-                                {auth?.user?.name || 'Usuario'}
+                                {auth?.usuario?.nombre || 'Usuario'}
                             </div>
                             <div className="text-xs text-blue-200 opacity-90">
-                                {auth?.user?.area?.nombre || 'Sin área'}
+                                {auth?.usuario?.area?.nombre || 'Sin área'}
                             </div>
                         </div>
 

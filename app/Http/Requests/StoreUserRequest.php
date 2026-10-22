@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\Rol;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
 {
@@ -44,7 +46,7 @@ class StoreUserRequest extends FormRequest
 
             'rol' => [
                 'required',
-                'in:admin,coordinador,usuario',
+                Rule::enum(Rol::class),
             ],
 
             // El área define qué bienes ve la persona: sin ella la cuenta queda ciega.

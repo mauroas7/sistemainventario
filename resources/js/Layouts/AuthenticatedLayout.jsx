@@ -8,7 +8,7 @@ export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     const { auth } = usePage().props;
-    const user = auth?.user || {};
+    const usuario = auth?.usuario || {};
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -50,7 +50,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 type="button"
                                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-600 bg-white hover:text-blue-700 focus:outline-none transition ease-in-out duration-150"
                                             >
-                                                {user.name}
+                                                {usuario.nombre}
                                                 {/* Puedes agregar aquí el área del usuario si la cargamos en la sesión después */}
 
                                                 <svg
@@ -123,8 +123,8 @@ export default function AuthenticatedLayout({ header, children }) {
                     {/* Opciones de Usuario (Móviles) */}
                     <div className="pt-4 pb-1 border-t border-gray-200">
                         <div className="px-4">
-                            <div className="font-medium text-base text-gray-800">{user.name}</div>
-                            <div className="font-medium text-sm text-gray-500">{user.email}</div>
+                            <div className="font-medium text-base text-gray-800">{usuario.nombre}</div>
+                            <div className="font-medium text-sm text-gray-500">{usuario.email}</div>
                         </div>
 
                         <div className="mt-3 space-y-1">

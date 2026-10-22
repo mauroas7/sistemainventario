@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Rol;
 use App\Models\EstadoMovimiento;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
@@ -41,7 +42,7 @@ class DatosInicialesTest extends TestCase
 
         $usuario = User::where('email', 'silvana@hospital.test')->firstOrFail();
 
-        $this->assertSame('admin', $usuario->rol);
+        $this->assertSame(Rol::Admin, $usuario->rol);
         $this->assertTrue($usuario->activo);
     }
 

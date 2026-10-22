@@ -2,6 +2,7 @@
 
 namespace Database\Seeders\Demo;
 
+use App\Enums\Rol;
 use App\Models\Area;
 use App\Models\User;
 
@@ -21,12 +22,12 @@ class DemoSeeder extends SeederDePrueba
 
         // Patrimonio es Gestión de Bienes e Insumos: recibe los avisos y vuelca todo a Diaguita.
         $usuarios = [
-            ['Silvana - Gestión de Bienes', 'patrimonio@hospital.test', 'admin', 'Patrimonio'],
-            ['Administrador', 'admin@hospital.test', 'admin', 'Dirección'],
-            ['Juan Pérez', 'juan@hospital.test', 'coordinador', 'Sistemas'],
-            ['Ana Gómez', 'ana@hospital.test', 'usuario', 'Enfermería'],
-            ['Carlos Ruiz', 'carlos@hospital.test', 'usuario', 'Laboratorio'],
-            ['María López', 'maria@hospital.test', 'usuario', 'Administración'],
+            ['Silvana - Gestión de Bienes', 'patrimonio@hospital.test', Rol::Admin, 'Patrimonio'],
+            ['Administrador', 'admin@hospital.test', Rol::Admin, 'Dirección'],
+            ['Juan Pérez', 'juan@hospital.test', Rol::Coordinador, 'Sistemas'],
+            ['Ana Gómez', 'ana@hospital.test', Rol::Usuario, 'Enfermería'],
+            ['Carlos Ruiz', 'carlos@hospital.test', Rol::Usuario, 'Laboratorio'],
+            ['María López', 'maria@hospital.test', Rol::Usuario, 'Administración'],
         ];
 
         foreach ($usuarios as [$nombre, $email, $rol, $area]) {

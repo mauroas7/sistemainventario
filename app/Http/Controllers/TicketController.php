@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Rol;
 use App\Http\Resources\MovimientoResource;
 use App\Models\Area;
 use App\Models\Bien;
@@ -32,7 +33,7 @@ class TicketController extends Controller
         $bienesQuery = Bien::query()
             ->with(['ubicacionActual', 'responsable']);
 
-        if (! $user || $user->rol !== 'admin') {
+        if (! $user?->tieneRol(Rol::Admin)) {
             $bienesQuery->where('area_id', $user?->area_id);
         }
 
@@ -94,7 +95,7 @@ class TicketController extends Controller
     public function inbox(Request $request): Response
     {
         $user = Auth::user();
-        $esAdmin = $user?->rol === 'admin';
+        $esAdmin = $user->tieneRol(Rol::Admin);
 
         $pestana = $request->query('estado');
         if (! array_key_exists($pestana, self::ESTADOS_POR_PESTANA)) {
@@ -131,7 +132,7 @@ class TicketController extends Controller
         $user = Auth::user();
         abort_unless($user, 403);
 
-        $puedeVer = $user->rol === 'admin'
+        $puedeVer = $user->tieneRol(Rol::Admin)
             || (int) $user->area_id === (int) $movimiento->area_origen_id
             || (int) $user->area_id === (int) $movimiento->area_destino_id;
 
@@ -147,7 +148,7 @@ class TicketController extends Controller
             'movimiento' => (new MovimientoResource($movimiento))->resolve(request()),
             // Solo Patrimonio puede definir el responsable de un movimiento que se
             // informó sin uno, y solo entre el personal del área que recibió el bien.
-            'responsables' => $user->rol === 'admin'
+            'responsables' => $user->tieneRol(Rol::Admin)
                 ? User::query()
                     ->activos()
                     ->where('area_id', $movimiento->area_destino_id)
@@ -173,7 +174,7 @@ class TicketController extends Controller
         $esNuevoResponsable = (int) $user->id === (int) $movimiento->responsable_nuevo_id;
         $esAreaDestino = (int) $user->area_id === (int) $movimiento->area_destino_id;
 
-        if ($user->rol !== 'admin' && ! $esNuevoResponsable && ! $esAreaDestino) {
+        if (! $user->tieneRol(Rol::Admin) && ! $esNuevoResponsable && ! $esAreaDestino) {
             abort(403);
         }
 
@@ -203,7 +204,7 @@ class TicketController extends Controller
             abort(409, 'Solo se pueden anular movimientos que todavía no se registraron en Diaguita.');
         }
 
-        if ($user->rol !== 'admin' && (int) $user->id !== (int) $movimiento->creado_por) {
+        if (! $user->tieneRol(Rol::Admin) && (int) $user->id !== (int) $movimiento->creado_por) {
             abort(403, 'Solo quien informó el movimiento o Patrimonio pueden anularlo.');
         }
 
@@ -222,7 +223,7 @@ class TicketController extends Controller
     public function updateMovimientoResponsable(Request $request, Movimiento $movimiento)
     {
         $user = Auth::user();
-        abort_unless($user && $user->rol === 'admin', 403);
+        abort_unless($user?->tieneRol(Rol::Admin), 403);
 
         $validated = $request->validate([
             'responsable_nuevo_id' => ['nullable', 'exists:users,id'],
@@ -255,7 +256,7 @@ class TicketController extends Controller
     public function updateMovimientoEstado(Request $request, Movimiento $movimiento)
     {
         $user = Auth::user();
-        abort_unless($user && $user->rol === 'admin', 403);
+        abort_unless($user?->tieneRol(Rol::Admin), 403);
 
         $validated = $request->validate([
             'estado_movimiento_id' => ['required', 'exists:estados_movimiento,id'],
@@ -324,7 +325,7 @@ class TicketController extends Controller
 
         $bien = Bien::findOrFail($validated['bien_id']);
 
-        if ($user->rol !== 'admin' && (int) $user->area_id !== (int) $validated['area_origen_id']) {
+        if (! $user->tieneRol(Rol::Admin) && (int) $user->area_id !== (int) $validated['area_origen_id']) {
             abort(403, 'No puede informar movimientos desde un área distinta a la suya.');
         }
 
@@ -382,7 +383,7 @@ class TicketController extends Controller
     public function exportarMovimientos(Request $request): StreamedResponse
     {
         $user = Auth::user();
-        abort_unless($user && $user->rol === 'admin', 403);
+        abort_unless($user?->tieneRol(Rol::Admin), 403);
 
         $filtros = $request->validate([
             'area_id' => ['nullable', 'exists:areas,id'],

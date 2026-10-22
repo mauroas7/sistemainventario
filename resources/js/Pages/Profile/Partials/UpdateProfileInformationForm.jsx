@@ -6,12 +6,12 @@ import { Transition } from '@headlessui/react';
 import { useForm, usePage } from '@inertiajs/react';
 
 export default function UpdateProfileInformation({ className = '' }) {
-    const user = usePage().props.auth.user;
+    const usuario = usePage().props.auth.usuario;
 
     const { data, setData, patch, errors, processing, recentlySuccessful } =
         useForm({
-            name: user.name,
-            email: user.email,
+            name: usuario.nombre,
+            email: usuario.email,
         });
 
     const submit = (e) => {

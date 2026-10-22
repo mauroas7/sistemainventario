@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\Rol;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
@@ -39,7 +40,7 @@ class CrearAdministrador extends Command
             return self::FAILURE;
         }
 
-        $usuario = User::create([...$validador->validated(), 'rol' => 'admin']);
+        $usuario = User::create([...$validador->validated(), 'rol' => Rol::Admin]);
 
         $this->components->info("Administrador creado: {$usuario->name} ({$usuario->email}).");
 

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Rol;
 use App\Mail\MovimientoAcuseCreador;
 use App\Mail\MovimientoAvisoResponsableSaliente;
 use App\Mail\MovimientoInformadoPatrimonio;
@@ -62,7 +63,7 @@ class NotificacionMovimientoService
         }
 
         return User::query()
-            ->where('rol', 'admin')
+            ->where('rol', Rol::Admin)
             ->whereNotNull('email')
             ->pluck('email')
             ->all();

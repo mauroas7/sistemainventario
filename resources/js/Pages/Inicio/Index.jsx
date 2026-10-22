@@ -16,7 +16,7 @@ const ICONOS = {
 
 export default function Index() {
     const { auth } = usePage().props;
-    const role = auth?.user?.rol;
+    const role = auth?.usuario?.rol;
 
     const actions = [
         {
@@ -54,7 +54,7 @@ export default function Index() {
                 <div className="mb-6">
                     <h2 className="text-2xl font-bold text-institucional-primario">Inicio</h2>
                     <p className="text-sm text-gray-500 mt-1">
-                        Bienvenido/a, {auth?.user?.name || 'usuario'}. Accesos rápidos para operar movimientos de bienes.
+                        Bienvenido/a, {auth?.usuario?.nombre || 'usuario'}. Accesos rápidos para operar movimientos de bienes.
                     </p>
                 </div>
 

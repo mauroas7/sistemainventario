@@ -18,7 +18,7 @@ export default function Bandeja({
     resumen = { informados: 0, registrados: 0, cerrados: 0, anulados: 0, total: 0 },
 }) {
     const { auth } = usePage().props;
-    const user = auth?.user || {};
+    const usuario = auth?.usuario || {};
 
     // El filtrado y el conteo los hace la base: cada pestaña y página es una visita.
     function irA(clave, pagina = 1) {
@@ -29,9 +29,9 @@ export default function Bandeja({
     }
 
     function relacion(m) {
-        if (user.rol === 'admin') return 'Admin';
-        if (String(m.area_origen?.id) === String(user.area_id)) return 'Enviado';
-        if (String(m.area_destino?.id) === String(user.area_id)) return 'A recibir';
+        if (usuario.rol === 'admin') return 'Admin';
+        if (String(m.area_origen?.id) === String(usuario.area?.id)) return 'Enviado';
+        if (String(m.area_destino?.id) === String(usuario.area?.id)) return 'A recibir';
         return '—';
     }
 
@@ -47,15 +47,15 @@ export default function Bandeja({
     function puedeConfirmar(m) {
         if (m.estado_movimiento?.nombre === 'Anulado' || m.recibido_por) return false;
 
-        return user.rol === 'admin'
-            || String(m.responsable_nuevo?.id) === String(user.id)
-            || String(m.area_destino?.id) === String(user.area_id);
+        return usuario.rol === 'admin'
+            || String(m.responsable_nuevo?.id) === String(usuario.id)
+            || String(m.area_destino?.id) === String(usuario.area?.id);
     }
 
     // Anular solo mientras Patrimonio no lo haya volcado a Diaguita.
     function puedeCancelar(m) {
         return m.estado_movimiento?.nombre === 'Informado'
-            && (user.rol === 'admin' || String(m.creado_por?.id) === String(user.id));
+            && (usuario.rol === 'admin' || String(m.creado_por?.id) === String(usuario.id));
     }
 
     // Por axios y no por fetch(): toma el token CSRF de la cookie XSRF-TOKEN, y el

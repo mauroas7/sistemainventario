@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\Rol;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BienResource;
 use App\Services\BienService;
@@ -19,7 +20,7 @@ class BienController extends Controller
 
         $bienes = $this->bienService->obtenerBienes(
             $user?->area_id,
-            $user?->rol === 'admin'
+            $user->tieneRol(Rol::Admin)
         );
 
         return BienResource::collection($bienes);

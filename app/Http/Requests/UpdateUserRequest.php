@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\Rol;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -42,7 +43,7 @@ class UpdateUserRequest extends FormRequest
             'rol' => [
                 'sometimes',
                 'required',
-                'in:admin,coordinador,usuario',
+                Rule::enum(Rol::class),
             ],
 
             // Ver StoreUserRequest: sin área la cuenta no ve ningún bien.

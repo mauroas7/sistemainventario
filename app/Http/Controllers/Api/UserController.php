@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\Rol;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -66,7 +67,7 @@ class UserController extends Controller
                 return response()->json(['message' => 'No podés desactivar tu propia cuenta.'], 422);
             }
 
-            if (array_key_exists('rol', $datosValidados) && $datosValidados['rol'] !== 'admin') {
+            if (array_key_exists('rol', $datosValidados) && Rol::desde($datosValidados['rol']) !== Rol::Admin) {
                 return response()->json(['message' => 'No podés quitarte a vos mismo el rol de administrador.'], 422);
             }
         }
@@ -116,11 +117,11 @@ class UserController extends Controller
      */
     private function dejariaSinAdmin(User $user, array $cambios): bool
     {
-        if ($user->rol !== 'admin' || ! $user->activo) {
+        if (! $user->tieneRol(Rol::Admin) || ! $user->activo) {
             return false;
         }
 
-        $pierdeAdmin = (array_key_exists('rol', $cambios) && $cambios['rol'] !== 'admin')
+        $pierdeAdmin = (array_key_exists('rol', $cambios) && Rol::desde($cambios['rol']) !== Rol::Admin)
             || (array_key_exists('activo', $cambios) && ! $cambios['activo']);
 
         if (! $pierdeAdmin) {
@@ -128,7 +129,7 @@ class UserController extends Controller
         }
 
         return User::query()
-            ->where('rol', 'admin')
+            ->where('rol', Rol::Admin)
             ->activos()
             ->whereKeyNot($user->id)
             ->doesntExist();

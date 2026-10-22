@@ -29,7 +29,7 @@ const FORM_VACIO = { name: '', email: '', password: '', rol: 'coordinador', area
 
 export default function Index() {
     const { auth } = usePage().props;
-    const usuarioActualId = auth?.user?.id;
+    const usuarioActualId = auth?.usuario?.id;
 
     const [areas, setAreas] = useState([]);
     const [usuarios, setUsuarios] = useState([]);

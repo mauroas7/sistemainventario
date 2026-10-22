@@ -4,38 +4,18 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Restringe una ruta a uno o más roles: `->middleware('rol:admin')`.
+ * Acepta slugs y etiquetas de `App\Enums\Rol`.
+ */
 class RequerirRol
 {
-    /**
-     * Handle an incoming request.
-     * Usage in route: ->middleware(\App\Http\Middleware\RequerirRol::class . ':admin')
-     * Multiple roles can be passed comma-separated: 'admin,coordinator'
-     */
-    public function handle(Request $request, Closure $next, ?string $roles = null)
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        $user = $request->user();
-
-        if (! $user) {
-            return $request->expectsJson()
-                ? response()->json(['message' => 'Unauthenticated.'], 401)
-                : abort(401);
-        }
-
-        if (! $roles) {
-            // no roles required
-            return $next($request);
-        }
-
-        $allowed = array_map('trim', explode(',', $roles));
-
-        // The user model stores role in 'rol' attribute
-        $userRole = $user->rol ?? null;
-
-        if (! $userRole || ! in_array($userRole, $allowed, true)) {
-            return $request->expectsJson()
-                ? response()->json(['message' => 'Forbidden. Insufficient role.'], 403)
-                : abort(403);
+        if (! $request->user()?->tieneRol(...$roles)) {
+            abort(403, 'No tenés permiso para esta acción.');
         }
 
         return $next($request);

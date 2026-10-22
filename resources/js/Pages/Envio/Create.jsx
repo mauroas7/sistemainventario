@@ -15,8 +15,8 @@ const FORM_VACIO = {
 
 export default function Create({ bienes = [], areas = [], tiposMovimiento = [], motivos = [], responsables = [] }) {
     const { auth } = usePage().props;
-    const user = auth?.user || {};
-    const isAdmin = user.rol === 'admin';
+    const usuario = auth?.usuario || {};
+    const isAdmin = usuario.rol === 'admin';
     const fileInputRef = useRef(null);
 
     const [form, setForm] = useState(FORM_VACIO);
@@ -421,7 +421,7 @@ export default function Create({ bienes = [], areas = [], tiposMovimiento = [], 
                             </div>
                             <div>
                                 <p className="text-gray-500">Informado por</p>
-                                <p className="font-medium text-gray-900">{user.name || '—'}</p>
+                                <p className="font-medium text-gray-900">{usuario.nombre || '—'}</p>
                             </div>
 
                             {imagenPreview && (

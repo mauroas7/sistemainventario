@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\Rol;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MovimientoResource;
 use App\Models\Movimiento;
@@ -43,7 +44,7 @@ class MovimientoController extends Controller
 
         $porPagina = $validado['per_page'] ?? 20;
         $filtros = collect($validado)->except(['per_page', 'page'])->all();
-        $esAdmin = $user?->rol === 'admin';
+        $esAdmin = $user->tieneRol(Rol::Admin);
 
         $paginador = $this->movimientoService->obtenerParaBandeja(
             $user?->area_id,
@@ -63,7 +64,7 @@ class MovimientoController extends Controller
         $user = $request->user();
         abort_unless($user, 403);
 
-        $puedeVer = $user->rol === 'admin'
+        $puedeVer = $user->tieneRol(Rol::Admin)
             || (int) $user->area_id === (int) $movimiento->area_origen_id
             || (int) $user->area_id === (int) $movimiento->area_destino_id;
 
