@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
-import { Alerta, Boton, Estado, ModalConfirmar, Select, Tarjeta, useConfirmacion } from 'hu-kit/componentes';
+import { Alerta, Boton, Dato, Estado, ModalConfirmar, Select, Tarjeta, useConfirmacion } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
-import Dato from '@/Components/UI/Dato';
 import { tonoEstadoMovimiento } from '@/utils/estados';
 import { fechaYHora } from '@/utils/fechas';
 import { puedeAcusar, puedeAnular, relacion } from '@/utils/movimientos';

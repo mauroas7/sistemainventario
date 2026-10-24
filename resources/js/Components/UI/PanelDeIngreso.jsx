@@ -1,5 +1,4 @@
-import { PanelAutenticacion } from 'hu-kit/componentes';
-import Flash from '@/Components/UI/Flash';
+import { Flash, PanelAutenticacion } from 'hu-kit/componentes';
 
 /** El panel de `hu-kit` con el nombre de este sistema, para las tres pantallas de ingreso. */
 export default function PanelDeIngreso({ tituloPestana, titulo, subtitulo, children }) {

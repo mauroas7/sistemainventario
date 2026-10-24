@@ -12,7 +12,7 @@ trabajar sin ella está en este documento.
 ```
 resources/js/
 ├── Components/
-│   ├── UI/            ← el marco de la app; las primitivas vienen de hu-kit
+│   ├── UI/            ← lo propio del marco; el marco y las primitivas vienen de hu-kit
 │   ├── Envio/         ← las partes del formulario de envío
 │   └── Patrimonio/    ← las partes del control patrimonial
 ├── Pages/             ← páginas Inertia, y sólo eso
@@ -36,15 +36,20 @@ y los componentes, que se importan de `hu-kit/componentes`:
 - formularios: `Boton`, `Campo` y `claseControl`, `Input`, `PasswordInput`,
   `Select`, `Textarea`, `Checkbox`, `SelectorFecha`;
 - contenido: `Tarjeta`, `Estado`, `EstadoVacio`, `Alerta`, `Rotulo`, `Metrica`,
-  `Paginador` y las clases de tabla (`encabezadoTabla`, `cuerpoTabla`,
+  `Dato`, `Paginador` y las clases de tabla (`encabezadoTabla`, `cuerpoTabla`,
   `renglonTabla`);
 - `Modal`, `ModalConfirmar` y `useConfirmacion`;
+- el marco: `MarcoApp` (barra lateral, encabezado, menú de la cuenta y `Flash`)
+  y `rutaActiva`;
 - `Icono`, `ApplicationLogo`, `PanelAutenticacion`, `ErrorBoundary`,
   `ThemeToggle` y `ThemeProvider`.
 
-En `Components/UI/` queda sólo el marco de este sistema: `AppLayout`, `Nav`,
-`MenuDeUsuario`, `Flash`, `PanelDeIngreso` (los textos del login sobre
-`PanelAutenticacion`) y `Dato` (una etiqueta con su valor).
+Qué hay y cómo se ve, en el catálogo de hu-kit (`npm run catalogo` en su carpeta)
+y en su guía, `docs/guia-hu-kit.pdf`.
+
+En `Components/UI/` queda sólo lo propio de este sistema: `AppLayout`, que le pasa
+a `MarcoApp` el menú del rol, el área del usuario y «Mi cuenta», y
+`PanelDeIngreso` (los textos del login sobre `PanelAutenticacion`).
 
 `tailwind.config.js` carga el preset y suma los componentes del paquete a
 `content`, sin lo cual Tailwind no genera sus clases; `resources/css/app.css`
@@ -140,8 +145,8 @@ confirmar({
   `total`), que `Paginador` sabe dibujar.
 - **Fechas** → viajan en ISO 8601 con huso, nunca formateadas; las formatea
   `utils/fechas.js`.
-- **Rutas** → `route()` de Ziggy. Para saber en qué ruta estás,
-  `utils/rutas.js`: un patrón terminado en `.` es un prefijo.
+- **Rutas** → `route()` de Ziggy. Para saber en qué ruta estás, `rutaActiva` de
+  hu-kit: un patrón terminado en `.` es un prefijo.
 - **Props compartidas** → `HandleInertiaRequests::share()` manda `auth.usuario`
   (`id`, `nombre`, `email`, `rol`, `rolEtiqueta`, `area`) y `flash` (`exito`,
   `error`), que muestra `Flash`.

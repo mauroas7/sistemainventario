@@ -1,5 +1,4 @@
-import { Alerta, Estado, Icono, Rotulo, Tarjeta } from 'hu-kit/componentes';
-import Dato from '@/Components/UI/Dato';
+import { Alerta, Dato, Estado, Icono, Rotulo, Tarjeta } from 'hu-kit/componentes';
 
 const VALOR = 'font-semibold text-primary dark:text-gray-100';
 const FALTA = 'italic text-brandText-muted dark:text-brandText-mutedDark';

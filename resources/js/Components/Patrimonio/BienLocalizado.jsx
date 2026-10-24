@@ -1,5 +1,4 @@
-import { Boton, Estado, Rotulo, Tarjeta } from 'hu-kit/componentes';
-import Dato from '@/Components/UI/Dato';
+import { Boton, Dato, Estado, Rotulo, Tarjeta } from 'hu-kit/componentes';
 import { tonoEstadoBien, tonoEstadoMovimiento } from '@/utils/estados';
 import { fechaYHora } from '@/utils/fechas';
 
