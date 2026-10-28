@@ -17,7 +17,7 @@ Laravel 12 · PHP 8.2 · React 18 + Inertia 2 · Vite 7 + Tailwind 3.
   con el acuse de recibo y la anulación.
 - **Control patrimonial** (sólo administradores): el tablero de movimientos con
   filtros, cambio de estado y exportación a CSV; el localizador, el directorio de
-  bienes y la configuración de usuarios.
+  bienes con su alta y edición, y la configuración de áreas y usuarios.
 - Una suite de tests (Pest): `php artisan test`.
 
 ---
@@ -82,12 +82,10 @@ php artisan migrate --seed --force                                  # el esquema
 php artisan usuarios:crear-administrador patrimonio@hospital.edu.ar # el primer admin
 ```
 
-El comando pide nombre y contraseña. Desde ahí, el administrador da de alta al
-resto de los usuarios desde Configuración.
-
-**Áreas y bienes no tienen alta desde la aplicación**: la demo los inventa, y en
-producción hoy hay que cargarlos directo en la base (`areas` y `bienes`). Sin
-áreas no se puede dar de alta a nadie que no sea administrador.
+El comando pide nombre y contraseña. Desde ahí, el administrador carga todo lo
+demás: las áreas y los usuarios desde Configuración, y los bienes desde el
+Directorio de bienes. Sin áreas no se puede dar de alta a nadie que no sea
+administrador.
 
 - En producción `migrate:fresh`, `migrate:rollback` y `db:wipe` no corren, y la
   demo tampoco aunque se la pida a mano.

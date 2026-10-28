@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CuentaController;
 use App\Http\Controllers\InicioController;
+use App\Http\Controllers\Patrimonio\AreaController;
 use App\Http\Controllers\Patrimonio\BienController;
 use App\Http\Controllers\Patrimonio\DashboardController;
 use App\Http\Controllers\Patrimonio\LocalizadorController;
@@ -49,9 +50,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/localizador', [LocalizadorController::class, 'index'])->name('localizador.index');
 
         Route::get('/bienes', [BienController::class, 'index'])->name('bienes.index');
+        Route::post('/bienes', [BienController::class, 'store'])->name('bienes.store');
         Route::get('/bienes/{bien}', [BienController::class, 'show'])->name('bienes.show');
+        Route::put('/bienes/{bien}', [BienController::class, 'update'])->name('bienes.update');
 
         Route::get('/configuracion', [UsuarioController::class, 'index'])->name('configuracion.index');
+        Route::post('/areas', [AreaController::class, 'store'])->name('areas.store');
+        Route::put('/areas/{area}', [AreaController::class, 'update'])->name('areas.update');
         Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
         Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
     });

@@ -45,7 +45,7 @@ pregunta con `User::tieneRol()`, que acepta el enum, el slug o la etiqueta.
 
 | Rol | Qué ve | Qué hace |
 |---|---|---|
-| Administrador (Gestión de Bienes) | Todo el hospital, sin área | Informa, recibe y anula como cualquiera; además el control patrimonial: tablero, estados, responsables, localizador, directorio y usuarios |
+| Administrador (Gestión de Bienes) | Todo el hospital, sin área | Informa, recibe y anula como cualquiera; además el control patrimonial: tablero, estados, responsables, localizador, el alta de bienes, áreas y usuarios |
 | Coordinador / Jefe de área | Todo lo que sale de su área o llega a ella | Informa traslados de los bienes del área, acusa recibo de lo que llega al área y anula lo que informó |
 | Usuario | Sólo lo suyo: lo que informó y lo que lo nombra responsable, saliente o nuevo | Informa traslados de los bienes del área, acusa recibo de lo que queda a su cargo y anula lo que informó |
 
@@ -89,6 +89,13 @@ reciente del bien y copia su área destino y su responsable nuevo, aunque sea
 `null`. Sin ninguno vigente, el bien vuelve al origen del primero. Por eso anular
 un movimiento devuelve el bien a donde estaba, en el orden que sea.
 
+Por la misma razón, **el área y el responsable de un bien se editan sólo mientras
+no tiene movimientos**: Gestión de Bienes los fija al darlo de alta, y desde el
+primer traslado los define el historial. `GuardarBienRequest` los descarta si el
+bien ya se movió; el resto de la ficha (inventario, Diaguita, descripción,
+estado) se edita siempre. Las áreas se dan de alta y se renombran, pero no se
+borran: las sostienen sus bienes y movimientos.
+
 ## Mails
 
 `NotificacionMovimientoService` manda tres avisos al informar un movimiento, en
@@ -124,8 +131,8 @@ los entornos:
 `password` y ocho bienes, sin movimientos. `Demo/MovimientosSeeder` la siembra y
 le suma cinco movimientos en distintos estados, para ver qué le toca a cada rol;
 los tests de qué ve cada rol usan ese mismo escenario. Las dos heredan de `SeederDePrueba`, que se
-niega a correr en producción. Áreas y bienes todavía no tienen alta desde la
-aplicación.
+niega a correr en producción. En producción, áreas y bienes los carga Gestión de
+Bienes desde la aplicación.
 
 ### Migraciones: se edita el `create_*`, no se agrega otra (hasta producción)
 

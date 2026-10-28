@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
-import { Alerta, Boton, EstadoVacio, ModalConfirmar, Tarjeta, useConfirmacion } from 'hu-kit/componentes';
+import { Alerta, Boton, ModalConfirmar, Tarjeta, useConfirmacion } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import FormularioUsuario from '@/Components/Patrimonio/FormularioUsuario';
+import ListaDeAreas from '@/Components/Patrimonio/ListaDeAreas';
 import TablaUsuarios from '@/Components/Patrimonio/TablaUsuarios';
 
 const FORM_VACIO = { name: '', email: '', password: '', rol: 'coordinador', area_id: '' };
@@ -99,17 +100,7 @@ export default function Index({ areas = [], roles = [], usuarios = [] }) {
     return (
         <AppLayout titulo="Configuración del sistema" subtitulo="Áreas y cuentas de acceso al portal.">
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-                <Tarjeta titulo="Áreas" icono="domain" contador={areas.length} className="h-fit">
-                    {areas.length > 0 ? (
-                        <ul className="space-y-2 text-sm text-brandText dark:text-brandText-dark">
-                            {areas.map((a) => (
-                                <li key={a.id}>{a.nombre}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <EstadoVacio enTarjeta icono="domain">Sin áreas cargadas.</EstadoVacio>
-                    )}
-                </Tarjeta>
+                <ListaDeAreas areas={areas} />
 
                 <Tarjeta
                     titulo={`Usuarios · ${activos} activos de ${usuarios.length}`}

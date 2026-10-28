@@ -23,7 +23,7 @@ sirve a ese lector, sobra. **Límite: 4 líneas de prosa por comentario.**
 ```php
 /** Patrimonio ya volcó el movimiento a Diaguita. */                        // rótulo
 // Sin esto, anular un movimiento deja el bien donde lo dejó el anulado.     // contrafáctico
-// TODO: falta el alta de bienes; hoy los inventa la demo.                  // pendiente
+// TODO: falta importar la planilla de Patrimonio; hoy se carga de a uno.   // pendiente
 ```
 
 Si ninguna de las cuatro encaja, lo más probable es que el comentario no haga

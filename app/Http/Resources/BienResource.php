@@ -42,6 +42,8 @@ class BienResource extends JsonResource
                 'id' => $this->estado->id,
                 'nombre' => $this->estado->nombre,
             ],
+
+            'movimientos' => $this->whenCounted('movimientos'),
         ];
     }
 }

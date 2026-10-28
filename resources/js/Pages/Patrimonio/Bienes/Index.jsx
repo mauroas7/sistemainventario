@@ -1,13 +1,37 @@
+import { useState } from 'react';
 import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, renglonTabla, Tarjeta } from 'hu-kit/componentes';
+import FormularioBien from '@/Components/Patrimonio/FormularioBien';
 import AppLayout from '@/Components/UI/AppLayout';
 import { tonoEstadoBien } from '@/utils/estados';
 
 const ATENUADO = 'text-xs italic text-brandText-muted dark:text-brandText-mutedDark';
 
-export default function Index({ bienes = [] }) {
+export default function Index({ bienes = [], areas = [], estados = [], responsables = [] }) {
+    const [editando, setEditando] = useState(null); // null | 'nuevo' | id
+
     return (
-        <AppLayout titulo="Directorio de bienes" subtitulo="Consulta del inventario general.">
-            <Tarjeta titulo="Bienes" icono="inventory_2" contador={bienes.length}>
+        <AppLayout titulo="Directorio de bienes" subtitulo="Consulta y carga del inventario general.">
+            <Tarjeta
+                titulo="Bienes"
+                icono="inventory_2"
+                contador={bienes.length}
+                acciones={editando === null && (
+                    <Boton icono="add" forma="grupo" tipo="button" onClick={() => setEditando('nuevo')}>
+                        Nuevo bien
+                    </Boton>
+                )}
+            >
+                {editando !== null && (
+                    <FormularioBien
+                        key={editando}
+                        bien={editando === 'nuevo' ? null : bienes.find((b) => b.id === editando)}
+                        areas={areas}
+                        estados={estados}
+                        responsables={responsables}
+                        onCerrar={() => setEditando(null)}
+                    />
+                )}
+
                 <div className="-mx-5 overflow-x-auto">
                     <table className="w-full min-w-[56rem] text-sm">
                         <thead>
@@ -36,9 +60,14 @@ export default function Index({ bienes = [] }) {
                                             <Estado tono={tonoEstadoBien(bien.estado?.nombre)}>{bien.estado?.nombre || '—'}</Estado>
                                         </td>
                                         <td className="px-5 py-3">
-                                            <Boton variante="fantasma" forma="grupo" icono="history" href={route('patrimonio.bienes.show', { bien: bien.id })}>
-                                                Ver historial
-                                            </Boton>
+                                            <div className="flex items-center gap-2">
+                                                <Boton tipo="button" variante="fantasma" forma="grupo" icono="edit" onClick={() => setEditando(bien.id)}>
+                                                    Editar
+                                                </Boton>
+                                                <Boton variante="fantasma" forma="grupo" icono="history" href={route('patrimonio.bienes.show', { bien: bien.id })}>
+                                                    Ver historial
+                                                </Boton>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

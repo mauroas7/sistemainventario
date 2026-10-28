@@ -2,6 +2,7 @@
 
 use App\Models\Area;
 use App\Models\Bien;
+use App\Models\EstadoBien;
 use App\Models\Motivo;
 use App\Models\Movimiento;
 use App\Models\TipoMovimiento;
@@ -180,4 +181,92 @@ test('un movimiento anulado no admite acuse de recibo', function () {
     $this->actingAs($this->patrimonio)
         ->post(route('recepcion.confirmar', $movimiento))
         ->assertSessionHasErrors('movimiento');
+});
+
+/** Los datos de un bien nuevo en Enfermería; `$extra` pisa cualquiera. */
+function datosDeBien(array $extra = []): array
+{
+    return [
+        'codigo' => 'INV-9001',
+        'numero_diaguita' => 'DG-9001',
+        'nombre' => 'Monitor multiparamétrico',
+        'area_id' => Area::where('nombre', 'Enfermería')->value('id'),
+        'estado_id' => EstadoBien::where('nombre', 'En uso')->value('id'),
+        ...$extra,
+    ];
+}
+
+test('patrimonio da de alta un bien en su área y a cargo de alguien de esa área', function () {
+    $laura = User::where('email', 'laura@hospital.test')->firstOrFail(); // Enfermería
+
+    $this->actingAs($this->patrimonio)
+        ->post(route('patrimonio.bienes.store'), datosDeBien(['responsable_id' => $laura->id]))
+        ->assertSessionHasNoErrors();
+
+    $bien = Bien::where('codigo', 'INV-9001')->firstOrFail();
+
+    expect($bien->area_id)->toBe($laura->area_id)
+        ->and($bien->ubicacion_actual_id)->toBe($laura->area_id)
+        ->and($bien->responsable_id)->toBe($laura->id);
+
+    $this->post(route('patrimonio.bienes.store'), datosDeBien(['responsable_id' => $this->juan->id]))
+        ->assertSessionHasErrors(['codigo', 'numero_diaguita']);
+
+    $this->post(route('patrimonio.bienes.store'), datosDeBien(['codigo' => 'INV-9002', 'numero_diaguita' => null, 'responsable_id' => $this->juan->id]))
+        ->assertSessionHasErrors('responsable_id');
+});
+
+test('un bien sin movimientos se edita entero y uno con movimientos no cambia de área ni de responsable', function () {
+    $farmacia = Area::where('nombre', 'Farmacia')->value('id');
+    $sinMovimientos = Bien::where('codigo', '!=', 'NB001')->firstOrFail();
+
+    $this->actingAs($this->patrimonio)
+        ->put(route('patrimonio.bienes.update', $sinMovimientos), datosDeBien(['codigo' => $sinMovimientos->codigo, 'area_id' => $farmacia]))
+        ->assertSessionHasNoErrors();
+
+    expect($sinMovimientos->fresh())
+        ->area_id->toBe($farmacia)
+        ->ubicacion_actual_id->toBe($farmacia)
+        ->nombre->toBe('Monitor multiparamétrico');
+
+    $carlos = User::where('email', 'carlos@hospital.test')->firstOrFail(); // Laboratorio
+    $movido = informarTraslado(['responsable_nuevo_id' => $carlos->id])->bien;
+    $laboratorio = $movido->area_id;
+
+    $this->actingAs($this->patrimonio)
+        ->put(route('patrimonio.bienes.update', $movido), datosDeBien([
+            'codigo' => $movido->codigo,
+            'numero_diaguita' => 'DG-9002',
+            'area_id' => $farmacia,
+            'responsable_id' => null,
+        ]))
+        ->assertSessionHasNoErrors();
+
+    expect($movido->fresh())
+        ->area_id->toBe($laboratorio)
+        ->ubicacion_actual_id->toBe($laboratorio)
+        ->responsable_id->toBe($carlos->id)
+        ->numero_diaguita->toBe('DG-9002');
+});
+
+test('patrimonio da de alta y renombra un área sin repetir nombres', function () {
+    $this->actingAs($this->patrimonio)
+        ->post(route('patrimonio.areas.store'), ['nombre' => 'Kinesiología'])
+        ->assertSessionHasNoErrors();
+
+    $area = Area::where('nombre', 'Kinesiología')->firstOrFail();
+
+    $this->put(route('patrimonio.areas.update', $area), ['nombre' => 'Farmacia'])->assertSessionHasErrors('nombre');
+    $this->put(route('patrimonio.areas.update', $area), ['nombre' => 'Kinesiología y Fisiatría'])->assertSessionHasNoErrors();
+
+    expect($area->fresh()->nombre)->toBe('Kinesiología y Fisiatría');
+});
+
+test('sólo patrimonio da de alta bienes y áreas', function () {
+    $this->actingAs($this->juan);
+
+    $this->post(route('patrimonio.bienes.store'), datosDeBien())->assertForbidden();
+    $this->put(route('patrimonio.bienes.update', Bien::firstOrFail()), datosDeBien())->assertForbidden();
+    $this->post(route('patrimonio.areas.store'), ['nombre' => 'Kinesiología'])->assertForbidden();
+    $this->put(route('patrimonio.areas.update', Area::firstOrFail()), ['nombre' => 'Otra'])->assertForbidden();
 });
