@@ -24,12 +24,12 @@ class DashboardController extends Controller
     public function index(Request $request): Response
     {
         $filtros = $this->filtros($request);
-        $paginador = $this->movimientoService->obtenerParaBandeja(null, true, $filtros, self::POR_PAGINA);
+        $paginador = $this->movimientoService->obtenerParaBandeja(null, $filtros, self::POR_PAGINA);
 
         return Inertia::render('Patrimonio/Dashboard', [
             'movimientos' => $paginador->through(fn (Movimiento $m) => (new MovimientoResource($m))->resolve($request)),
             // Sobre todo lo que matchea el filtro, no sobre la página actual.
-            'resumen' => $this->movimientoService->obtenerResumen(null, true, $filtros),
+            'resumen' => $this->movimientoService->obtenerResumen(null, $filtros),
             'filtros' => $filtros,
             'estados' => EstadoMovimiento::orderBy('id')->get(['id', 'nombre']),
             'areas' => Area::orderBy('nombre')->get(['id', 'nombre']),
@@ -40,7 +40,7 @@ class DashboardController extends Controller
     /** El mismo recorte que se ve filtrado, entero y no sólo la página actual. */
     public function exportar(Request $request): StreamedResponse
     {
-        $movimientos = $this->movimientoService->obtenerParaBandeja(null, true, $this->filtros($request));
+        $movimientos = $this->movimientoService->obtenerParaBandeja(null, $this->filtros($request));
 
         $nombreArchivo = 'movimientos_'.now()->format('Y-m-d_His').'.csv';
 
@@ -50,24 +50,25 @@ class DashboardController extends Controller
             // BOM UTF-8 y separador ";" para que Excel en es-AR abra el CSV sin preguntar nada.
             fwrite($salida, "\xEF\xBB\xBF");
 
-            // En el orden del Excel que lleva Patrimonio, para pegarlo ahí sin reordenar.
+            // Las nueve columnas de la planilla de Patrimonio, en su orden, y después las del circuito.
             fputcsv($salida, [
-                'N° Inventario', 'N° Diaguita', 'Fecha', 'Ubicación anterior', 'Nueva ubicación',
-                'Responsable anterior', 'Nuevo responsable', 'Descripción del bien',
-                'Motivo del traslado', 'Informado por', 'Estado', 'Registrado en Diaguita',
+                'N° Inventario', 'N° Sistema', 'Ubicación actual', 'Responsable actual',
+                'Descripción del bien', 'Detalle del bien', 'Nueva ubicación', 'Nuevo responsable',
+                'Motivo del traslado', 'Fecha', 'Informado por', 'Estado', 'Registrado en Diaguita',
             ], ';');
 
             foreach ($movimientos as $m) {
                 fputcsv($salida, [
                     $m->bien->codigo,
                     $m->bien->numero_diaguita ?: 'sin cargar',
-                    optional($m->fecha_movimiento)->format('d/m/Y H:i'),
                     $m->areaOrigen->nombre,
-                    $m->areaDestino->nombre,
                     $m->responsableAnterior->name ?? 'sin asignar',
+                    $m->bien->nombre,
+                    $m->bien->descripcion ?? '',
+                    $m->areaDestino->nombre,
                     $m->responsableNuevo->name ?? 'sin asignar',
-                    $m->bien->descripcion ?: $m->bien->nombre,
                     $m->motivo->nombre,
+                    optional($m->fecha_movimiento)->format('d/m/Y H:i'),
                     $m->creador->name,
                     $m->estadoMovimiento->nombre,
                     optional($m->fecha_registro_diaguita)->format('d/m/Y H:i') ?: '',

@@ -15,6 +15,7 @@ export default function TablaControl({ movimientos, estados, estadoElegido, onEl
                         <th className="px-3 pb-2 font-semibold">Ubicación actual</th>
                         <th className="px-3 pb-2 font-semibold">Responsable actual</th>
                         <th className="px-3 pb-2 font-semibold">Descripción del bien</th>
+                        <th className="px-3 pb-2 font-semibold">Detalle del bien</th>
                         <th className="px-3 pb-2 font-semibold">Nueva ubicación</th>
                         <th className="px-3 pb-2 font-semibold">Nuevo responsable</th>
                         <th className="px-3 pb-2 font-semibold">Motivo del traslado</th>
@@ -33,8 +34,9 @@ export default function TablaControl({ movimientos, estados, estadoElegido, onEl
                                 <td className="whitespace-nowrap px-3 py-3">{fechaYHora(m.fecha_movimiento)}</td>
                                 <td className="whitespace-nowrap px-3 py-3">{m.area_origen.nombre}</td>
                                 <td className="whitespace-nowrap px-3 py-3">{m.responsable_anterior?.nombre || '—'}</td>
-                                <td className="max-w-xs truncate px-3 py-3" title={m.bien.descripcion || m.bien.nombre}>
-                                    {m.bien.descripcion || m.bien.nombre}
+                                <td className="whitespace-nowrap px-3 py-3">{m.bien.nombre}</td>
+                                <td className="max-w-xs truncate px-3 py-3" title={m.bien.descripcion || undefined}>
+                                    {m.bien.descripcion || '—'}
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-3">{m.area_destino.nombre}</td>
                                 <td className="whitespace-nowrap px-3 py-3">
@@ -67,7 +69,7 @@ export default function TablaControl({ movimientos, estados, estadoElegido, onEl
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={11}>
+                            <td colSpan={12}>
                                 <EstadoVacio enTarjeta icono="search_off">
                                     {hayFiltrosActivos ? 'Ningún movimiento coincide con los filtros aplicados.' : 'No hay movimientos registrados.'}
                                 </EstadoVacio>

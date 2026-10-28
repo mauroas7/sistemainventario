@@ -85,6 +85,26 @@ test('el dashboard filtra en el servidor', function () {
             ->where('filtros.bien', 'no-existe'));
 });
 
+test('el csv sale con las columnas de la planilla de patrimonio, en su orden', function () {
+    $bien = informarTraslado()->bien;
+
+    $respuesta = $this->actingAs($this->patrimonio)->get(route('patrimonio.dashboard.exportar'));
+    $renglones = array_map(
+        fn (string $renglon) => str_getcsv($renglon, ';'),
+        explode("\n", trim(substr($respuesta->streamedContent(), 3))),
+    );
+
+    expect(array_slice($renglones[0], 0, 9))->toBe([
+        'N° Inventario', 'N° Sistema', 'Ubicación actual', 'Responsable actual',
+        'Descripción del bien', 'Detalle del bien', 'Nueva ubicación', 'Nuevo responsable',
+        'Motivo del traslado',
+    ]);
+    expect(array_slice($renglones[1], 0, 7))->toBe([
+        'NB001', $bien->numero_diaguita, 'Sistemas', 'Juan Pérez',
+        'Notebook Dell Latitude 5420', 'Notebook utilizada por Sistemas.', 'Laboratorio',
+    ]);
+});
+
 test('un coordinador no entra a ninguna pantalla de patrimonio', function () {
     $movimiento = informarTraslado();
 
