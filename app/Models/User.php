@@ -85,17 +85,11 @@ class User extends Authenticatable
         return $query->whereNull('fecha_baja');
     }
 
-    /**
-     * Área a la que pertenece el usuario.
-     */
     public function area(): BelongsTo
     {
         return $this->belongsTo(Area::class);
     }
 
-    /**
-     * Movimientos creados por el usuario.
-     */
     public function movimientosCreados(): HasMany
     {
         return $this->hasMany(
@@ -104,9 +98,6 @@ class User extends Authenticatable
         );
     }
 
-    /**
-     * Movimientos recibidos por el usuario.
-     */
     public function movimientosRecibidos(): HasMany
     {
         return $this->hasMany(

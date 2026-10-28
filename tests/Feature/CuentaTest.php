@@ -1,94 +1,80 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use Tests\TestCase;
 
-class CuentaTest extends TestCase
-{
-    use RefreshDatabase;
+test('profile page is displayed', function () {
+    $user = User::factory()->create();
 
-    public function test_profile_page_is_displayed(): void
-    {
-        $user = User::factory()->create();
+    $response = $this
+        ->actingAs($user)
+        ->get('/mi-cuenta');
 
-        $response = $this
-            ->actingAs($user)
-            ->get('/mi-cuenta');
+    $response->assertOk();
+});
 
-        $response->assertOk();
-    }
+test('profile information can be updated', function () {
+    $user = User::factory()->create();
 
-    public function test_profile_information_can_be_updated(): void
-    {
-        $user = User::factory()->create();
+    $response = $this
+        ->actingAs($user)
+        ->patch('/mi-cuenta', [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+        ]);
 
-        $response = $this
-            ->actingAs($user)
-            ->patch('/mi-cuenta', [
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-            ]);
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/mi-cuenta');
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/mi-cuenta');
+    $user->refresh();
 
-        $user->refresh();
+    $this->assertSame('Test User', $user->name);
+    $this->assertSame('test@example.com', $user->email);
+});
 
-        $this->assertSame('Test User', $user->name);
-        $this->assertSame('test@example.com', $user->email);
-    }
+test('un usuario no puede eliminar su propia cuenta', function () {
+    $user = User::factory()->create();
 
-    public function test_un_usuario_no_puede_eliminar_su_propia_cuenta(): void
-    {
-        $user = User::factory()->create();
+    $this->actingAs($user)
+        ->delete('/mi-cuenta', ['password' => 'password'])
+        ->assertStatus(405);
 
-        $this->actingAs($user)
-            ->delete('/mi-cuenta', ['password' => 'password'])
-            ->assertStatus(405);
+    $this->assertNotNull($user->fresh());
+});
 
-        $this->assertNotNull($user->fresh());
-    }
+test('password can be updated', function () {
+    $user = User::factory()->create();
 
-    public function test_password_can_be_updated(): void
-    {
-        $user = User::factory()->create();
+    $response = $this
+        ->actingAs($user)
+        ->from('/mi-cuenta')
+        ->put('/mi-cuenta/clave', [
+            'current_password' => 'password',
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ]);
 
-        $response = $this
-            ->actingAs($user)
-            ->from('/mi-cuenta')
-            ->put('/mi-cuenta/clave', [
-                'current_password' => 'password',
-                'password' => 'new-password',
-                'password_confirmation' => 'new-password',
-            ]);
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/mi-cuenta');
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/mi-cuenta');
+    $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
+});
 
-        $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
-    }
+test('correct password must be provided to update password', function () {
+    $user = User::factory()->create();
 
-    public function test_correct_password_must_be_provided_to_update_password(): void
-    {
-        $user = User::factory()->create();
+    $response = $this
+        ->actingAs($user)
+        ->from('/mi-cuenta')
+        ->put('/mi-cuenta/clave', [
+            'current_password' => 'wrong-password',
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ]);
 
-        $response = $this
-            ->actingAs($user)
-            ->from('/mi-cuenta')
-            ->put('/mi-cuenta/clave', [
-                'current_password' => 'wrong-password',
-                'password' => 'new-password',
-                'password_confirmation' => 'new-password',
-            ]);
-
-        $response
-            ->assertSessionHasErrors('current_password')
-            ->assertRedirect('/mi-cuenta');
-    }
-}
+    $response
+        ->assertSessionHasErrors('current_password')
+        ->assertRedirect('/mi-cuenta');
+});

@@ -6,8 +6,6 @@ import { tonoEstadoMovimiento } from '@/utils/estados';
 import { fechaYHora } from '@/utils/fechas';
 import { puedeAcusar, puedeAnular, relacion } from '@/utils/movimientos';
 
-const avisoDeError = (mensajePorDefecto) => (errores) => alert(Object.values(errores)[0] || mensajePorDefecto);
-
 export default function Show({ movimiento: m, responsables = [] }) {
     const usuario = usePage().props.auth.usuario;
     const esAdmin = usuario.rol === 'admin';
@@ -15,6 +13,9 @@ export default function Show({ movimiento: m, responsables = [] }) {
 
     const [nuevoResponsable, setNuevoResponsable] = useState('');
     const [asignando, setAsignando] = useState(false);
+    const [error, setError] = useState('');
+
+    const avisoDeError = (mensajePorDefecto) => (errores) => setError(Object.values(errores)[0] || mensajePorDefecto);
 
     const acusa = puedeAcusar(m, usuario);
     const anula = puedeAnular(m, usuario);
@@ -24,6 +25,7 @@ export default function Show({ movimiento: m, responsables = [] }) {
         if (! nuevoResponsable) return;
 
         setAsignando(true);
+        setError('');
         router.patch(route('patrimonio.movimientos.responsable', { movimiento: m.id }), { responsable_nuevo_id: nuevoResponsable }, {
             preserveScroll: true,
             onError: avisoDeError('No se pudo asignar el responsable'),
@@ -32,6 +34,7 @@ export default function Show({ movimiento: m, responsables = [] }) {
     };
 
     const acusar = () => {
+        setError('');
         router.post(route('recepcion.confirmar', { movimiento: m.id }), {}, {
             preserveScroll: true,
             onError: avisoDeError('No se pudo completar la acción'),
@@ -39,6 +42,7 @@ export default function Show({ movimiento: m, responsables = [] }) {
     };
 
     const anular = () => {
+        setError('');
         confirmar({
             titulo: `Anular el ticket TK-${m.id}`,
             detalle: 'El bien vuelve a su ubicación y responsable anteriores. El ticket queda en el historial como anulado.',
@@ -129,6 +133,8 @@ export default function Show({ movimiento: m, responsables = [] }) {
                     )}
 
                     <div className="mt-6 border-t border-brandText-soft/70 pt-4 dark:border-gray-800">
+                        {error && <Alerta tipo="error" className="mb-4">{error}</Alerta>}
+
                         {acusa || anula ? (
                             <div className="flex flex-wrap gap-3">
                                 {acusa && (

@@ -34,7 +34,7 @@ sistemas del hospital. Trae el preset de Tailwind, los estilos base, las fuentes
 y los componentes, que se importan de `hu-kit/componentes`:
 
 - formularios: `Boton`, `Campo` y `claseControl`, `Input`, `PasswordInput`,
-  `Select`, `Textarea`, `Checkbox`, `SelectorFecha`;
+  `Select`, `Textarea`, `Checkbox`, `SelectorFecha`, `SelectorDeArchivo`;
 - contenido: `Tarjeta`, `Estado`, `EstadoVacio`, `Alerta`, `Rotulo`, `Metrica`,
   `Dato`, `Paginador` y las clases de tabla (`encabezadoTabla`, `cuerpoTabla`,
   `renglonTabla`);
@@ -133,6 +133,10 @@ confirmar({
 <ModalConfirmar {...modal} />
 ```
 
+- **El error de una acción** que no es un formulario (acusar, anular, cambiar un
+  estado) → una `Alerta tipo="error"` en la tarjeta de la acción, nunca
+  `alert()`.
+- **Un archivo** → `SelectorDeArchivo`, que en el celular ofrece sacar la foto.
 - **Lo que el usuario puede hacer** con un movimiento sale de
   `utils/movimientos.js` (`puedeAcusar`, `puedeAnular`): no se ofrece un botón
   que el servidor después rechaza. El servidor lo verifica igual.

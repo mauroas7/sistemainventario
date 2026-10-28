@@ -54,9 +54,6 @@ class Bien extends Model
         );
     }
 
-    /**
-     * Estado actual del bien.
-     */
     public function estado(): BelongsTo
     {
         return $this->belongsTo(
@@ -65,9 +62,6 @@ class Bien extends Model
         );
     }
 
-    /**
-     * Historial de movimientos del bien.
-     */
     public function movimientos(): HasMany
     {
         return $this->hasMany(Movimiento::class);

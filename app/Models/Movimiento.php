@@ -40,11 +40,7 @@ class Movimiento extends Model
         ];
     }
 
-    /**
-     * La bitácora de estados se arma acá, con los eventos del modelo, y no dentro del
-     * servicio: así ningún camino puede saltearla. Vale igual si el estado lo cambia el
-     * panel de Patrimonio, la API o un comando de consola.
-     */
+    /** La bitácora de estados: la escriben los eventos del modelo, así ningún camino la saltea. */
     protected static function booted(): void
     {
         static::created(function (Movimiento $movimiento) {
@@ -75,17 +71,11 @@ class Movimiento extends Model
         ]);
     }
 
-    /**
-     * Bien involucrado en el movimiento.
-     */
     public function bien(): BelongsTo
     {
         return $this->belongsTo(Bien::class);
     }
 
-    /**
-     * Usuario que creó el movimiento.
-     */
     public function creador(): BelongsTo
     {
         return $this->belongsTo(
@@ -94,9 +84,7 @@ class Movimiento extends Model
         );
     }
 
-    /**
-     * Usuario que recibió el bien.
-     */
+    /** Quien dio el acuse de recibo, que es opcional. */
     public function receptor(): BelongsTo
     {
         return $this->belongsTo(
@@ -138,9 +126,6 @@ class Movimiento extends Model
         );
     }
 
-    /**
-     * Área desde donde sale el bien.
-     */
     public function areaOrigen(): BelongsTo
     {
         return $this->belongsTo(
@@ -149,9 +134,6 @@ class Movimiento extends Model
         );
     }
 
-    /**
-     * Área hacia donde se dirige el bien.
-     */
     public function areaDestino(): BelongsTo
     {
         return $this->belongsTo(
@@ -160,9 +142,6 @@ class Movimiento extends Model
         );
     }
 
-    /**
-     * Tipo de movimiento.
-     */
     public function tipoMovimiento(): BelongsTo
     {
         return $this->belongsTo(
@@ -171,9 +150,6 @@ class Movimiento extends Model
         );
     }
 
-    /**
-     * Motivo del movimiento.
-     */
     public function motivo(): BelongsTo
     {
         return $this->belongsTo(
@@ -182,9 +158,6 @@ class Movimiento extends Model
         );
     }
 
-    /**
-     * Estado actual del movimiento.
-     */
     public function estadoMovimiento(): BelongsTo
     {
         return $this->belongsTo(

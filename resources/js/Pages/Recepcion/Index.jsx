@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import {
+    Alerta,
     Boton,
     cuerpoTabla,
     encabezadoTabla,
@@ -22,16 +24,18 @@ const PESTANAS = [
     { clave: 'todos', etiqueta: 'Todos' },
 ];
 
-const avisoDeError = (mensajePorDefecto) => (errores) => alert(Object.values(errores)[0] || mensajePorDefecto);
-
 export default function Bandeja({ movimientos, pestana = 'informados', resumen }) {
     const usuario = usePage().props.auth.usuario;
     const { confirmar, props: modal } = useConfirmacion();
+    const [error, setError] = useState('');
+
+    const avisoDeError = (mensajePorDefecto) => (errores) => setError(Object.values(errores)[0] || mensajePorDefecto);
 
     // El filtrado y el conteo los hace la base: cada pestaña es una visita.
     const irA = (clave) => router.get(route('recepcion.bandeja'), { estado: clave }, { preserveScroll: true });
 
     const acusar = (m) => {
+        setError('');
         router.post(route('recepcion.confirmar', { movimiento: m.id }), {}, {
             preserveScroll: true,
             onError: avisoDeError('No se pudo confirmar la recepción'),
@@ -39,6 +43,7 @@ export default function Bandeja({ movimientos, pestana = 'informados', resumen }
     };
 
     const anular = (m) => {
+        setError('');
         confirmar({
             titulo: `Anular el ticket TK-${m.id}`,
             detalle: 'El bien vuelve a su ubicación y responsable anteriores. El ticket queda en el historial como anulado.',
@@ -82,6 +87,8 @@ export default function Bandeja({ movimientos, pestana = 'informados', resumen }
                     </Boton>
                 ))}
             >
+                {error && <Alerta tipo="error" className="mb-4">{error}</Alerta>}
+
                 <div className="-mx-5 overflow-x-auto">
                     <table className="w-full min-w-[60rem] text-sm">
                         <thead>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
-import { Metrica, Paginador, Tarjeta } from 'hu-kit/componentes';
+import { Alerta, Metrica, ModalConfirmar, Paginador, Tarjeta, useConfirmacion } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import FiltrosDashboard from '@/Components/Patrimonio/FiltrosDashboard';
 import TablaControl from '@/Components/Patrimonio/TablaControl';
@@ -26,6 +26,8 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
     // `filtros` es lo que el usuario está tipeando; `aplicados` es lo que ya se consultó.
     const [filtros, setFiltros] = useState(aplicados);
     const [elegidos, setElegidos] = useState({});
+    const [errorEstado, setErrorEstado] = useState('');
+    const { confirmar, props: modal } = useConfirmacion();
     const errorFiltros = Object.keys(FILTROS_VACIOS).map((clave) => errors?.[clave]).filter(Boolean).join(' ');
     const hayFiltrosActivos = Object.values(aplicados).some((valor) => valor !== '');
 
@@ -39,10 +41,25 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
     // El cambio de estado puede mover los totales y la página del movimiento: vuelve
     // la vista entera en vez de parchear la fila.
     const guardarEstado = (m) => {
-        router.patch(route('patrimonio.movimientos.estado', { movimiento: m.id }), { estado_movimiento_id: estadoElegido(m) }, {
-            preserveScroll: true,
-            onSuccess: () => setElegidos({}),
-            onError: (errores) => alert(Object.values(errores)[0] || 'No se pudo actualizar el estado'),
+        setErrorEstado('');
+        const estadoId = estadoElegido(m);
+        const accion = (r) =>
+            r.patch(route('patrimonio.movimientos.estado', { movimiento: m.id }), { estado_movimiento_id: estadoId }, {
+                preserveScroll: true,
+                onSuccess: () => setElegidos({}),
+                onError: (errores) => setErrorEstado(Object.values(errores)[0] || 'No se pudo actualizar el estado'),
+            });
+
+        if (estados.find((estado) => String(estado.id) === String(estadoId))?.nombre !== 'Anulado') {
+            accion(router);
+            return;
+        }
+
+        confirmar({
+            titulo: `Anular el ticket TK-${m.id}`,
+            detalle: 'El bien vuelve a su ubicación y responsable anteriores. El ticket queda en el historial como anulado.',
+            textoAceptar: 'Anular',
+            accion,
         });
     };
 
@@ -79,6 +96,8 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
             </div>
 
             <Tarjeta titulo="Movimientos" icono="swap_horiz" contador={movimientos.total}>
+                {errorEstado && <Alerta tipo="error" className="mb-4">{errorEstado}</Alerta>}
+
                 <TablaControl
                     movimientos={movimientos.data}
                     estados={estados}
@@ -92,6 +111,8 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
                     <Paginador paginador={movimientos} />
                 </div>
             </Tarjeta>
+
+            <ModalConfirmar {...modal} />
         </AppLayout>
     );
 }

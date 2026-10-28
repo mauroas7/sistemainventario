@@ -13,9 +13,6 @@ class Area extends Model
         'nombre',
     ];
 
-    /**
-     * Usuarios pertenecientes al área.
-     */
     public function usuarios(): HasMany
     {
         return $this->hasMany(User::class);
@@ -43,9 +40,6 @@ class Area extends Model
         );
     }
 
-    /**
-     * Movimientos cuyo origen es esta área.
-     */
     public function movimientosOrigen(): HasMany
     {
         return $this->hasMany(
@@ -54,9 +48,6 @@ class Area extends Model
         );
     }
 
-    /**
-     * Movimientos cuyo destino es esta área.
-     */
     public function movimientosDestino(): HasMany
     {
         return $this->hasMany(

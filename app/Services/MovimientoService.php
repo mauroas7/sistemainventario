@@ -112,9 +112,9 @@ class MovimientoService
     }
 
     /**
-     * Movimientos visibles para un usuario, con filtros opcionales del panel de control.
-     * Si se pasa $porPagina, devuelve un paginador; si no, la colección completa
-     * (usado por la bandeja de recepción, que siempre trabaja con el set completo).
+     * Movimientos visibles para un usuario, con los filtros de `consultaBase()`. Con
+     * $porPagina devuelve un paginador; sin él, la colección completa, que es lo que
+     * exporta el CSV.
      */
     public function obtenerParaBandeja(?User $usuario = null, array $filtros = [], ?int $porPagina = null)
     {
@@ -131,9 +131,8 @@ class MovimientoService
     }
 
     /**
-     * Totales por estado para los mismos filtros del listado, calculados con COUNT
-     * agregado en base de datos (no sobre las filas de la página actual), para que
-     * las tarjetas de resumen del dashboard sean correctas incluso paginando.
+     * Totales por estado para los mismos filtros del listado, contados en la base sobre
+     * todo lo filtrado y no sobre la página actual.
      */
     public function obtenerResumen(?User $usuario, array $filtros): array
     {
@@ -295,10 +294,8 @@ class MovimientoService
             $responsableId = $primero->responsable_anterior_id;
         }
 
-        // El responsable del último movimiento manda, incluso si es null: eso significa
-        // "el bien está en el área destino pero todavía no tiene una persona a cargo",
-        // y es información valiosa (Patrimonio tiene que definirla). Arrastrar al
-        // responsable anterior sería peor: le atribuiría un bien que ya no tiene.
+        // Un responsable null también se copia: el bien está en el área destino y nadie
+        // lo tiene a cargo hasta que Patrimonio lo defina.
         Bien::query()->whereKey($bienId)->update([
             'area_id' => $areaId,
             'ubicacion_actual_id' => $areaId,

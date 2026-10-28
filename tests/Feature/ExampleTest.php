@@ -1,18 +1,10 @@
 <?php
 
-namespace Tests\Feature;
+/**
+ * La raíz no renderiza nada: deriva al login si no hay sesión y al inicio si la hay.
+ */
+test('la raiz redirige al login cuando no hay sesion', function () {
+    $response = $this->get('/');
 
-use Tests\TestCase;
-
-class ExampleTest extends TestCase
-{
-    /**
-     * La raíz no renderiza nada: deriva al login si no hay sesión y al inicio si la hay.
-     */
-    public function test_la_raiz_redirige_al_login_cuando_no_hay_sesion(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertRedirect(route('login'));
-    }
-}
+    $response->assertRedirect(route('login'));
+});

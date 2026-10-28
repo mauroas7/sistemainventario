@@ -13,9 +13,6 @@ class EstadoBien extends Model
         'nombre',
     ];
 
-    /**
-     * Bienes que tienen este estado.
-     */
     public function bienes(): HasMany
     {
         return $this->hasMany(Bien::class, 'estado_id');

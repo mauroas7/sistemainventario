@@ -16,6 +16,7 @@ export default function Index({ areas = [], roles = [], usuarios = [] }) {
     const [errors, setErrors] = useState({});
     const [errorGeneral, setErrorGeneral] = useState('');
     const [guardando, setGuardando] = useState(false);
+    const [errorEstado, setErrorEstado] = useState('');
 
     // Una cuenta sin área no ve ningún bien: hay que poder detectarlas de un vistazo.
     const sinArea = usuarios.filter((u) => u.rol !== 'admin' && ! u.area_id);
@@ -75,10 +76,11 @@ export default function Index({ areas = [], roles = [], usuarios = [] }) {
     };
 
     const cambiarEstado = (usuario) => {
+        setErrorEstado('');
         const accion = (r) =>
             r.put(route('patrimonio.usuarios.update', { usuario: usuario.id }), { activo: ! usuario.activo }, {
                 preserveScroll: true,
-                onError: (errores) => alert(errores.general || Object.values(errores)[0] || 'No se pudo cambiar el estado del usuario.'),
+                onError: (errores) => setErrorEstado(errores.general || Object.values(errores)[0] || 'No se pudo cambiar el estado del usuario.'),
             });
 
         if (! usuario.activo) {
@@ -140,6 +142,8 @@ export default function Index({ areas = [], roles = [], usuarios = [] }) {
                             onCancelar={cerrar}
                         />
                     )}
+
+                    {errorEstado && <Alerta tipo="error" className="mb-4">{errorEstado}</Alerta>}
 
                     <TablaUsuarios usuarios={usuarios} usuarioActualId={usuarioActualId} onEditar={abrirEdicion} onCambiarEstado={cambiarEstado} />
                 </Tarjeta>

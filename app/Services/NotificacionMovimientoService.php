@@ -26,12 +26,13 @@ class NotificacionMovimientoService
         $this->enviar(
             $this->destinatariosPatrimonio(),
             new MovimientoInformadoPatrimonio($movimiento),
-            "aviso a Patrimonio del movimiento {$movimiento->id}"
+            'aviso a Patrimonio',
+            $movimiento->id
         );
 
         // Acuse a quien informó: su constancia de que avisó.
         if ($correo = $movimiento->creador?->email) {
-            $this->enviar([$correo], new MovimientoAcuseCreador($movimiento), "acuse al creador del movimiento {$movimiento->id}");
+            $this->enviar([$correo], new MovimientoAcuseCreador($movimiento), 'acuse al creador', $movimiento->id);
         }
 
         // Responsable saliente, salvo que sea la misma persona que informó.
@@ -41,7 +42,8 @@ class NotificacionMovimientoService
             $this->enviar(
                 [$saliente->email],
                 new MovimientoAvisoResponsableSaliente($movimiento),
-                "aviso al responsable saliente del movimiento {$movimiento->id}"
+                'aviso al responsable saliente',
+                $movimiento->id
             );
         }
     }
@@ -69,12 +71,12 @@ class NotificacionMovimientoService
             ->all();
     }
 
-    private function enviar(array $destinatarios, $mailable, string $contexto): void
+    private function enviar(array $destinatarios, $mailable, string $aviso, int $movimientoId): void
     {
         $destinatarios = array_filter($destinatarios);
 
         if (empty($destinatarios)) {
-            Log::warning("NotificacionMovimientoService@enviar - sin destinatarios: {$contexto}");
+            Log::warning('NotificacionMovimientoService@enviar - sin destinatarios', ['aviso' => $aviso, 'movimiento_id' => $movimientoId]);
 
             return;
         }
@@ -82,7 +84,11 @@ class NotificacionMovimientoService
         try {
             Mail::to($destinatarios)->send($mailable);
         } catch (\Throwable $e) {
-            Log::error("NotificacionMovimientoService@enviar - no salió el {$contexto}", ['error' => $e->getMessage()]);
+            Log::error('NotificacionMovimientoService@enviar - no salió el mail', [
+                'aviso' => $aviso,
+                'movimiento_id' => $movimientoId,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 }

@@ -70,8 +70,7 @@ class TicketController extends Controller
                 'estado_id',
             ]);
 
-        // Patrimonio pidió que el nuevo responsable se elija de una lista, no que se
-        // escriba a mano. Las cuentas dadas de baja no pueden recibir bienes nuevos.
+        // Las cuentas dadas de baja no pueden recibir bienes nuevos.
         $responsables = User::query()
             ->activos()
             ->with('area:id,nombre')

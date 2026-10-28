@@ -25,6 +25,6 @@
         "vite": "^7.3.7"
     },
     "dependencies": {
-        "hu-kit": "github:mauroas7/hu-kit#v1.8.1"
+        "hu-kit": "github:mauroas7/hu-kit#v1.10.0"
     }
 }
