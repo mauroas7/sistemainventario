@@ -66,6 +66,13 @@ y unos bienes. En producción se niega a correr.
 php artisan db:seed --class="Database\Seeders\Demo\DemoSeeder"
 ```
 
+Para ver además qué le toca a cada rol, `MovimientosSeeder` siembra la demo y le
+suma cinco movimientos ya informados. Sobre una base sin movimientos:
+
+```bash
+php artisan db:seed --class="Database\Seeders\Demo\MovimientosSeeder"
+```
+
 ### Producción
 
 La base de producción nace vacía: no se copia de ninguna otra.
@@ -127,6 +134,13 @@ Existen sólo con la demo sembrada. Todos usan la contraseña **`password`**.
 | `ana@hospital.test`        | Usuario       | Enfermería     |
 | `carlos@hospital.test`     | Usuario       | Laboratorio    |
 | `maria@hospital.test`      | Usuario       | Administración |
+| `laura@hospital.test`      | Coordinador   | Enfermería     |
+| `pedro@hospital.test`      | Usuario       | Enfermería     |
+
+El coordinador ve todo lo que sale de su área o llega a ella; el usuario, sólo lo
+que informó y lo que lo nombra responsable. Con los movimientos de la demo,
+Enfermería lo muestra: Laura ve los cuatro movimientos del área, Ana dos y Pedro
+uno.
 
 ---
 

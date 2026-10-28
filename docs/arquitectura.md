@@ -46,13 +46,14 @@ pregunta con `User::tieneRol()`, que acepta el enum, el slug o la etiqueta.
 | Rol | Qué ve | Qué hace |
 |---|---|---|
 | Administrador (Gestión de Bienes) | Todo el hospital, sin área | Informa, recibe y anula como cualquiera; además el control patrimonial: tablero, estados, responsables, localizador, directorio y usuarios |
-| Coordinador / Jefe de área | Lo que sale de su área o llega a ella | Informa traslados de sus bienes, acusa recibo y anula lo que informó |
-| Usuario | Igual que el coordinador | Igual que el coordinador |
+| Coordinador / Jefe de área | Todo lo que sale de su área o llega a ella | Informa traslados de los bienes del área, acusa recibo de lo que llega al área y anula lo que informó |
+| Usuario | Sólo lo suyo: lo que informó y lo que lo nombra responsable, saliente o nuevo | Informa traslados de los bienes del área, acusa recibo de lo que queda a su cargo y anula lo que informó |
 
-**Coordinador y Usuario tienen hoy los mismos permisos**: sólo cambia la
-etiqueta. **El área es lo que define qué ve cada uno** (`MovimientoService::puedeVer()`
-y la consulta de la bandeja), por eso toda cuenta que no es administrador
-necesita área.
+**Qué ve cada uno lo decide `MovimientoService::puedeVer()`**, y la consulta de
+la bandeja aplica la misma regla. Las dos cuentas informan traslados de cualquier
+bien de su área, por eso toda cuenta que no es administrador necesita área. Un
+movimiento sin responsable, en cambio, sólo lo ve y lo acusa el coordinador del
+área que recibe, hasta que Gestión de Bienes define el responsable.
 
 El menú sale de `resources/js/data/navegacion.js`; quién entra a cada ruta, del
 `rol:` en `routes/web.php`. Si se toca uno, hay que revisar el otro: nada los ata.
@@ -119,9 +120,12 @@ los entornos:
 - `SistemaSeeder`: los estados de movimiento, que el código busca por nombre;
 - `ListasSeeder`: estados de bien, tipos de movimiento y motivos.
 
-**La demo** (`Demo/DemoSeeder`) inventa las áreas, seis usuarios con clave
-`password` y ocho bienes. Hereda de `SeederDePrueba`, que se niega a correr en
-producción. Áreas y bienes todavía no tienen alta desde la aplicación.
+**La demo** (`Demo/DemoSeeder`) inventa las áreas, ocho usuarios con clave
+`password` y ocho bienes, sin movimientos. `Demo/MovimientosSeeder` la siembra y
+le suma cinco movimientos en distintos estados, para ver qué le toca a cada rol;
+los tests de qué ve cada rol usan ese mismo escenario. Las dos heredan de `SeederDePrueba`, que se
+niega a correr en producción. Áreas y bienes todavía no tienen alta desde la
+aplicación.
 
 ### Migraciones: se edita el `create_*`, no se agrega otra (hasta producción)
 

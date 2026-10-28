@@ -28,27 +28,47 @@ class MovimientoService
         'estadoMovimiento',
     ];
 
-    /** Patrimonio ve todo; el resto, lo que sale de su área o llega a ella. */
+    /**
+     * Patrimonio ve todo; el coordinador, lo que sale de su área o llega a ella; el
+     * usuario, lo que informó y lo que lo nombra responsable, saliente o nuevo.
+     */
     public function puedeVer(User $usuario, Movimiento $movimiento): bool
     {
-        return $usuario->tieneRol(Rol::Admin)
-            || (int) $usuario->area_id === (int) $movimiento->area_origen_id
-            || (int) $usuario->area_id === (int) $movimiento->area_destino_id;
+        if ($usuario->tieneRol(Rol::Admin)) {
+            return true;
+        }
+
+        if ($usuario->tieneRol(Rol::Coordinador)) {
+            return in_array((int) $usuario->area_id, [(int) $movimiento->area_origen_id, (int) $movimiento->area_destino_id], true);
+        }
+
+        return in_array((int) $usuario->id, array_map('intval', [
+            $movimiento->creado_por,
+            $movimiento->responsable_anterior_id,
+            $movimiento->responsable_nuevo_id,
+        ]), true);
     }
 
     /**
-     * Movimientos visibles para un usuario. La comparten el listado, el resumen y la
-     * exportación, así cuentan lo mismo. Filtros: area_id (origen o destino),
-     * estado_movimiento_id, tipo_movimiento_id, motivo_id, desde, hasta y bien.
+     * Movimientos visibles para un usuario (`puedeVer()`); sin usuario, los de todo el
+     * hospital. La comparten el listado, el resumen y la exportación, así cuentan lo
+     * mismo. Filtros: area_id (origen o destino), estado_movimiento_id,
+     * tipo_movimiento_id, motivo_id, desde, hasta y bien.
      */
-    private function consultaBase(?int $areaId, bool $esAdmin, array $filtros)
+    private function consultaBase(?User $usuario, array $filtros)
     {
         $query = Movimiento::query();
 
-        if (! $esAdmin && $areaId) {
-            $query->where(function ($q) use ($areaId) {
-                $q->where('area_origen_id', $areaId)
-                    ->orWhere('area_destino_id', $areaId);
+        if ($usuario && ! $usuario->tieneRol(Rol::Admin)) {
+            $query->where(function ($q) use ($usuario) {
+                if ($usuario->tieneRol(Rol::Coordinador)) {
+                    $q->where('area_origen_id', $usuario->area_id)
+                        ->orWhere('area_destino_id', $usuario->area_id);
+                } else {
+                    $q->where('creado_por', $usuario->id)
+                        ->orWhere('responsable_anterior_id', $usuario->id)
+                        ->orWhere('responsable_nuevo_id', $usuario->id);
+                }
             });
         }
 
@@ -96,9 +116,9 @@ class MovimientoService
      * Si se pasa $porPagina, devuelve un paginador; si no, la colección completa
      * (usado por la bandeja de recepción, que siempre trabaja con el set completo).
      */
-    public function obtenerParaBandeja(?int $areaId = null, bool $esAdmin = false, array $filtros = [], ?int $porPagina = null)
+    public function obtenerParaBandeja(?User $usuario = null, array $filtros = [], ?int $porPagina = null)
     {
-        $query = $this->consultaBase($areaId, $esAdmin, $filtros)
+        $query = $this->consultaBase($usuario, $filtros)
             ->with(self::RELACIONES)
             ->orderByDesc('fecha_movimiento')
             ->orderByDesc('id');
@@ -115,9 +135,9 @@ class MovimientoService
      * agregado en base de datos (no sobre las filas de la página actual), para que
      * las tarjetas de resumen del dashboard sean correctas incluso paginando.
      */
-    public function obtenerResumen(?int $areaId, bool $esAdmin, array $filtros): array
+    public function obtenerResumen(?User $usuario, array $filtros): array
     {
-        $base = fn () => $this->consultaBase($areaId, $esAdmin, $filtros);
+        $base = fn () => $this->consultaBase($usuario, $filtros);
 
         $porEstado = fn (array $nombres) => $base()
             ->whereHas('estadoMovimiento', fn ($q) => $q->whereIn('nombre', $nombres))

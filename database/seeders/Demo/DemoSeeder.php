@@ -28,6 +28,8 @@ class DemoSeeder extends SeederDePrueba
             ['Ana Gómez', 'ana@hospital.test', Rol::Usuario, 'Enfermería'],
             ['Carlos Ruiz', 'carlos@hospital.test', Rol::Usuario, 'Laboratorio'],
             ['María López', 'maria@hospital.test', Rol::Usuario, 'Administración'],
+            ['Laura Díaz', 'laura@hospital.test', Rol::Coordinador, 'Enfermería'],
+            ['Pedro Sosa', 'pedro@hospital.test', Rol::Usuario, 'Enfermería'],
         ];
 
         foreach ($usuarios as [$nombre, $email, $rol, $area]) {

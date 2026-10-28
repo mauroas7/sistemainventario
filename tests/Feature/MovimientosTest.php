@@ -11,6 +11,7 @@ use App\Models\TipoMovimiento;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\Demo\DemoSeeder;
+use Database\Seeders\Demo\MovimientosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -196,6 +197,47 @@ class MovimientosTest extends TestCase
             ->assertInertia(fn ($page) => $page
                 ->component('Recepcion/Index')
                 ->has('movimientos.data', 1));
+    }
+
+    public function test_cada_rol_ve_en_la_bandeja_lo_que_le_toca(): void
+    {
+        $this->seed(MovimientosSeeder::class);
+
+        $esperados = [
+            'patrimonio' => 5, // todo el hospital
+            'laura' => 4,      // coordinadora: todo lo que sale de Enfermería o llega
+            'juan' => 2,       // coordinador: la tablet que llegó y la notebook que salió
+            'ana' => 2,        // la tablet que informó y el electrocardiógrafo a su cargo
+            'pedro' => 1,      // el monitor a su cargo
+            'carlos' => 2,     // el electrocardiógrafo que informó y la impresora anulada
+            'maria' => 2,      // los dos que informó
+        ];
+
+        foreach ($esperados as $nombre => $cantidad) {
+            $this->actingAs($this->usuario("{$nombre}@hospital.test"))
+                ->get('/recepcion/bandeja?estado=todos')
+                ->assertInertia(fn ($page) => $page
+                    ->where('movimientos.total', $cantidad)
+                    ->where('resumen.total', $cantidad));
+        }
+    }
+
+    public function test_un_usuario_no_ve_ni_acusa_lo_de_su_area_que_no_es_suyo(): void
+    {
+        $this->seed(MovimientosSeeder::class);
+
+        // Carlos mandó el electrocardiógrafo a Enfermería, a cargo de Ana.
+        $movimiento = Movimiento::whereHas('bien', fn ($q) => $q->where('codigo', 'ECG001'))->firstOrFail();
+
+        $pedro = $this->usuario('pedro@hospital.test'); // Usuario de Enfermería
+        $this->actingAs($pedro)->get("/recepcion/movimientos/{$movimiento->id}")->assertForbidden();
+        $this->actingAs($pedro)->post("/recepcion/movimientos/{$movimiento->id}/confirmar")->assertForbidden();
+
+        $this->actingAs($this->usuario('ana@hospital.test'))->get("/recepcion/movimientos/{$movimiento->id}")->assertOk();
+
+        $laura = $this->usuario('laura@hospital.test'); // coordinadora de Enfermería
+        $this->actingAs($laura)->post("/recepcion/movimientos/{$movimiento->id}/confirmar")->assertSessionHasNoErrors();
+        $this->assertSame($laura->id, $movimiento->fresh()->recibido_por);
     }
 
     public function test_cada_cambio_de_estado_queda_registrado_con_su_autor(): void

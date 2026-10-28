@@ -53,7 +53,9 @@ export default function Bandeja({ movimientos, pestana = 'informados', resumen }
     return (
         <AppLayout
             titulo="Flujo de recepción"
-            subtitulo="Movimientos informados que involucran a tu sector. Lo que queda abierto es el trámite de Gestión de Bienes: la carga en Diaguita y la firma de la ficha."
+            subtitulo={`${usuario.rol === 'usuario'
+                ? 'Los movimientos que informaste y los de bienes que estuvieron o quedan a tu cargo.'
+                : 'Movimientos informados que involucran a tu sector.'} Lo que queda abierto es el trámite de Gestión de Bienes: la carga en Diaguita y la firma de la ficha.`}
         >
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Metrica valor={resumen.informados} etiqueta="A registrar en Diaguita" icono="schedule" tono="aviso" />

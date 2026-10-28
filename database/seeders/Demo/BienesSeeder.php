@@ -17,7 +17,8 @@ class BienesSeeder extends SeederDePrueba
     {
         $areas = Area::pluck('id', 'nombre');
         $estados = EstadoBien::pluck('id', 'nombre');
-        $responsablePorArea = User::whereNotNull('area_id')->get()->keyBy('area_id');
+        // El primer usuario de cada área: `keyBy` se queda con el último de la lista.
+        $responsablePorArea = User::whereNotNull('area_id')->orderByDesc('id')->get()->keyBy('area_id');
 
         $bienes = [
             ['NB001', 'Notebook Dell Latitude 5420', 'Notebook utilizada por Sistemas.', 'Sistemas', 'Disponible'],

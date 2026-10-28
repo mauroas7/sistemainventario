@@ -4,11 +4,13 @@
  */
 const mismo = (a, b) => a != null && b != null && String(a) === String(b);
 
-/** El acuse lo da quien quedó a cargo o su área, mientras no esté anulado ni acusado. */
+/** El acuse lo da quien quedó a cargo o el coordinador que recibe, mientras no esté anulado ni acusado. */
 export const puedeAcusar = (m, usuario) =>
     m.estado_movimiento?.nombre !== 'Anulado'
     && ! m.recibido_por
-    && (usuario.rol === 'admin' || mismo(m.responsable_nuevo?.id, usuario.id) || mismo(m.area_destino?.id, usuario.area?.id));
+    && (usuario.rol === 'admin'
+        || mismo(m.responsable_nuevo?.id, usuario.id)
+        || (usuario.rol === 'coordinador' && mismo(m.area_destino?.id, usuario.area?.id)));
 
 /** Anula quien lo informó o Patrimonio, sólo mientras no esté volcado a Diaguita. */
 export const puedeAnular = (m, usuario) =>

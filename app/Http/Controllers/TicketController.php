@@ -125,7 +125,6 @@ class TicketController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $esAdmin = $user->tieneRol(Rol::Admin);
 
         $pestana = (string) $request->query('estado');
         if (! array_key_exists($pestana, self::ESTADOS_POR_PESTANA)) {
@@ -138,13 +137,13 @@ class TicketController extends Controller
         }
 
         // Paginado: para Patrimonio son todos los movimientos del hospital.
-        $paginador = $this->movimientoService->obtenerParaBandeja($user->area_id, $esAdmin, $filtros, 25);
+        $paginador = $this->movimientoService->obtenerParaBandeja($user, $filtros, 25);
 
         return Inertia::render('Recepcion/Index', [
             'movimientos' => $paginador->through(fn (Movimiento $m) => (new MovimientoResource($m))->resolve($request)),
             'pestana' => $pestana,
             // Sobre todo lo visible para el usuario, no sobre la página: no cambian al paginar.
-            'resumen' => $this->movimientoService->obtenerResumen($user->area_id, $esAdmin, []),
+            'resumen' => $this->movimientoService->obtenerResumen($user, []),
         ]);
     }
 
@@ -183,8 +182,8 @@ class TicketController extends Controller
     }
 
     /**
-     * Acuse de recibo del nuevo responsable. Es opcional: el bien ya cambió de manos
-     * cuando se informó el movimiento, esto sólo deja constancia de que está al tanto.
+     * Acuse de recibo del nuevo responsable o del coordinador del área que recibe. Es
+     * opcional: el bien ya cambió de manos al informarse; sólo deja constancia.
      */
     public function confirmar(Request $request, Movimiento $movimiento): RedirectResponse
     {
@@ -195,9 +194,10 @@ class TicketController extends Controller
         }
 
         $esNuevoResponsable = (int) $user->id === (int) $movimiento->responsable_nuevo_id;
-        $esAreaDestino = (int) $user->area_id === (int) $movimiento->area_destino_id;
+        $esCoordinadorDestino = $user->tieneRol(Rol::Coordinador)
+            && (int) $user->area_id === (int) $movimiento->area_destino_id;
 
-        abort_unless($user->tieneRol(Rol::Admin) || $esNuevoResponsable || $esAreaDestino, 403);
+        abort_unless($user->tieneRol(Rol::Admin) || $esNuevoResponsable || $esCoordinadorDestino, 403);
 
         if ($movimiento->recibido_por) {
             return back()->with('exito', 'El ticket ya tenía acuse de recibo.');
