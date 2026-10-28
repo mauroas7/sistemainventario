@@ -131,7 +131,9 @@ test('nadie se da de baja a sí mismo ni deja el sistema sin administrador', fun
 
     $this->actingAs($otroAdmin->fresh())
         ->put(route('patrimonio.usuarios.update', $this->patrimonio), ['rol' => 'coordinador', 'area_id' => Area::value('id')])
-        ->assertSessionHasErrors('general');
+        ->assertRedirect(route('login'));
+
+    expect($this->patrimonio->fresh()->tieneRol('admin'))->toBeTrue();
 });
 
 test('la foto del movimiento es privada y la ve sólo quien puede ver el movimiento', function () {

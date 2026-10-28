@@ -4,6 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -39,6 +40,37 @@ class AuthenticationTest extends TestCase
             'password' => 'wrong-password',
         ]);
 
+        $this->assertGuest();
+    }
+
+    public function test_una_cuenta_dada_de_baja_pierde_la_sesion_abierta(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->get(route('inicio'))->assertOk();
+
+        $user->update(['activo' => false]);
+
+        $this->get(route('inicio'))
+            ->assertRedirect(route('login'))
+            ->assertSessionHasErrors('email');
+        $this->assertGuest();
+    }
+
+    public function test_una_cuenta_dada_de_baja_no_entra_con_recordarme(): void
+    {
+        $user = User::factory()->create(['remember_token' => 'token-de-prueba']);
+        $recordarme = Auth::guard('web')->getRecallerName();
+        $cookie = $user->id.'|token-de-prueba|'.$user->getAuthPassword();
+
+        $this->withCookie($recordarme, $cookie)->get(route('inicio'))->assertOk();
+
+        $user->update(['activo' => false]);
+        Auth::forgetGuards();
+        $this->flushSession();
+
+        $this->withCookie($recordarme, $cookie)
+            ->get(route('inicio'))
+            ->assertRedirect(route('login'));
         $this->assertGuest();
     }
 

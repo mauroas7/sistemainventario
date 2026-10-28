@@ -34,7 +34,9 @@ Auth estándar de Laravel: tabla `users`, guard de sesión, correo y contraseña
 con recuperación de clave por mail. **No hay registro público**: las cuentas las
 da de alta un administrador desde Configuración, y el primero se crea con
 `php artisan usuarios:crear-administrador`. Una cuenta dada de baja
-(`users.fecha_baja`) no puede iniciar sesión (`LoginRequest`); nadie se da de baja
+(`users.fecha_baja`) no puede iniciar sesión (`LoginRequest`) y, si la tenía
+abierta o con «recordarme», la pierde en el pedido siguiente
+(`VerificarCuentaActiva`, en el grupo `web`); nadie se da de baja
 a sí mismo y siempre queda al menos un administrador activo.
 
 `App\Enums\Rol` guarda un **slug** en `users.rol` y `etiqueta()` da el nombre que
