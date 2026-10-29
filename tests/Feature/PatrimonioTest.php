@@ -322,3 +322,18 @@ test('el localizador busca en el servidor y trae el último movimiento de cada b
         ->has('bienes.data', 10)
         ->where('bienes.total', Bien::count()));
 });
+
+test('el directorio de bienes busca por inventario, descripción y detalle', function () {
+    $this->actingAs($this->patrimonio);
+
+    foreach (['nb002', 'lenovo', 'de uso general'] as $texto) {
+        $this->get(route('patrimonio.bienes.index', ['busqueda' => $texto]))->assertInertia(fn (AssertableInertia $pagina) => $pagina
+            ->has('bienes.data', 1)
+            ->where('bienes.data.0.codigo', 'NB002')
+            ->where('busqueda', $texto));
+    }
+
+    $this->get(route('patrimonio.bienes.index', ['busqueda' => 'no-existe']))->assertInertia(fn (AssertableInertia $pagina) => $pagina
+        ->has('bienes.data', 0)
+        ->where('bienes.total', 0));
+});

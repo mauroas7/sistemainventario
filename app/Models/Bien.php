@@ -63,6 +63,16 @@ class Bien extends Model
         );
     }
 
+    /** Bienes cuyo inventario, número de Diaguita, descripción o detalle contienen el texto. */
+    public function scopeBuscar($query, string $texto)
+    {
+        return $query->where(fn ($q) => $q
+            ->where('codigo', 'like', "%{$texto}%")
+            ->orWhere('numero_diaguita', 'like', "%{$texto}%")
+            ->orWhere('nombre', 'like', "%{$texto}%")
+            ->orWhere('descripcion', 'like', "%{$texto}%"));
+    }
+
     public function movimientos(): HasMany
     {
         return $this->hasMany(Movimiento::class);

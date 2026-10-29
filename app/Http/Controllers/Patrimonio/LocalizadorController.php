@@ -25,11 +25,7 @@ class LocalizadorController extends Controller
         $relacionesDelUltimo = array_map(fn (string $relacion) => "ultimoMovimiento.{$relacion}", MovimientoService::RELACIONES);
 
         $paginador = Bien::with([...BienResource::RELACIONES, ...$relacionesDelUltimo])
-            ->when($busqueda !== '', fn ($query) => $query->where(fn ($q) => $q
-                ->where('codigo', 'like', "%{$busqueda}%")
-                ->orWhere('numero_diaguita', 'like', "%{$busqueda}%")
-                ->orWhere('nombre', 'like', "%{$busqueda}%")
-                ->orWhere('descripcion', 'like', "%{$busqueda}%")))
+            ->when($busqueda !== '', fn ($query) => $query->buscar($busqueda))
             ->orderBy('codigo')
             ->paginate(self::POR_PAGINA)
             ->withQueryString();

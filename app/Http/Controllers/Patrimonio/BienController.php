@@ -23,14 +23,20 @@ class BienController extends Controller
 
     public function index(Request $request): Response
     {
+        $busqueda = trim($request->validate([
+            'busqueda' => ['nullable', 'string', 'max:255'],
+        ])['busqueda'] ?? '');
+
         $paginador = Bien::with(BienResource::RELACIONES)
             ->withCount('movimientos')
+            ->when($busqueda !== '', fn ($query) => $query->buscar($busqueda))
             ->orderBy('id')
             ->paginate(self::POR_PAGINA)
             ->withQueryString();
 
         return Inertia::render('Patrimonio/Bienes/Index', [
             'bienes' => $paginador->through(fn (Bien $bien) => (new BienResource($bien))->resolve($request)),
+            'busqueda' => $busqueda,
             'areas' => Area::orderBy('nombre')->get(['id', 'nombre']),
             'estados' => EstadoBien::orderBy('id')->get(['id', 'nombre']),
             'responsables' => User::query()

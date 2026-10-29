@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, Paginador, renglonTabla, Tarjeta } from 'hu-kit/componentes';
+import { Boton, Buscador, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, Paginador, renglonTabla, Tarjeta } from 'hu-kit/componentes';
 import FormularioBien from '@/Components/Patrimonio/FormularioBien';
 import AppLayout from '@/Components/UI/AppLayout';
+import { useBusquedaEnServidor } from '@/utils/busqueda';
 import { tonoEstadoBien } from '@/utils/estados';
 
 const ATENUADO = 'text-xs italic text-brandText-muted dark:text-brandText-mutedDark';
 
-export default function Index({ bienes, areas = [], estados = [], responsables = [] }) {
+export default function Index({ bienes, busqueda: busquedaDelServidor = '', areas = [], estados = [], responsables = [] }) {
     const [editando, setEditando] = useState(null); // null | 'nuevo' | id
+    const [busqueda, setBusqueda] = useBusquedaEnServidor('patrimonio.bienes.index', busquedaDelServidor);
 
     return (
         <AppLayout titulo="Directorio de bienes" subtitulo="Consulta y carga del inventario general.">
@@ -21,6 +23,16 @@ export default function Index({ bienes, areas = [], estados = [], responsables =
                     </Boton>
                 )}
             >
+                <div className="mb-4">
+                    <Buscador
+                        nombre="busqueda"
+                        etiqueta="Buscar bien"
+                        valor={busqueda}
+                        onChange={setBusqueda}
+                        placeholder="Inventario, Diaguita, descripción o detalle"
+                    />
+                </div>
+
                 {editando !== null && (
                     <FormularioBien
                         key={editando}
@@ -74,7 +86,9 @@ export default function Index({ bienes, areas = [], estados = [], responsables =
                             ) : (
                                 <tr>
                                     <td colSpan={8}>
-                                        <EstadoVacio enTarjeta icono="inventory_2">No hay bienes para mostrar.</EstadoVacio>
+                                        <EstadoVacio enTarjeta icono={busquedaDelServidor ? 'search_off' : 'inventory_2'}>
+                                            {busquedaDelServidor ? `No se encontraron bienes para «${busquedaDelServidor}».` : 'No hay bienes para mostrar.'}
+                                        </EstadoVacio>
                                     </td>
                                 </tr>
                             )}

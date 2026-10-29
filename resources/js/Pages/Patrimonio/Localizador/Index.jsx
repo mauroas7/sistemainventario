@@ -1,28 +1,10 @@
-import { useEffect, useState } from 'react';
-import { router } from '@inertiajs/react';
 import { Buscador, EstadoVacio, Paginador, Tarjeta } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import BienLocalizado from '@/Components/Patrimonio/BienLocalizado';
-
-const ESPERA_MS = 300;
+import { useBusquedaEnServidor } from '@/utils/busqueda';
 
 export default function Index({ bienes, ultimosMovimientos = {}, busqueda: busquedaDelServidor = '' }) {
-    const [busqueda, setBusqueda] = useState(busquedaDelServidor);
-
-    // La búsqueda la hace el servidor: espera a que se deje de tipear y vuelve a la primera página.
-    useEffect(() => {
-        if (busqueda.trim() === busquedaDelServidor) return undefined;
-
-        const temporizador = setTimeout(() => {
-            router.get(route('patrimonio.localizador.index'), busqueda.trim() ? { busqueda: busqueda.trim() } : {}, {
-                preserveState: true,
-                preserveScroll: true,
-                replace: true,
-            });
-        }, ESPERA_MS);
-
-        return () => clearTimeout(temporizador);
-    }, [busqueda]);
+    const [busqueda, setBusqueda] = useBusquedaEnServidor('patrimonio.localizador.index', busquedaDelServidor);
 
     return (
         <AppLayout
