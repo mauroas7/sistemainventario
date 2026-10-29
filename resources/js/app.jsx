@@ -7,7 +7,7 @@ import { createRoot } from 'react-dom/client';
 import { ErrorBoundary, ThemeProvider } from 'hu-kit/componentes';
 import { colores } from 'hu-kit/tokens';
 
-const appName = import.meta.env.VITE_APP_NAME ?? 'Bienes HU';
+const appName = 'Bienes HU';
 
 createInertiaApp({
     title: (title) => (title ? `${title} · ${appName}` : appName),

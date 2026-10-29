@@ -70,10 +70,6 @@ export default function Login({ status, canResetPassword }) {
                 <Boton tamano="ingreso" disabled={processing} className="w-full">
                     {processing ? 'Ingresando…' : 'Ingresar'}
                 </Boton>
-
-                <p className="mt-6 text-center text-sm font-semibold text-brandText dark:text-brandText-dark">
-                    ¿No tenés cuenta? Las altas las hace Gestión de Bienes e Insumos.
-                </p>
             </form>
         </PanelDeIngreso>
     );

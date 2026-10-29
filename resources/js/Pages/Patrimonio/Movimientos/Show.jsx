@@ -5,7 +5,7 @@ import { fechaYHora } from '@/utils/fechas';
 
 export default function Show({ movimiento: m }) {
     return (
-        <AppLayout titulo="Auditoría de movimiento" subtitulo={`Ticket #TK-${m.id}`}>
+        <AppLayout titulo={`Auditoría del ticket TK-${m.id}`} subtitulo={`${m.bien.codigo} · ${m.bien.nombre}`}>
             <div className="mb-4">
                 <Boton variante="fantasma" forma="grupo" icono="arrow_back" href={route('patrimonio.dashboard')}>
                     Volver al dashboard

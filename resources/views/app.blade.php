@@ -6,7 +6,7 @@
 
     <link rel="icon" href="{{ asset('img/favicon_color.png') }}" type="image/png">
 
-    <title inertia>{{ config('app.name') }}</title>
+    <title inertia>Bienes HU</title>
 
     {{-- Montserrat y Material Symbols viajan en el bundle: ver resources/css/app.css. --}}
 

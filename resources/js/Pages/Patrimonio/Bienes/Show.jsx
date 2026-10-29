@@ -6,7 +6,7 @@ import { fechaYHora } from '@/utils/fechas';
 
 export default function Show({ bien, movimientos = [] }) {
     return (
-        <AppLayout titulo="Ficha y registro histórico" subtitulo={`Bien #${bien.codigo} - ${bien.nombre}`}>
+        <AppLayout titulo={`Ficha del bien ${bien.codigo}`} subtitulo={bien.nombre}>
             <div className="mb-4">
                 <Boton variante="fantasma" forma="grupo" icono="arrow_back" href={route('patrimonio.bienes.index')}>
                     Volver al directorio
