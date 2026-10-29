@@ -72,7 +72,7 @@ export default function Bandeja({ movimientos, pestana = 'informados', resumen }
             </div>
 
             <Tarjeta
-                titulo="Movimientos"
+                titulo="Tickets"
                 icono="move_to_inbox"
                 contador={movimientos.total}
                 acciones={PESTANAS.map(({ clave, etiqueta }) => (

@@ -67,7 +67,7 @@ export default function Show({ movimiento: m, responsables = [] }) {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <Tarjeta titulo="Estado del movimiento" icono="flag" className="h-fit">
+                <Tarjeta titulo="Estado del ticket" icono="flag" className="h-fit">
                     <div className="space-y-4 text-sm">
                         <Dato etiqueta="Estado" valor={<Estado tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>} />
                         <Dato etiqueta="Relación" valor={relacion(m, usuario)} />
@@ -106,7 +106,7 @@ export default function Show({ movimiento: m, responsables = [] }) {
                     </div>
 
                     {! m.responsable_nuevo && (
-                        <Alerta tipo="aviso" titulo="Este movimiento no tiene responsable definido" className="mt-6">
+                        <Alerta tipo="aviso" titulo="Este ticket no tiene responsable definido" className="mt-6">
                             El bien figura en {m.area_destino.nombre}, pero nadie quedó a cargo.
                             {esAdmin ? ' Definí quién lo recibe para poder emitir la ficha de firmas.' : ' Gestión de Bienes va a definir el responsable.'}
 

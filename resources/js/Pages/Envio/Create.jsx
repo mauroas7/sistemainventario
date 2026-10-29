@@ -121,7 +121,7 @@ export default function Create({ bienes = [], areas = [], tiposMovimiento = [], 
             : `Personal de ${areaDestino?.nombre}. Es quien deberá firmar la nueva ficha de inventario; si todavía no está definido, dejá la opción por defecto.`;
 
     return (
-        <AppLayout titulo="Nuevo movimiento de bien" subtitulo="Envío · Crear ticket">
+        <AppLayout titulo="Crear ticket de envío" subtitulo="Registrá el traslado de un bien hacia otro sector.">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <Tarjeta titulo="Datos del traslado" icono="local_shipping" className="lg:col-span-2">
                     <form className="space-y-5" onSubmit={enviar} noValidate>

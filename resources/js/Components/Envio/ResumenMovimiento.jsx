@@ -22,7 +22,7 @@ function Paso({ desde, hasta, etiquetaDesde, etiquetaHasta, faltaDesde, faltaHas
 /** Lo que va a quedar registrado, al costado del formulario mientras se completa. */
 export default function ResumenMovimiento({ bien, areaOrigen, areaDestino, responsableActual, responsableNuevo, tipo, motivo, informante }) {
     return (
-        <Tarjeta titulo="Resumen del movimiento" icono="receipt_long" className="h-fit lg:sticky lg:top-24">
+        <Tarjeta titulo="Resumen del ticket" icono="receipt_long" className="h-fit lg:sticky lg:top-24">
             <div className="space-y-4 text-sm">
                 <Dato
                     etiqueta="Bien"
