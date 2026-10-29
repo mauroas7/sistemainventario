@@ -14,7 +14,8 @@ Laravel 12 · PHP 8.2 · React 18 + Inertia 2 · Vite 7 + Tailwind 3.
   foto opcional. El traslado es efectivo en el acto y sale un aviso por mail a
   Patrimonio, a quien lo informó y al responsable saliente.
 - **Recepción**: la bandeja de los movimientos que salen del área o llegan a ella,
-  con el acuse de recibo y la anulación.
+  separada en lo que hay para acusar recibo, lo enviado y todo, con el acuse y la
+  anulación. Inicio muestra lo pendiente de acusar y los últimos tickets.
 - **Control patrimonial** (sólo administradores): el tablero de movimientos con
   filtros, cambio de estado y exportación a CSV; el localizador, el directorio de
   bienes con su alta y edición, y la configuración de áreas y usuarios.

@@ -66,7 +66,13 @@ El menú sale de `resources/js/data/navegacion.js`; quién entra a cada ruta, de
    eligió responsable, queda «a definir por Gestión de Bienes».
 2. **Avisos**: salen en el mismo pedido (ver *Mails*).
 3. **Recepción** (`recepcion.*`): quien recibe acusa recibo. El acuse es una
-   constancia; no cambia ni la ubicación ni el estado.
+   constancia; no cambia ni la ubicación ni el estado. La bandeja se ordena por
+   lo que le toca a cada uno: «Para acusar recibo», «Enviados por mí» y
+   «Todos», y abre en la primera si tiene algo. Inicio muestra lo mismo para
+   quien no es administrador. Quién puede acusar está escrito tres veces:
+   `TicketController::confirmar()`, el filtro `por_acusar` de
+   `MovimientoService` y `puedeAcusar()` en `utils/movimientos.js`. Si se toca
+   uno, hay que revisar los otros dos.
 4. **Control patrimonial** (`patrimonio.*`): Gestión de Bienes asigna el
    responsable si faltaba, vuelca el movimiento a Diaguita y hace firmar la ficha
    de inventario, moviendo el estado.

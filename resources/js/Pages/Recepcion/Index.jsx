@@ -7,7 +7,6 @@ import {
     encabezadoTabla,
     Estado,
     EstadoVacio,
-    Metrica,
     ModalConfirmar,
     Paginador,
     renglonTabla,
@@ -20,12 +19,18 @@ import { fechaYHora } from '@/utils/fechas';
 import { puedeAcusar, puedeAnular, relacion } from '@/utils/movimientos';
 
 const PESTANAS = [
-    { clave: 'informados', etiqueta: 'Informados' },
-    { clave: 'registrados', etiqueta: 'Registrados' },
-    { clave: 'todos', etiqueta: 'Todos' },
+    { clave: 'por_acusar', etiqueta: 'Para acusar recibo', vacia: 'No tenés bienes para acusar recibo.' },
+    { clave: 'enviados', etiqueta: 'Enviados por mí', vacia: 'Todavía no informaste ningún traslado.' },
+    { clave: 'todos', etiqueta: 'Todos', vacia: 'No hay tickets para mostrar.' },
 ];
 
-export default function Bandeja({ movimientos, pestana = 'informados', resumen }) {
+const SUBTITULO = {
+    admin: 'Los tickets de todo el hospital.',
+    coordinador: 'Los tickets que salen de tu sector o llegan a él.',
+    usuario: 'Los tickets que informaste y los de bienes que estuvieron o quedan a tu cargo.',
+};
+
+export default function Bandeja({ movimientos, pestana = 'todos', contadores }) {
     const usuario = usePage().props.auth.usuario;
     const { confirmar, props: modal } = useConfirmacion();
     const [error, setError] = useState('');
@@ -33,7 +38,7 @@ export default function Bandeja({ movimientos, pestana = 'informados', resumen }
     const avisoDeError = (mensajePorDefecto) => (errores) => setError(Object.values(errores)[0] || mensajePorDefecto);
 
     // El filtrado y el conteo los hace la base: cada pestaña es una visita.
-    const irA = (clave) => router.get(route('recepcion.bandeja'), { estado: clave }, { preserveScroll: true });
+    const irA = (clave) => router.get(route('recepcion.bandeja'), { ver: clave }, { preserveScroll: true });
 
     const acusar = (m) => {
         setError('');
@@ -57,20 +62,7 @@ export default function Bandeja({ movimientos, pestana = 'informados', resumen }
     };
 
     return (
-        <AppLayout
-            titulo="Flujo de recepción"
-            subtitulo={`${usuario.rol === 'usuario'
-                ? 'Los movimientos que informaste y los de bienes que estuvieron o quedan a tu cargo.'
-                : 'Movimientos informados que involucran a tu sector.'} Lo que queda abierto es el trámite de Gestión de Bienes: la carga en Diaguita y la firma de la ficha.`}
-        >
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Metrica valor={resumen.informados} etiqueta="A registrar en Diaguita" icono="schedule" tono="aviso" />
-                {/* Agrupa los dos estados en que el trámite ya salió del circuito, como la pestaña. */}
-                <Metrica valor={resumen.registrados + resumen.cerrados} etiqueta="Registrados" icono="check_circle" tono="exito" />
-                <Metrica valor={resumen.total} etiqueta="Total" icono="list_alt" />
-                <Metrica valor={resumen.anulados} etiqueta="Anulados" icono="cancel" tono="error" />
-            </div>
-
+        <AppLayout titulo="Bandeja de recepción" subtitulo={SUBTITULO[usuario.rol]}>
             <Tarjeta
                 titulo="Tickets"
                 icono="move_to_inbox"
@@ -84,7 +76,7 @@ export default function Bandeja({ movimientos, pestana = 'informados', resumen }
                         aria-pressed={pestana === clave}
                         onClick={() => irA(clave)}
                     >
-                        {etiqueta}
+                        {etiqueta} ({contadores[clave]})
                     </Boton>
                 ))}
             >
@@ -158,7 +150,7 @@ export default function Bandeja({ movimientos, pestana = 'informados', resumen }
                             ) : (
                                 <tr>
                                     <td colSpan={8}>
-                                        <EstadoVacio enTarjeta icono="inbox">No hay movimientos para este filtro.</EstadoVacio>
+                                        <EstadoVacio enTarjeta icono="inbox">{PESTANAS.find((p) => p.clave === pestana)?.vacia}</EstadoVacio>
                                     </td>
                                 </tr>
                             )}

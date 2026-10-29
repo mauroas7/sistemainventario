@@ -196,11 +196,69 @@ test('cada rol ve en la bandeja lo que le toca', function () {
 
     foreach ($esperados as $nombre => $cantidad) {
         $this->actingAs(usuarioPorCorreo("{$nombre}@hospital.test"))
-            ->get('/recepcion/bandeja?estado=todos')
+            ->get('/recepcion/bandeja?ver=todos')
             ->assertInertia(fn ($page) => $page
                 ->where('movimientos.total', $cantidad)
-                ->where('resumen.total', $cantidad));
+                ->where('contadores.todos', $cantidad));
     }
+});
+
+test('la bandeja separa lo que cada uno tiene para acusar y lo que envio', function () {
+    $this->seed(MovimientosSeeder::class);
+
+    // [para acusar recibo, enviados por él]. La tablet ya tiene acuse y la impresora está anulada.
+    $esperados = [
+        'patrimonio' => [3, 0], // todo lo que falta acusar en el hospital
+        'laura' => [3, 0],      // lo que llegó a Enfermería: electrocardiógrafo, notebook y monitor
+        'juan' => [0, 1],       // la notebook que mandó
+        'ana' => [1, 1],        // el electrocardiógrafo a su cargo; mandó la tablet
+        'pedro' => [1, 0],      // el monitor a su cargo
+        'carlos' => [0, 1],
+        'maria' => [0, 2],
+    ];
+
+    foreach ($esperados as $nombre => [$porAcusar, $enviados]) {
+        $usuario = usuarioPorCorreo("{$nombre}@hospital.test");
+
+        $this->actingAs($usuario)
+            ->get('/recepcion/bandeja?ver=por_acusar')
+            ->assertInertia(fn ($page) => $page
+                ->where('movimientos.total', $porAcusar)
+                ->where('contadores.por_acusar', $porAcusar)
+                ->where('contadores.enviados', $enviados));
+
+        $this->actingAs($usuario)
+            ->get('/recepcion/bandeja?ver=enviados')
+            ->assertInertia(fn ($page) => $page->where('movimientos.total', $enviados));
+    }
+});
+
+test('la bandeja abre en lo que hay para acusar y, si no hay nada, en todo', function () {
+    $this->seed(MovimientosSeeder::class);
+
+    $this->actingAs(usuarioPorCorreo('pedro@hospital.test'))
+        ->get('/recepcion/bandeja')
+        ->assertInertia(fn ($page) => $page->where('pestana', 'por_acusar'));
+
+    $this->actingAs(usuarioPorCorreo('maria@hospital.test'))
+        ->get('/recepcion/bandeja')
+        ->assertInertia(fn ($page) => $page->where('pestana', 'todos'));
+});
+
+test('el inicio muestra lo que hay para acusar y los ultimos tickets', function () {
+    $this->seed(MovimientosSeeder::class);
+
+    $this->actingAs(usuarioPorCorreo('laura@hospital.test'))
+        ->get(route('inicio'))
+        ->assertInertia(fn ($page) => $page
+            ->component('Inicio/Index')
+            ->where('porAcusar.total', 3)
+            ->has('ultimos.data', 4));
+
+    // Patrimonio sigue su trabajo desde el control patrimonial.
+    $this->actingAs(usuarioPorCorreo('patrimonio@hospital.test'))
+        ->get(route('inicio'))
+        ->assertInertia(fn ($page) => $page->missing('porAcusar')->missing('ultimos'));
 });
 
 test('un usuario no ve ni acusa lo de su area que no es suyo', function () {

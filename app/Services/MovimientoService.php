@@ -51,9 +51,9 @@ class MovimientoService
 
     /**
      * Movimientos visibles para un usuario (`puedeVer()`); sin usuario, los de todo el
-     * hospital. La comparten el listado, el resumen y la exportación, así cuentan lo
-     * mismo. Filtros: area_id (origen o destino), estado_movimiento_id,
-     * tipo_movimiento_id, motivo_id, desde, hasta y bien.
+     * hospital. La comparten el listado, el resumen y la exportación. Filtros: area_id,
+     * estado_movimiento_id, tipo_movimiento_id, motivo_id, desde, hasta, bien,
+     * creado_por y por_acusar (lo que `TicketController::confirmar` le deja acusar).
      */
     private function consultaBase(?User $usuario, array $filtros)
     {
@@ -98,6 +98,25 @@ class MovimientoService
             $query->whereDate('fecha_movimiento', '<=', $filtros['hasta']);
         }
 
+        if (! empty($filtros['creado_por'])) {
+            $query->where('creado_por', $filtros['creado_por']);
+        }
+
+        if (! empty($filtros['por_acusar']) && $usuario) {
+            $query->whereNull('recibido_por')
+                ->whereHas('estadoMovimiento', fn ($q) => $q->where('nombre', '!=', 'Anulado'));
+
+            if (! $usuario->tieneRol(Rol::Admin)) {
+                $query->where(function ($q) use ($usuario) {
+                    $q->where('responsable_nuevo_id', $usuario->id);
+
+                    if ($usuario->tieneRol(Rol::Coordinador)) {
+                        $q->orWhere('area_destino_id', $usuario->area_id);
+                    }
+                });
+            }
+        }
+
         if (! empty($filtros['bien'])) {
             $texto = trim($filtros['bien']);
             $query->whereHas('bien', function ($q) use ($texto) {
@@ -128,6 +147,12 @@ class MovimientoService
         }
 
         return $query->get();
+    }
+
+    /** Cuántos movimientos ve el usuario con esos filtros: los contadores de la bandeja. */
+    public function contar(User $usuario, array $filtros): int
+    {
+        return $this->consultaBase($usuario, $filtros)->count();
     }
 
     /**

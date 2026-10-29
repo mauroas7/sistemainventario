@@ -7,7 +7,6 @@ use App\Http\Requests\GuardarMovimientoRequest;
 use App\Http\Resources\MovimientoResource;
 use App\Models\Area;
 use App\Models\Bien;
-use App\Models\EstadoMovimiento;
 use App\Models\Motivo;
 use App\Models\Movimiento;
 use App\Models\TipoMovimiento;
@@ -29,16 +28,8 @@ class TicketController extends Controller
     /** Disco de las fotos: privado, se sirven sólo por `recepcion.movimientos.foto`. */
     private const DISCO_FOTOS = 'local';
 
-    /**
-     * Pestañas de la bandeja. Se resuelven contra los nombres de estado y no contra ids
-     * fijos para no atarse al orden en que se sembró la tabla.
-     */
-    private const ESTADOS_POR_PESTANA = [
-        'informados' => ['Informado'],
-        'registrados' => ['Registrado', 'Cerrado'],
-        'anulados' => ['Anulado'],
-        'todos' => null,
-    ];
+    /** Pestañas de la bandeja, por lo que le toca al usuario y no por el trámite de Diaguita. */
+    private const PESTANAS = ['por_acusar', 'enviados', 'todos'];
 
     public function __construct(
         private MovimientoService $movimientoService,
@@ -125,25 +116,33 @@ class TicketController extends Controller
     {
         $user = $request->user();
 
-        $pestana = (string) $request->query('estado');
-        if (! array_key_exists($pestana, self::ESTADOS_POR_PESTANA)) {
-            $pestana = 'informados';
+        $contadores = [];
+        foreach (self::PESTANAS as $clave) {
+            $contadores[$clave] = $this->movimientoService->contar($user, $this->filtrosDePestana($clave, $user));
         }
 
-        $filtros = [];
-        if ($nombres = self::ESTADOS_POR_PESTANA[$pestana]) {
-            $filtros['estado_movimiento_id'] = EstadoMovimiento::whereIn('nombre', $nombres)->pluck('id')->all();
+        $pestana = (string) $request->query('ver');
+        if (! in_array($pestana, self::PESTANAS, true)) {
+            $pestana = $contadores['por_acusar'] > 0 ? 'por_acusar' : 'todos';
         }
 
         // Paginado: para Patrimonio son todos los movimientos del hospital.
-        $paginador = $this->movimientoService->obtenerParaBandeja($user, $filtros, 25);
+        $paginador = $this->movimientoService->obtenerParaBandeja($user, $this->filtrosDePestana($pestana, $user), 25);
 
         return Inertia::render('Recepcion/Index', [
             'movimientos' => $paginador->through(fn (Movimiento $m) => (new MovimientoResource($m))->resolve($request)),
             'pestana' => $pestana,
-            // Sobre todo lo visible para el usuario, no sobre la página: no cambian al paginar.
-            'resumen' => $this->movimientoService->obtenerResumen($user, []),
+            'contadores' => $contadores,
         ]);
+    }
+
+    private function filtrosDePestana(string $pestana, User $user): array
+    {
+        return match ($pestana) {
+            'por_acusar' => ['por_acusar' => true],
+            'enviados' => ['creado_por' => $user->id],
+            default => [],
+        };
     }
 
     public function show(Request $request, Movimiento $movimiento): Response
