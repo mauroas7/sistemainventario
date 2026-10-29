@@ -46,8 +46,8 @@ pregunta con `User::tieneRol()`, que acepta el enum, el slug o la etiqueta.
 | Rol | Qué ve | Qué hace |
 |---|---|---|
 | Administrador (Gestión de Bienes) | Todo el hospital, sin área | Informa, recibe y anula como cualquiera; además el control patrimonial: tablero, estados, responsables, localizador, el alta de bienes, áreas y usuarios |
-| Coordinador / Jefe de área | Todo lo que sale de su área o llega a ella | Informa traslados de los bienes del área, acusa recibo de lo que llega al área y anula lo que informó |
-| Usuario | Sólo lo suyo: lo que informó y lo que lo nombra responsable, saliente o nuevo | Informa traslados de los bienes del área, acusa recibo de lo que queda a su cargo y anula lo que informó |
+| Coordinador / Jefe de área | Los bienes de su área (Mis bienes) y todo lo que sale de su área o llega a ella | Informa traslados de los bienes del área, acusa recibo de lo que llega al área y anula lo que informó |
+| Usuario | Los bienes de su área (Mis bienes); de los movimientos, sólo lo suyo: lo que informó y lo que lo nombra responsable, saliente o nuevo | Informa traslados de los bienes del área, acusa recibo de lo que queda a su cargo y anula lo que informó |
 
 **Qué ve cada uno lo decide `MovimientoService::puedeVer()`**, y la consulta de
 la bandeja aplica la misma regla. Las dos cuentas informan traslados de cualquier

@@ -10,6 +10,8 @@ Laravel 12 · PHP 8.2 · React 18 + Inertia 2 · Vite 7 + Tailwind 3.
 
 ## Qué tiene
 
+- **Mis bienes**: coordinadores y usuarios consultan los bienes de su área, con
+  buscador, su responsable y su estado.
 - **Envío**: cualquier usuario informa el traslado de un bien de su área, con una
   foto opcional. El traslado es efectivo en el acto y sale un aviso por mail a
   Patrimonio, a quien lo informó y al responsable saliente.

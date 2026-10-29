@@ -4,6 +4,7 @@
  */
 export const SECCIONES = [
     { etiqueta: 'Inicio', icono: 'home', ruta: 'inicio', roles: [] },
+    { etiqueta: 'Mis bienes', icono: 'inventory_2', ruta: 'mis-bienes', roles: ['coordinador', 'usuario'] },
     { titulo: 'Envío', etiqueta: 'Crear ticket de envío', icono: 'send', ruta: 'envio.crear', roles: [] },
     {
         titulo: 'Recepción',

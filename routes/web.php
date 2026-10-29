@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CuentaController;
 use App\Http\Controllers\InicioController;
+use App\Http\Controllers\MisBienesController;
 use App\Http\Controllers\Patrimonio\AreaController;
 use App\Http\Controllers\Patrimonio\BienController;
 use App\Http\Controllers\Patrimonio\DashboardController;
@@ -20,6 +21,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/inicio', [InicioController::class, 'index'])
         ->name('inicio');
+
+    Route::get('/mis-bienes', [MisBienesController::class, 'index'])
+        ->middleware('rol:coordinador,usuario')
+        ->name('mis-bienes');
 
     Route::get('/envio/crear-ticket', [TicketController::class, 'create'])
         ->name('envio.crear');

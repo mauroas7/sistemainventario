@@ -7,6 +7,13 @@ import { fechaYHora } from '@/utils/fechas';
 
 const ACCESOS = [
     {
+        etiqueta: 'Mis bienes',
+        ruta: 'mis-bienes',
+        icono: 'inventory_2',
+        descripcion: 'Consultá los bienes de tu área y quién los tiene a cargo.',
+        roles: ['coordinador', 'usuario'],
+    },
+    {
         etiqueta: 'Crear ticket de envío',
         ruta: 'envio.crear',
         icono: 'send',
