@@ -14,7 +14,7 @@ const ACCESOS = [
         etiqueta: 'Bandeja de recepción',
         ruta: 'recepcion.bandeja',
         icono: 'move_to_inbox',
-        descripcion: 'Confirmá o rechazá los movimientos que llegan a tu sector.',
+        descripcion: 'Seguí los movimientos de tu sector, acusá recibo y anulá lo que informaste por error.',
         roles: [],
     },
     {
