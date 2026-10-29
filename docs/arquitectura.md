@@ -133,11 +133,15 @@ los entornos:
 - `SistemaSeeder`: los estados de movimiento, que el código busca por nombre;
 - `ListasSeeder`: estados de bien, tipos de movimiento y motivos.
 
-**La demo** (`Demo/DemoSeeder`) inventa las áreas, ocho usuarios con clave
-`password` y ocho bienes, sin movimientos. `Demo/MovimientosSeeder` la siembra y
-le suma cinco movimientos en distintos estados, para ver qué le toca a cada rol;
-los tests de qué ve cada rol usan ese mismo escenario. Las dos heredan de `SeederDePrueba`, que se
-niega a correr en producción. En producción, áreas y bienes los carga Gestión de
+**La demo** (`Demo/DemoSeeder`) inventa las nueve áreas, un coordinador y dos
+usuarios por área (Patrimonio, dos administradores), una cuenta dada de baja y
+22 bienes repartidos, sin movimientos; todas las claves son `demo1234`.
+`Demo/MovimientosSeeder` la siembra y le suma diez movimientos fechados en las
+últimas tres semanas: un préstamo y su devolución, un trámite cerrado, uno
+registrado sin acuse, uno anulado, uno sin responsable, uno con foto y uno
+olvidado hace más de dos semanas. Los tests de qué ve cada rol usan ese mismo
+escenario. Las dos heredan de `SeederDePrueba`, que se niega a correr en
+producción. En producción, áreas y bienes los carga Gestión de
 Bienes desde la aplicación.
 
 ### Migraciones: se edita el `create_*`, no se agrega otra (hasta producción)

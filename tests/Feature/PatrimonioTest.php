@@ -16,8 +16,8 @@ use Inertia\Testing\AssertableInertia;
 beforeEach(function () {
     $this->seed([DatabaseSeeder::class, DemoSeeder::class]);
 
-    $this->patrimonio = User::where('email', 'patrimonio@hospital.test')->firstOrFail();
-    $this->juan = User::where('email', 'juan@hospital.test')->firstOrFail(); // Sistemas
+    $this->patrimonio = User::where('email', 'admin1.patrimonio@hospital.test')->firstOrFail();
+    $this->juan = User::where('email', 'coordinador.sistemas@hospital.test')->firstOrFail(); // Sistemas
 });
 
 /** Informa el traslado de NB001 (Sistemas) a Laboratorio, como Juan. */
@@ -52,7 +52,7 @@ test('las pantallas de patrimonio llegan con sus datos y sin api', function () {
 
     $this->get(route('patrimonio.bienes.index'))->assertInertia(fn (AssertableInertia $pagina) => $pagina
         ->component('Patrimonio/Bienes/Index')
-        ->has('bienes.data', Bien::count())
+        ->has('bienes.data', min(20, Bien::count()))
         ->where('bienes.total', Bien::count()));
 
     $this->get(route('patrimonio.bienes.show', $bien))->assertInertia(fn (AssertableInertia $pagina) => $pagina
@@ -60,7 +60,7 @@ test('las pantallas de patrimonio llegan con sus datos y sin api', function () {
         ->where('bien.codigo', 'NB001')
         ->has('movimientos', 1));
 
-    $this->get(route('patrimonio.localizador.index'))->assertInertia(fn (AssertableInertia $pagina) => $pagina
+    $this->get(route('patrimonio.localizador.index', ['busqueda' => 'NB001']))->assertInertia(fn (AssertableInertia $pagina) => $pagina
         ->component('Patrimonio/Localizador/Index')
         ->where("ultimosMovimientos.{$bien->id}.id", $movimiento->id));
 
@@ -102,7 +102,7 @@ test('el csv sale con las columnas de la planilla de patrimonio, en su orden', f
         'Motivo del traslado',
     ]);
     expect(array_slice($renglones[1], 0, 7))->toBe([
-        'NB001', $bien->numero_diaguita, 'Sistemas', 'Juan Pérez',
+        'NB001', $bien->numero_diaguita, 'Sistemas', 'Juan Test',
         'Notebook Dell Latitude 5420', 'Notebook utilizada por Sistemas.', 'Laboratorio',
     ]);
 });
@@ -148,7 +148,7 @@ test('nadie se da de baja a sí mismo ni deja el sistema sin administrador', fun
         ->put(route('patrimonio.usuarios.update', $this->patrimonio), ['activo' => false])
         ->assertSessionHasErrors('general');
 
-    $otroAdmin = User::where('email', 'admin@hospital.test')->firstOrFail();
+    $otroAdmin = User::where('email', 'admin2.patrimonio@hospital.test')->firstOrFail();
     $this->put(route('patrimonio.usuarios.update', $otroAdmin), ['activo' => false])->assertSessionHasNoErrors();
 
     $this->actingAs($otroAdmin->fresh())
@@ -169,7 +169,7 @@ test('la foto del movimiento es privada y la ve sólo quien puede ver el movimie
         ->get(route('recepcion.movimientos.foto', $movimiento))
         ->assertOk();
 
-    $this->actingAs(User::where('email', 'ana@hospital.test')->firstOrFail()) // Enfermería
+    $this->actingAs(User::where('email', 'usuario1.enfermeria@hospital.test')->firstOrFail()) // Enfermería
         ->get(route('recepcion.movimientos.foto', $movimiento))
         ->assertForbidden();
 });
@@ -198,7 +198,7 @@ function datosDeBien(array $extra = []): array
 }
 
 test('patrimonio da de alta un bien en su área y a cargo de alguien de esa área', function () {
-    $laura = User::where('email', 'laura@hospital.test')->firstOrFail(); // Enfermería
+    $laura = User::where('email', 'coordinador.enfermeria@hospital.test')->firstOrFail(); // Enfermería
 
     $this->actingAs($this->patrimonio)
         ->post(route('patrimonio.bienes.store'), datosDeBien(['responsable_id' => $laura->id]))
@@ -230,7 +230,7 @@ test('un bien sin movimientos se edita entero y uno con movimientos no cambia de
         ->ubicacion_actual_id->toBe($farmacia)
         ->nombre->toBe('Monitor multiparamétrico');
 
-    $carlos = User::where('email', 'carlos@hospital.test')->firstOrFail(); // Laboratorio
+    $carlos = User::where('email', 'usuario1.laboratorio@hospital.test')->firstOrFail(); // Laboratorio
     $movido = informarTraslado(['responsable_nuevo_id' => $carlos->id])->bien;
     $laboratorio = $movido->area_id;
 
@@ -273,7 +273,8 @@ test('sólo patrimonio da de alta bienes y áreas', function () {
 });
 
 test('el directorio de bienes se pagina de a 20', function () {
-    foreach (range(1, 25) as $numero) {
+    // Con 25 en total, la segunda página trae los 5 que no entran en la primera.
+    foreach (range(1, 25 - Bien::count()) as $numero) {
         Bien::create([...datosDeBien(['codigo' => "INV-{$numero}", 'numero_diaguita' => null]), 'ubicacion_actual_id' => datosDeBien()['area_id']]);
     }
 
@@ -292,7 +293,7 @@ test('el directorio de bienes se pagina de a 20', function () {
 
 test('el localizador busca en el servidor y trae el último movimiento de cada bien', function () {
     $primero = informarTraslado(); // NB001: Sistemas → Laboratorio
-    $carlos = User::where('email', 'carlos@hospital.test')->firstOrFail(); // Laboratorio
+    $carlos = User::where('email', 'usuario1.laboratorio@hospital.test')->firstOrFail(); // Laboratorio
 
     $this->actingAs($carlos)->post(route('envio.store'), [
         'bien_id' => $primero->bien_id,

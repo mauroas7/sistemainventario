@@ -1,10 +1,12 @@
 <?php
 
 use App\Enums\Rol;
+use App\Models\Area;
 use App\Models\EstadoMovimiento;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\Demo\DemoSeeder;
+use Illuminate\Support\Facades\Hash;
 
 test('la siembra de todos los entornos no crea usuarios', function () {
     $this->seed(DatabaseSeeder::class);
@@ -20,6 +22,20 @@ test('la demo no corre en produccion', function () {
     $this->expectException(RuntimeException::class);
 
     $this->app->make(DemoSeeder::class)->setContainer($this->app)->__invoke();
+});
+
+test('la demo tiene un coordinador y dos usuarios por area, y Patrimonio solo administradores', function () {
+    $this->seed([DatabaseSeeder::class, DemoSeeder::class]);
+
+    foreach (Area::with(['usuarios' => fn ($q) => $q->activos()])->get() as $area) {
+        $roles = $area->usuarios->countBy(fn (User $usuario) => $usuario->rol->value)->sortKeys()->all();
+
+        expect($roles)->toBe($area->nombre === 'Patrimonio' ? ['admin' => 2] : ['coordinador' => 1, 'usuario' => 2]);
+    }
+
+    expect(User::all())->each(fn ($usuario) => $usuario->name->toEndWith(' Test'))
+        ->and(Hash::check(DemoSeeder::CLAVE, User::where('email', 'admin1.patrimonio@hospital.test')->value('password')))->toBeTrue()
+        ->and(User::where('email', 'usuario3.farmacia@hospital.test')->firstOrFail()->activo)->toBeFalse();
 });
 
 test('crea el primer administrador desde la consola', function () {

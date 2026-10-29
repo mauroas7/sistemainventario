@@ -68,7 +68,8 @@ php artisan db:seed --class="Database\Seeders\Demo\DemoSeeder"
 ```
 
 Para ver además qué le toca a cada rol, `MovimientosSeeder` siembra la demo y le
-suma cinco movimientos ya informados. Sobre una base sin movimientos:
+suma diez movimientos de las últimas tres semanas, uno por cada paso del circuito.
+Sobre una base sin movimientos:
 
 ```bash
 php artisan db:seed --class="Database\Seeders\Demo\MovimientosSeeder"
@@ -123,23 +124,25 @@ Antes de dar algo por terminado: `php artisan test` y `./vendor/bin/pint`.
 
 ## Usuarios de prueba
 
-Existen sólo con la demo sembrada. Todos usan la contraseña **`password`**.
+Existen sólo con la demo sembrada. Todas las cuentas usan la contraseña
+**`demo1234`** y se llaman *Nombre Test*. El correo dice el puesto y el área:
 
-| correo                     | rol           | área           |
-| -------------------------- | ------------- | -------------- |
-| `patrimonio@hospital.test` | Administrador | Patrimonio     |
-| `admin@hospital.test`      | Administrador | Dirección      |
-| `juan@hospital.test`       | Coordinador   | Sistemas       |
-| `ana@hospital.test`        | Usuario       | Enfermería     |
-| `carlos@hospital.test`     | Usuario       | Laboratorio    |
-| `maria@hospital.test`      | Usuario       | Administración |
-| `laura@hospital.test`      | Coordinador   | Enfermería     |
-| `pedro@hospital.test`      | Usuario       | Enfermería     |
+| correo                                  | rol           | cuántas                       |
+| --------------------------------------- | ------------- | ----------------------------- |
+| `admin1.patrimonio@hospital.test`       | Administrador | Silvana; `admin2` es Gustavo  |
+| `coordinador.<área>@hospital.test`      | Coordinador   | una por área                  |
+| `usuario1.<área>@hospital.test`         | Usuario       | dos por área (`usuario2`)     |
+
+El área va sin tildes y con guiones: `direccion`, `administracion`,
+`recursos-humanos`, `mantenimiento`, `enfermeria`, `laboratorio`, `farmacia`,
+`sistemas`. Patrimonio tiene sólo a los dos administradores. Además,
+`usuario3.farmacia@hospital.test` está dada de baja: no entra y no se ofrece como
+responsable.
 
 El coordinador ve todo lo que sale de su área o llega a ella; el usuario, sólo lo
 que informó y lo que lo nombra responsable. Con los movimientos de la demo,
-Enfermería lo muestra: Laura ve los cuatro movimientos del área, Ana dos y Pedro
-uno.
+Enfermería lo muestra: la coordinadora ve los tres del área, `usuario1` dos y
+`usuario2` ninguno.
 
 ---
 
