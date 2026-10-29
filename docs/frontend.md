@@ -90,9 +90,11 @@ claro y se resetea cuando cambia el usuario. Todo componente nace con sus pares
 
 ## Layout
 
-- **Ancho** → prop `ancho` de `AppLayout`: `completo` (por defecto) para tablas
-  y tableros, `lectura` para fichas y detalle, `formulario` para una columna de
-  tarjetas (Mi cuenta).
+- **Ancho** → prop `ancho` de `AppLayout`: `completo` (por defecto) para todas
+  las pantallas, fichas y detalle incluidos, que reparten el ancho en una grilla
+  de tarjetas; `formulario` sólo para una columna de tarjetas (Mi cuenta). No se
+  usa `lectura`: frena el contenido en 1152 px y deja vacío el resto de la
+  pantalla.
 - **Grillas**: siempre con `grid-cols-1` de base, o en celular la página
   entera scrollea de costado.
 - **Tablas** → adentro de una `Tarjeta`, en un `-mx-5 overflow-x-auto` con un

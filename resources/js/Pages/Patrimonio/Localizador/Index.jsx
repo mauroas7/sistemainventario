@@ -10,7 +10,6 @@ export default function Index({ bienes, ultimosMovimientos = {}, busqueda: busqu
         <AppLayout
             titulo="Localizador de bienes"
             subtitulo="Buscá por número de inventario interno, número de Diaguita, nombre o descripción."
-            ancho="lectura"
         >
             <Tarjeta className="mb-6">
                 <Buscador

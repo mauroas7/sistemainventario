@@ -58,7 +58,6 @@ export default function Show({ movimiento: m, responsables = [] }) {
         <AppLayout
             titulo={`Ticket TK-${m.id}`}
             subtitulo={`${m.bien.codigo} · Diaguita ${m.bien.numero_diaguita || 'sin cargar'} · ${m.bien.nombre}`}
-            ancho="lectura"
         >
             <div className="mb-4">
                 <Boton variante="fantasma" forma="grupo" icono="arrow_back" href={route('recepcion.bandeja')}>

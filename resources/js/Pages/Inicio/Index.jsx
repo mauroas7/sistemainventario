@@ -63,7 +63,7 @@ export default function Index({ porAcusar = null, ultimos = null }) {
 
     return (
         <AppLayout titulo="Inicio" subtitulo={`Hola, ${usuario.nombre}. Accesos rápidos para operar movimientos de bienes.`}>
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className={`mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 ${accesos.length > 2 ? 'lg:grid-cols-3' : ''}`}>
                 {accesos.map((acceso) => (
                     <Link
                         key={acceso.ruta}
