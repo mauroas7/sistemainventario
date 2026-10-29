@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Bien extends Model
 {
@@ -65,5 +66,11 @@ class Bien extends Model
     public function movimientos(): HasMany
     {
         return $this->hasMany(Movimiento::class);
+    }
+
+    /** El movimiento más reciente, anulado o no: el mismo orden que la ficha del bien. */
+    public function ultimoMovimiento(): HasOne
+    {
+        return $this->hasOne(Movimiento::class)->ofMany(['fecha_movimiento' => 'max', 'id' => 'max']);
     }
 }

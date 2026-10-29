@@ -289,3 +289,36 @@ test('el directorio de bienes se pagina de a 20', function () {
         ->has('bienes.data', $total - 20)
         ->where('bienes.current_page', 2));
 });
+
+test('el localizador busca en el servidor y trae el último movimiento de cada bien', function () {
+    $primero = informarTraslado(); // NB001: Sistemas → Laboratorio
+    $carlos = User::where('email', 'carlos@hospital.test')->firstOrFail(); // Laboratorio
+
+    $this->actingAs($carlos)->post(route('envio.store'), [
+        'bien_id' => $primero->bien_id,
+        'area_origen_id' => $primero->area_destino_id,
+        'area_destino_id' => $primero->area_origen_id,
+        'tipo_movimiento_id' => TipoMovimiento::orderBy('id')->value('id'),
+        'motivo_id' => Motivo::orderBy('id')->value('id'),
+    ])->assertSessionHasNoErrors();
+    $segundo = Movimiento::latest('id')->firstOrFail();
+
+    $this->actingAs($this->patrimonio);
+
+    $this->get(route('patrimonio.localizador.index', ['busqueda' => 'nb001']))->assertInertia(fn (AssertableInertia $pagina) => $pagina
+        ->has('bienes.data', 1)
+        ->where('bienes.data.0.codigo', 'NB001')
+        ->where("ultimosMovimientos.{$primero->bien_id}.id", $segundo->id));
+
+    $this->get(route('patrimonio.localizador.index', ['busqueda' => 'no-existe']))->assertInertia(fn (AssertableInertia $pagina) => $pagina
+        ->has('bienes.data', 0)
+        ->where('busqueda', 'no-existe'));
+
+    foreach (range(1, 5) as $numero) {
+        Bien::create([...datosDeBien(['codigo' => "INV-{$numero}", 'numero_diaguita' => null]), 'ubicacion_actual_id' => datosDeBien()['area_id']]);
+    }
+
+    $this->get(route('patrimonio.localizador.index'))->assertInertia(fn (AssertableInertia $pagina) => $pagina
+        ->has('bienes.data', 10)
+        ->where('bienes.total', Bien::count()));
+});

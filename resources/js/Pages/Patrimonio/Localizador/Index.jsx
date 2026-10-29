@@ -1,20 +1,28 @@
-import { useMemo, useState } from 'react';
-import { EstadoVacio, Input, Tarjeta } from 'hu-kit/componentes';
+import { useEffect, useState } from 'react';
+import { router } from '@inertiajs/react';
+import { Buscador, EstadoVacio, Paginador, Tarjeta } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import BienLocalizado from '@/Components/Patrimonio/BienLocalizado';
 
-const normalizar = (texto) => String(texto ?? '').toLowerCase();
+const ESPERA_MS = 300;
 
-export default function Index({ bienes = [], ultimosMovimientos = {} }) {
-    const [busqueda, setBusqueda] = useState('');
+export default function Index({ bienes, ultimosMovimientos = {}, busqueda: busquedaDelServidor = '' }) {
+    const [busqueda, setBusqueda] = useState(busquedaDelServidor);
 
-    const resultados = useMemo(() => {
-        const q = normalizar(busqueda.trim());
+    // La búsqueda la hace el servidor: espera a que se deje de tipear y vuelve a la primera página.
+    useEffect(() => {
+        if (busqueda.trim() === busquedaDelServidor) return undefined;
 
-        return bienes
-            .filter((bien) => ! q || [bien.codigo, bien.numero_diaguita, bien.nombre, bien.descripcion].some((campo) => normalizar(campo).includes(q)))
-            .sort((a, b) => String(a.codigo).localeCompare(String(b.codigo)));
-    }, [bienes, busqueda]);
+        const temporizador = setTimeout(() => {
+            router.get(route('patrimonio.localizador.index'), busqueda.trim() ? { busqueda: busqueda.trim() } : {}, {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            });
+        }, ESPERA_MS);
+
+        return () => clearTimeout(temporizador);
+    }, [busqueda]);
 
     return (
         <AppLayout
@@ -23,22 +31,30 @@ export default function Index({ bienes = [], ultimosMovimientos = {} }) {
             ancho="lectura"
         >
             <Tarjeta className="mb-6">
-                <Input
+                <Buscador
                     nombre="busqueda"
                     etiqueta="Buscar bien"
                     valor={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
+                    onChange={setBusqueda}
                     placeholder="Ej: MON001, 950003, notebook, impresora…"
                     autoFocus
                 />
             </Tarjeta>
 
             <div className="space-y-4">
-                {resultados.length === 0 && <EstadoVacio icono="search_off">No se encontraron bienes para «{busqueda}».</EstadoVacio>}
+                {bienes.data.length === 0 && (
+                    <EstadoVacio icono="search_off">
+                        {busquedaDelServidor ? `No se encontraron bienes para «${busquedaDelServidor}».` : 'No hay bienes cargados.'}
+                    </EstadoVacio>
+                )}
 
-                {resultados.map((bien) => (
+                {bienes.data.map((bien) => (
                     <BienLocalizado key={bien.id} bien={bien} ultimo={ultimosMovimientos[bien.id]} />
                 ))}
+            </div>
+
+            <div className="mt-4 empty:hidden">
+                <Paginador paginador={bienes} />
             </div>
         </AppLayout>
     );
