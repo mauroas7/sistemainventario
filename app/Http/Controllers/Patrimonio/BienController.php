@@ -19,12 +19,18 @@ use Inertia\Response;
 /** El directorio de bienes del hospital, su alta y edición, y la ficha de cada uno. */
 class BienController extends Controller
 {
+    private const POR_PAGINA = 20;
+
     public function index(Request $request): Response
     {
-        $bienes = Bien::with(BienResource::RELACIONES)->withCount('movimientos')->orderBy('id')->get();
+        $paginador = Bien::with(BienResource::RELACIONES)
+            ->withCount('movimientos')
+            ->orderBy('id')
+            ->paginate(self::POR_PAGINA)
+            ->withQueryString();
 
         return Inertia::render('Patrimonio/Bienes/Index', [
-            'bienes' => BienResource::collection($bienes)->resolve($request),
+            'bienes' => $paginador->through(fn (Bien $bien) => (new BienResource($bien))->resolve($request)),
             'areas' => Area::orderBy('nombre')->get(['id', 'nombre']),
             'estados' => EstadoBien::orderBy('id')->get(['id', 'nombre']),
             'responsables' => User::query()

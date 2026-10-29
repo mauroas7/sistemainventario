@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, renglonTabla, Tarjeta } from 'hu-kit/componentes';
+import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, Paginador, renglonTabla, Tarjeta } from 'hu-kit/componentes';
 import FormularioBien from '@/Components/Patrimonio/FormularioBien';
 import AppLayout from '@/Components/UI/AppLayout';
 import { tonoEstadoBien } from '@/utils/estados';
 
 const ATENUADO = 'text-xs italic text-brandText-muted dark:text-brandText-mutedDark';
 
-export default function Index({ bienes = [], areas = [], estados = [], responsables = [] }) {
+export default function Index({ bienes, areas = [], estados = [], responsables = [] }) {
     const [editando, setEditando] = useState(null); // null | 'nuevo' | id
 
     return (
@@ -14,7 +14,7 @@ export default function Index({ bienes = [], areas = [], estados = [], responsab
             <Tarjeta
                 titulo="Bienes"
                 icono="inventory_2"
-                contador={bienes.length}
+                contador={bienes.total}
                 acciones={editando === null && (
                     <Boton icono="add" forma="grupo" tipo="button" onClick={() => setEditando('nuevo')}>
                         Nuevo bien
@@ -24,7 +24,7 @@ export default function Index({ bienes = [], areas = [], estados = [], responsab
                 {editando !== null && (
                     <FormularioBien
                         key={editando}
-                        bien={editando === 'nuevo' ? null : bienes.find((b) => b.id === editando)}
+                        bien={editando === 'nuevo' ? null : bienes.data.find((b) => b.id === editando)}
                         areas={areas}
                         estados={estados}
                         responsables={responsables}
@@ -47,8 +47,8 @@ export default function Index({ bienes = [], areas = [], estados = [], responsab
                             </tr>
                         </thead>
                         <tbody className={cuerpoTabla}>
-                            {bienes.length > 0 ? (
-                                bienes.map((bien) => (
+                            {bienes.data.length > 0 ? (
+                                bienes.data.map((bien) => (
                                     <tr key={bien.id} className={renglonTabla}>
                                         <td className="px-5 py-3 font-semibold text-primary dark:text-gray-100">{bien.codigo}</td>
                                         <td className="px-3 py-3">{bien.numero_diaguita || <span className={ATENUADO}>sin cargar</span>}</td>
@@ -80,6 +80,10 @@ export default function Index({ bienes = [], areas = [], estados = [], responsab
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                <div className="mt-4 empty:hidden">
+                    <Paginador paginador={bienes} />
                 </div>
             </Tarjeta>
         </AppLayout>

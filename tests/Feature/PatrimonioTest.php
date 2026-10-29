@@ -52,7 +52,8 @@ test('las pantallas de patrimonio llegan con sus datos y sin api', function () {
 
     $this->get(route('patrimonio.bienes.index'))->assertInertia(fn (AssertableInertia $pagina) => $pagina
         ->component('Patrimonio/Bienes/Index')
-        ->has('bienes', Bien::count()));
+        ->has('bienes.data', Bien::count())
+        ->where('bienes.total', Bien::count()));
 
     $this->get(route('patrimonio.bienes.show', $bien))->assertInertia(fn (AssertableInertia $pagina) => $pagina
         ->component('Patrimonio/Bienes/Show')
@@ -269,4 +270,22 @@ test('sólo patrimonio da de alta bienes y áreas', function () {
     $this->put(route('patrimonio.bienes.update', Bien::firstOrFail()), datosDeBien())->assertForbidden();
     $this->post(route('patrimonio.areas.store'), ['nombre' => 'Kinesiología'])->assertForbidden();
     $this->put(route('patrimonio.areas.update', Area::firstOrFail()), ['nombre' => 'Otra'])->assertForbidden();
+});
+
+test('el directorio de bienes se pagina de a 20', function () {
+    foreach (range(1, 25) as $numero) {
+        Bien::create([...datosDeBien(['codigo' => "INV-{$numero}", 'numero_diaguita' => null]), 'ubicacion_actual_id' => datosDeBien()['area_id']]);
+    }
+
+    $total = Bien::count();
+
+    $this->actingAs($this->patrimonio);
+
+    $this->get(route('patrimonio.bienes.index'))->assertInertia(fn (AssertableInertia $pagina) => $pagina
+        ->has('bienes.data', 20)
+        ->where('bienes.total', $total));
+
+    $this->get(route('patrimonio.bienes.index', ['page' => 2]))->assertInertia(fn (AssertableInertia $pagina) => $pagina
+        ->has('bienes.data', $total - 20)
+        ->where('bienes.current_page', 2));
 });
