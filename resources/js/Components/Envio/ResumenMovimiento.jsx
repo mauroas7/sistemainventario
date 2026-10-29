@@ -49,9 +49,9 @@ export default function ResumenMovimiento({ bien, areaOrigen, areaDestino, respo
                     faltaHasta="A definir"
                 />
 
-                {! responsableNuevo && (
+                {areaDestino && ! responsableNuevo && (
                     <Alerta tipo="aviso">
-                        El bien quedará registrado en {areaDestino?.nombre || 'el área de destino'} sin una persona a cargo.
+                        El bien quedará registrado en {areaDestino.nombre} sin una persona a cargo.
                         Gestión de Bienes definirá el responsable antes de emitir la ficha de firmas.
                     </Alerta>
                 )}

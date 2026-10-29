@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import { Boton, Dato, Estado, EstadoVacio, Tarjeta } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import { tonoEstadoMovimiento } from '@/utils/estados';
@@ -28,7 +29,12 @@ export default function Show({ bien, movimientos = [] }) {
                             {movimientos.map((m) => (
                                 <li key={m.id} className="rounded-xl bg-canvas p-4 dark:bg-white/5">
                                     <div className="flex items-start justify-between gap-3">
-                                        <p className="font-semibold text-primary dark:text-gray-100">TK-{m.id}</p>
+                                        <Link
+                                            href={route('patrimonio.movimientos.show', { movimiento: m.id })}
+                                            className="font-semibold text-primary hover:underline dark:text-gray-100"
+                                        >
+                                            TK-{m.id}
+                                        </Link>
                                         <Estado tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>
                                     </div>
                                     <p className="mt-1 text-sm">{m.area_origen.nombre} → {m.area_destino.nombre}</p>

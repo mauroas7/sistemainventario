@@ -20,7 +20,10 @@ export default function TablaControl({ movimientos, estados, estadoElegido, onEl
                         <th className="px-3 pb-2 font-semibold">Nuevo responsable</th>
                         <th className="px-3 pb-2 font-semibold">Motivo del traslado</th>
                         <th className="px-3 pb-2 font-semibold">Estado actual</th>
-                        <th className="px-5 pb-2 font-semibold">Nuevo estado</th>
+                        <th className="px-3 pb-2 font-semibold">Nuevo estado</th>
+                        <th className="w-px px-5 pb-2 font-semibold">
+                            <span className="sr-only">Auditoría</span>
+                        </th>
                     </tr>
                 </thead>
                 <tbody className={cuerpoTabla}>
@@ -46,7 +49,7 @@ export default function TablaControl({ movimientos, estados, estadoElegido, onEl
                                 <td className="whitespace-nowrap px-3 py-3">
                                     <Estado tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>
                                 </td>
-                                <td className="whitespace-nowrap px-5 py-3">
+                                <td className="whitespace-nowrap px-3 py-3">
                                     <div className="flex items-center gap-2">
                                         <select
                                             aria-label={`Nuevo estado del ticket TK-${m.id}`}
@@ -65,11 +68,22 @@ export default function TablaControl({ movimientos, estados, estadoElegido, onEl
                                         </Boton>
                                     </div>
                                 </td>
+                                <td className="px-5 py-3">
+                                    <Boton
+                                        variante="fantasma"
+                                        forma="grupo"
+                                        icono="visibility"
+                                        href={route('patrimonio.movimientos.show', { movimiento: m.id })}
+                                        aria-label={`Ver la auditoría del ticket TK-${m.id}`}
+                                    >
+                                        Ver
+                                    </Boton>
+                                </td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={12}>
+                            <td colSpan={13}>
                                 <EstadoVacio enTarjeta icono="search_off">
                                     {hayFiltrosActivos ? 'Ningún movimiento coincide con los filtros aplicados.' : 'No hay movimientos registrados.'}
                                 </EstadoVacio>

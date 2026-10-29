@@ -16,6 +16,7 @@ import {
 } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import { tonoEstadoMovimiento } from '@/utils/estados';
+import { fechaYHora } from '@/utils/fechas';
 import { puedeAcusar, puedeAnular, relacion } from '@/utils/movimientos';
 
 const PESTANAS = [
@@ -90,10 +91,11 @@ export default function Bandeja({ movimientos, pestana = 'informados', resumen }
                 {error && <Alerta tipo="error" className="mb-4">{error}</Alerta>}
 
                 <div className="-mx-5 overflow-x-auto">
-                    <table className="w-full min-w-[60rem] text-sm">
+                    <table className="w-full min-w-[68rem] text-sm">
                         <thead>
                             <tr className={encabezadoTabla}>
                                 <th className="px-5 pb-2 font-semibold">Ticket</th>
+                                <th className="px-3 pb-2 font-semibold">Fecha</th>
                                 <th className="px-3 pb-2 font-semibold">Bien</th>
                                 <th className="px-3 pb-2 font-semibold">Traslado</th>
                                 <th className="px-3 pb-2 font-semibold">Responsable</th>
@@ -107,6 +109,7 @@ export default function Bandeja({ movimientos, pestana = 'informados', resumen }
                                 movimientos.data.map((m) => (
                                     <tr key={m.id} className={renglonTabla}>
                                         <td className="px-5 py-3 font-semibold text-primary dark:text-gray-100">TK-{m.id}</td>
+                                        <td className="whitespace-nowrap px-3 py-3">{fechaYHora(m.fecha_movimiento)}</td>
                                         <td className="min-w-56 px-3 py-3">
                                             <p className="text-brandText dark:text-brandText-dark">
                                                 <span className="font-semibold">{m.bien.codigo}</span> - {m.bien.nombre}
@@ -154,7 +157,7 @@ export default function Bandeja({ movimientos, pestana = 'informados', resumen }
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={7}>
+                                    <td colSpan={8}>
                                         <EstadoVacio enTarjeta icono="inbox">No hay movimientos para este filtro.</EstadoVacio>
                                     </td>
                                 </tr>
