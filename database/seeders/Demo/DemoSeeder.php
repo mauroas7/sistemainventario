@@ -9,29 +9,29 @@ use Illuminate\Support\Str;
 
 /**
  * Áreas, cuentas y bienes de prueba, todas con la clave `demo1234`; se puede volver
- * a correr. El correo dice rol y área: `coordinador.enfermeria@hospital.test`,
- * `usuario1.enfermeria@…`, `usuario2.enfermeria@…`, `admin1.patrimonio@…`.
+ * a correr. El correo dice el puesto y el área: `coordinador@enfermeria.test`,
+ * `usuario@enfermeria.test`, `gestor@patrimonio.test`.
  */
 class DemoSeeder extends SeederDePrueba
 {
     public const CLAVE = 'demo1234';
 
-    /** Por área: el coordinador y los dos usuarios. Patrimonio tiene sólo administradores. */
+    /** Por área: el coordinador y el usuario. Patrimonio tiene sólo a Gestión de Bienes. */
     private const PERSONAL = [
-        'Dirección' => ['Marta', 'Raúl', 'Inés'],
-        'Administración' => ['Jorge', 'María', 'Pablo'],
-        'Recursos Humanos' => ['Claudia', 'Diego', 'Paula'],
-        'Mantenimiento' => ['Roberto', 'Sergio', 'Lucía'],
-        'Enfermería' => ['Laura', 'Ana', 'Pedro'],
-        'Laboratorio' => ['Sofía', 'Carlos', 'Martín'],
-        'Farmacia' => ['Verónica', 'Hernán', 'Julia'],
-        'Sistemas' => ['Juan', 'Nicolás', 'Carla'],
+        'Dirección' => ['Marta', 'Raúl'],
+        'Administración' => ['Jorge', 'María'],
+        'Recursos Humanos' => ['Claudia', 'Diego'],
+        'Mantenimiento' => ['Roberto', 'Sergio'],
+        'Enfermería' => ['Laura', 'Ana'],
+        'Laboratorio' => ['Sofía', 'Carlos'],
+        'Farmacia' => ['Verónica', 'Hernán'],
+        'Sistemas' => ['Juan', 'Nicolás'],
     ];
 
-    /** El correo de una cuenta de la demo: `correo('usuario1', 'Enfermería')`. */
+    /** El correo de una cuenta de la demo: `correo('usuario', 'Enfermería')` es `usuario@enfermeria.test`. */
     public static function correo(string $puesto, string $area): string
     {
-        return "{$puesto}.".Str::slug($area).'@hospital.test';
+        return "{$puesto}@".Str::slug($area).'.test';
     }
 
     public function run(): void
@@ -41,17 +41,18 @@ class DemoSeeder extends SeederDePrueba
         }
 
         // Patrimonio es Gestión de Bienes e Insumos: recibe los avisos y vuelca todo a Diaguita.
-        $this->cuenta('Silvana', 'admin1', Rol::Admin, 'Patrimonio');
-        $this->cuenta('Gustavo', 'admin2', Rol::Admin, 'Patrimonio');
+        $this->cuenta('Silvana', 'gestor', Rol::Patrimonio, 'Patrimonio');
 
-        foreach (self::PERSONAL as $area => [$coordinador, $usuario1, $usuario2]) {
+        foreach (self::PERSONAL as $area => [$coordinador, $usuario]) {
             $this->cuenta($coordinador, 'coordinador', Rol::Coordinador, $area);
-            $this->cuenta($usuario1, 'usuario1', Rol::Usuario, $area);
-            $this->cuenta($usuario2, 'usuario2', Rol::Usuario, $area);
+            $this->cuenta($usuario, 'usuario', Rol::Usuario, $area);
         }
 
+        // Un compañero de Ana, para ver que un usuario no ve lo que no lo nombra.
+        $this->cuenta('Pedro', 'usuario2', Rol::Usuario, 'Enfermería');
+
         // Dada de baja: no entra y no se ofrece como responsable.
-        $this->cuenta('Elena', 'usuario3', Rol::Usuario, 'Farmacia', activa: false);
+        $this->cuenta('Elena', 'baja', Rol::Usuario, 'Farmacia', activa: false);
 
         $this->call(BienesSeeder::class);
     }

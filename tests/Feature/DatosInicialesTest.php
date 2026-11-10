@@ -24,18 +24,22 @@ test('la demo no corre en produccion', function () {
     $this->app->make(DemoSeeder::class)->setContainer($this->app)->__invoke();
 });
 
-test('la demo tiene un coordinador y dos usuarios por area, y Patrimonio solo administradores', function () {
+test('la demo tiene un coordinador y un usuario por area, dos en Enfermeria, y Patrimonio solo Gestion de Bienes', function () {
     $this->seed([DatabaseSeeder::class, DemoSeeder::class]);
 
     foreach (Area::with(['usuarios' => fn ($q) => $q->activos()])->get() as $area) {
         $roles = $area->usuarios->countBy(fn (User $usuario) => $usuario->rol->value)->sortKeys()->all();
 
-        expect($roles)->toBe($area->nombre === 'Patrimonio' ? ['admin' => 2] : ['coordinador' => 1, 'usuario' => 2]);
+        expect($roles)->toBe(match ($area->nombre) {
+            'Patrimonio' => ['patrimonio' => 1],
+            'Enfermería' => ['coordinador' => 1, 'usuario' => 2],
+            default => ['coordinador' => 1, 'usuario' => 1],
+        });
     }
 
     expect(User::all())->each(fn ($usuario) => $usuario->name->toEndWith(' Test'))
-        ->and(Hash::check(DemoSeeder::CLAVE, User::where('email', 'admin1.patrimonio@hospital.test')->value('password')))->toBeTrue()
-        ->and(User::where('email', 'usuario3.farmacia@hospital.test')->firstOrFail()->activo)->toBeFalse();
+        ->and(Hash::check(DemoSeeder::CLAVE, User::where('email', 'gestor@patrimonio.test')->value('password')))->toBeTrue()
+        ->and(User::where('email', 'baja@farmacia.test')->firstOrFail()->activo)->toBeFalse();
 });
 
 test('crea el primer administrador desde la consola', function () {
@@ -46,7 +50,7 @@ test('crea el primer administrador desde la consola', function () {
 
     $usuario = User::where('email', 'silvana@hospital.test')->firstOrFail();
 
-    $this->assertSame(Rol::Admin, $usuario->rol);
+    $this->assertSame(Rol::Patrimonio, $usuario->rol);
     $this->assertTrue($usuario->activo);
 });
 

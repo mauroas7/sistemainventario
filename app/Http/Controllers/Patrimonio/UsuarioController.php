@@ -54,19 +54,19 @@ class UsuarioController extends Controller
             unset($datos['password']);
         }
 
-        // Nadie puede quitarse a sí mismo el acceso o el rol de admin y quedar afuera.
+        // Nadie puede quitarse a sí mismo el acceso o el rol de Gestión de Bienes y quedar afuera.
         if ($request->user()->is($usuario)) {
             if (array_key_exists('activo', $datos) && ! $datos['activo']) {
                 throw ValidationException::withMessages(['general' => 'No podés desactivar tu propia cuenta.']);
             }
 
-            if (array_key_exists('rol', $datos) && Rol::desde($datos['rol']) !== Rol::Admin) {
-                throw ValidationException::withMessages(['general' => 'No podés quitarte a vos mismo el rol de administrador.']);
+            if (array_key_exists('rol', $datos) && Rol::desde($datos['rol']) !== Rol::Patrimonio) {
+                throw ValidationException::withMessages(['general' => 'No podés quitarte a vos mismo el rol de Gestión de Bienes.']);
             }
         }
 
         if ($this->dejariaSinAdmin($usuario, $datos)) {
-            throw ValidationException::withMessages(['general' => 'Debe quedar al menos un administrador activo en el sistema.']);
+            throw ValidationException::withMessages(['general' => 'Debe quedar al menos una cuenta de Gestión de Bienes activa en el sistema.']);
         }
 
         $usuario->update($datos);
@@ -76,15 +76,15 @@ class UsuarioController extends Controller
 
     private function dejariaSinAdmin(User $usuario, array $cambios): bool
     {
-        if (! $usuario->tieneRol(Rol::Admin) || ! $usuario->activo) {
+        if (! $usuario->tieneRol(Rol::Patrimonio) || ! $usuario->activo) {
             return false;
         }
 
-        $pierdeAdmin = (array_key_exists('rol', $cambios) && Rol::desde($cambios['rol']) !== Rol::Admin)
+        $pierdeAdmin = (array_key_exists('rol', $cambios) && Rol::desde($cambios['rol']) !== Rol::Patrimonio)
             || (array_key_exists('activo', $cambios) && ! $cambios['activo']);
 
         return $pierdeAdmin && User::query()
-            ->where('rol', Rol::Admin)
+            ->where('rol', Rol::Patrimonio)
             ->activos()
             ->whereKeyNot($usuario->id)
             ->doesntExist();

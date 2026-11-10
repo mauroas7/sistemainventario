@@ -53,8 +53,8 @@ function datosDeMovimiento(Bien $bien, Area $destino, ?User $responsable = null)
 }
 
 test('informar un movimiento mueve el bien y cambia su responsable', function () {
-    $juan = usuarioPorCorreo('coordinador.sistemas@hospital.test');      // Sistemas
-    $carlos = usuarioPorCorreo('usuario1.laboratorio@hospital.test');  // Laboratorio
+    $juan = usuarioPorCorreo('coordinador@sistemas.test');      // Sistemas
+    $carlos = usuarioPorCorreo('usuario@laboratorio.test');  // Laboratorio
     $bien = bienPorCodigo('NB001');                      // está en Sistemas
     $laboratorio = areaPorNombre('Laboratorio');
 
@@ -80,7 +80,7 @@ test('un movimiento sin responsable deja el bien sin persona a cargo', function 
     // Es un caso válido: quien informa no siempre sabe quién lo va a recibir, y
     // Patrimonio define el responsable después. Lo que no puede pasar es que el bien
     // siga figurando a cargo de quien ya no lo tiene.
-    $juan = usuarioPorCorreo('coordinador.sistemas@hospital.test');
+    $juan = usuarioPorCorreo('coordinador@sistemas.test');
     $bien = bienPorCodigo('NB001');
     $mantenimiento = areaPorNombre('Mantenimiento');
 
@@ -95,7 +95,7 @@ test('un movimiento sin responsable deja el bien sin persona a cargo', function 
 });
 
 test('un usuario no puede informar movimientos de bienes de otra area', function () {
-    $carlos = usuarioPorCorreo('usuario1.laboratorio@hospital.test'); // Laboratorio
+    $carlos = usuarioPorCorreo('usuario@laboratorio.test'); // Laboratorio
     $bien = bienPorCodigo('NB001');                     // está en Sistemas
     $farmacia = areaPorNombre('Farmacia');
 
@@ -107,7 +107,7 @@ test('un usuario no puede informar movimientos de bienes de otra area', function
 });
 
 test('el destino no puede ser la misma area de origen', function () {
-    $juan = usuarioPorCorreo('coordinador.sistemas@hospital.test');
+    $juan = usuarioPorCorreo('coordinador@sistemas.test');
     $bien = bienPorCodigo('NB001');
     $sistemas = areaPorNombre('Sistemas');
 
@@ -119,8 +119,8 @@ test('el destino no puede ser la misma area de origen', function () {
 });
 
 test('el responsable nuevo debe pertenecer al area de destino', function () {
-    $juan = usuarioPorCorreo('coordinador.sistemas@hospital.test');
-    $ana = usuarioPorCorreo('usuario1.enfermeria@hospital.test'); // Enfermería, no Laboratorio
+    $juan = usuarioPorCorreo('coordinador@sistemas.test');
+    $ana = usuarioPorCorreo('usuario@enfermeria.test'); // Enfermería, no Laboratorio
     $bien = bienPorCodigo('NB001');
     $laboratorio = areaPorNombre('Laboratorio');
 
@@ -132,8 +132,8 @@ test('el responsable nuevo debe pertenecer al area de destino', function () {
 });
 
 test('anular un movimiento devuelve el bien a donde estaba', function () {
-    $juan = usuarioPorCorreo('coordinador.sistemas@hospital.test');
-    $carlos = usuarioPorCorreo('usuario1.laboratorio@hospital.test');
+    $juan = usuarioPorCorreo('coordinador@sistemas.test');
+    $carlos = usuarioPorCorreo('usuario@laboratorio.test');
     $bien = bienPorCodigo('NB001');
     $sistemas = areaPorNombre('Sistemas');
     $laboratorio = areaPorNombre('Laboratorio');
@@ -158,8 +158,8 @@ test('anular un movimiento devuelve el bien a donde estaba', function () {
 });
 
 test('la bandeja solo muestra los movimientos del area del usuario', function () {
-    $juan = usuarioPorCorreo('coordinador.sistemas@hospital.test');    // Sistemas
-    $maria = usuarioPorCorreo('usuario1.administracion@hospital.test');  // Administración
+    $juan = usuarioPorCorreo('coordinador@sistemas.test');    // Sistemas
+    $maria = usuarioPorCorreo('usuario@administracion.test');  // Administración
 
     // Movimiento entre Sistemas y Laboratorio: no toca a Administración.
     $this->actingAs($juan)->post('/envio/crear-ticket', datosDeMovimiento(
@@ -202,22 +202,21 @@ test('la demo de movimientos pasa por cada paso del circuito', function () {
  * acusar recibo, enviados por ella]. Pedro no tiene nada: ningún movimiento lo nombra.
  */
 dataset('bandejas de la demo', [
-    'Patrimonio, todo el hospital' => ['admin1.patrimonio', [10, 5, 1]],
-    'coordinadora de Enfermería' => ['coordinador.enfermeria', [3, 2, 0]],
-    'coordinador de Sistemas' => ['coordinador.sistemas', [3, 0, 1]],
-    'coordinadora de Laboratorio' => ['coordinador.laboratorio', [5, 1, 0]],
-    'Ana, de Enfermería' => ['usuario1.enfermeria', [2, 1, 1]],
-    'Pedro, de Enfermería' => ['usuario2.enfermeria', [0, 0, 0]],
-    'Carlos, de Laboratorio' => ['usuario1.laboratorio', [2, 0, 1]],
-    'María, de Administración' => ['usuario1.administracion', [1, 0, 1]],
-    'Pablo, de Administración' => ['usuario2.administracion', [2, 1, 1]],
+    'Patrimonio, todo el hospital' => ['gestor@patrimonio.test', [10, 5, 1]],
+    'coordinadora de Enfermería' => ['coordinador@enfermeria.test', [3, 2, 0]],
+    'coordinador de Sistemas' => ['coordinador@sistemas.test', [3, 0, 1]],
+    'coordinadora de Laboratorio' => ['coordinador@laboratorio.test', [5, 1, 0]],
+    'Ana, de Enfermería' => ['usuario@enfermeria.test', [2, 1, 1]],
+    'Pedro, de Enfermería' => ['usuario2@enfermeria.test', [0, 0, 0]],
+    'Carlos, de Laboratorio' => ['usuario@laboratorio.test', [4, 0, 2]],
+    'María, de Administración' => ['usuario@administracion.test', [3, 1, 2]],
 ]);
 
 test('cada rol ve en la bandeja lo que le toca', function (string $cuenta, array $esperado) {
     $this->seed(MovimientosSeeder::class);
     [$todos, $porAcusar, $enviados] = $esperado;
 
-    $this->actingAs(usuarioPorCorreo("{$cuenta}@hospital.test"));
+    $this->actingAs(usuarioPorCorreo($cuenta));
 
     foreach (['todos' => $todos, 'por_acusar' => $porAcusar, 'enviados' => $enviados] as $pestana => $cantidad) {
         $this->get("/recepcion/bandeja?ver={$pestana}")
@@ -230,11 +229,11 @@ test('cada rol ve en la bandeja lo que le toca', function (string $cuenta, array
 test('la bandeja abre en lo que hay para acusar y, si no hay nada, en todo', function () {
     $this->seed(MovimientosSeeder::class);
 
-    $this->actingAs(usuarioPorCorreo('usuario2.administracion@hospital.test'))
+    $this->actingAs(usuarioPorCorreo('usuario@administracion.test'))
         ->get('/recepcion/bandeja')
         ->assertInertia(fn ($page) => $page->where('pestana', 'por_acusar'));
 
-    $this->actingAs(usuarioPorCorreo('usuario1.administracion@hospital.test'))
+    $this->actingAs(usuarioPorCorreo('usuario@laboratorio.test'))
         ->get('/recepcion/bandeja')
         ->assertInertia(fn ($page) => $page->where('pestana', 'todos'));
 });
@@ -242,7 +241,7 @@ test('la bandeja abre en lo que hay para acusar y, si no hay nada, en todo', fun
 test('el inicio muestra lo que hay para acusar y los ultimos tickets', function () {
     $this->seed(MovimientosSeeder::class);
 
-    $this->actingAs(usuarioPorCorreo('coordinador.enfermeria@hospital.test'))
+    $this->actingAs(usuarioPorCorreo('coordinador@enfermeria.test'))
         ->get(route('inicio'))
         ->assertInertia(fn ($page) => $page
             ->component('Inicio/Index')
@@ -250,7 +249,7 @@ test('el inicio muestra lo que hay para acusar y los ultimos tickets', function 
             ->has('ultimos.data', 3));
 
     // Patrimonio sigue su trabajo desde el control patrimonial.
-    $this->actingAs(usuarioPorCorreo('admin1.patrimonio@hospital.test'))
+    $this->actingAs(usuarioPorCorreo('gestor@patrimonio.test'))
         ->get(route('inicio'))
         ->assertInertia(fn ($page) => $page->missing('porAcusar')->missing('ultimos'));
 });
@@ -261,20 +260,20 @@ test('un usuario no ve ni acusa lo de su area que no es suyo', function () {
     // Carlos mandó el electrocardiógrafo a Enfermería, a cargo de Ana.
     $movimiento = Movimiento::whereHas('bien', fn ($q) => $q->where('codigo', 'ECG001'))->firstOrFail();
 
-    $pedro = usuarioPorCorreo('usuario2.enfermeria@hospital.test'); // Usuario de Enfermería
+    $pedro = usuarioPorCorreo('usuario2@enfermeria.test'); // Usuario de Enfermería
     $this->actingAs($pedro)->get("/recepcion/movimientos/{$movimiento->id}")->assertForbidden();
     $this->actingAs($pedro)->post("/recepcion/movimientos/{$movimiento->id}/confirmar")->assertForbidden();
 
-    $this->actingAs(usuarioPorCorreo('usuario1.enfermeria@hospital.test'))->get("/recepcion/movimientos/{$movimiento->id}")->assertOk();
+    $this->actingAs(usuarioPorCorreo('usuario@enfermeria.test'))->get("/recepcion/movimientos/{$movimiento->id}")->assertOk();
 
-    $laura = usuarioPorCorreo('coordinador.enfermeria@hospital.test'); // coordinadora de Enfermería
+    $laura = usuarioPorCorreo('coordinador@enfermeria.test'); // coordinadora de Enfermería
     $this->actingAs($laura)->post("/recepcion/movimientos/{$movimiento->id}/confirmar")->assertSessionHasNoErrors();
     $this->assertSame($laura->id, $movimiento->fresh()->recibido_por);
 });
 
 test('cada cambio de estado queda registrado con su autor', function () {
-    $juan = usuarioPorCorreo('coordinador.sistemas@hospital.test');
-    $patrimonio = usuarioPorCorreo('admin1.patrimonio@hospital.test'); // admin
+    $juan = usuarioPorCorreo('coordinador@sistemas.test');
+    $patrimonio = usuarioPorCorreo('gestor@patrimonio.test'); // Gestión de Bienes
     $bien = bienPorCodigo('NB001');
 
     $this->actingAs($juan)->post('/envio/crear-ticket', datosDeMovimiento(
@@ -310,11 +309,11 @@ test('cada cambio de estado queda registrado con su autor', function () {
 });
 
 test('un usuario comun no entra al panel de patrimonio', function () {
-    $this->actingAs(usuarioPorCorreo('usuario1.laboratorio@hospital.test'))
+    $this->actingAs(usuarioPorCorreo('usuario@laboratorio.test'))
         ->get('/patrimonio/dashboard')
         ->assertForbidden();
 
-    $this->actingAs(usuarioPorCorreo('admin1.patrimonio@hospital.test'))
+    $this->actingAs(usuarioPorCorreo('gestor@patrimonio.test'))
         ->get('/patrimonio/dashboard')
         ->assertOk();
 });

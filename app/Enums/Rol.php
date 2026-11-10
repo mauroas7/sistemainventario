@@ -8,7 +8,7 @@ namespace App\Enums;
  */
 enum Rol: string
 {
-    case Admin = 'admin';
+    case Patrimonio = 'patrimonio';
     case Coordinador = 'coordinador';
     case Usuario = 'usuario';
 
@@ -16,7 +16,7 @@ enum Rol: string
     public function etiqueta(): string
     {
         return match ($this) {
-            self::Admin => 'Administrador (Gestión de Bienes)',
+            self::Patrimonio => 'Gestión de Bienes',
             self::Coordinador => 'Coordinador / Jefe de área',
             self::Usuario => 'Usuario',
         };

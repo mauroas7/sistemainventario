@@ -8,7 +8,7 @@ use Inertia\Testing\AssertableInertia;
 test('el rol se resuelve por slug, por etiqueta o por el enum', function () {
     expect(Rol::desde('coordinador'))->toBe(Rol::Coordinador)
         ->and(Rol::desde('Coordinador / Jefe de área'))->toBe(Rol::Coordinador)
-        ->and(Rol::desde(Rol::Admin))->toBe(Rol::Admin)
+        ->and(Rol::desde(Rol::Patrimonio))->toBe(Rol::Patrimonio)
         ->and(Rol::desde('jefe'))->toBeNull();
 });
 
@@ -16,15 +16,15 @@ test('un usuario tiene solo los roles que le tocan', function () {
     $coordinador = User::factory()->create(['rol' => Rol::Coordinador]);
 
     expect($coordinador->tieneRol('coordinador'))->toBeTrue()
-        ->and($coordinador->tieneRol(Rol::Admin, Rol::Usuario))->toBeFalse();
+        ->and($coordinador->tieneRol(Rol::Patrimonio, Rol::Usuario))->toBeFalse();
 });
 
-test('la ruta rol:admin deja pasar solo al admin', function () {
+test('la ruta rol:patrimonio deja pasar solo a Gestion de Bienes', function () {
     $this->actingAs(User::factory()->create(['rol' => Rol::Usuario]))
         ->get(route('patrimonio.dashboard'))
         ->assertForbidden();
 
-    $this->actingAs(User::factory()->create(['rol' => Rol::Admin]))
+    $this->actingAs(User::factory()->create(['rol' => Rol::Patrimonio]))
         ->get(route('patrimonio.dashboard'))
         ->assertOk();
 });

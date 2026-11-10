@@ -42,7 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/recepcion/movimientos/{movimiento}/anular', [TicketController::class, 'anular'])
         ->name('recepcion.anular');
 
-    Route::middleware('rol:admin')->prefix('patrimonio')->name('patrimonio.')->group(function () {
+    Route::middleware('rol:patrimonio')->prefix('patrimonio')->name('patrimonio.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/exportar', [DashboardController::class, 'exportar'])->name('dashboard.exportar');
 

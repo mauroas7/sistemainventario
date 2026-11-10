@@ -65,7 +65,7 @@ class NotificacionMovimientoService
         }
 
         return User::query()
-            ->where('rol', Rol::Admin)
+            ->where('rol', Rol::Patrimonio)
             ->whereNotNull('email')
             ->pluck('email')
             ->all();

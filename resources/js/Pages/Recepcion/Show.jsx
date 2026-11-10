@@ -8,7 +8,7 @@ import { puedeAcusar, puedeAnular, relacion } from '@/utils/movimientos';
 
 export default function Show({ movimiento: m, responsables = [] }) {
     const usuario = usePage().props.auth.usuario;
-    const esAdmin = usuario.rol === 'admin';
+    const esPatrimonio = usuario.rol === 'patrimonio';
     const { confirmar, props: modal } = useConfirmacion();
 
     const [nuevoResponsable, setNuevoResponsable] = useState('');
@@ -107,9 +107,9 @@ export default function Show({ movimiento: m, responsables = [] }) {
                     {! m.responsable_nuevo && (
                         <Alerta tipo="aviso" titulo="Este ticket no tiene responsable definido" className="mt-6">
                             El bien figura en {m.area_destino.nombre}, pero nadie quedó a cargo.
-                            {esAdmin ? ' Definí quién lo recibe para poder emitir la ficha de firmas.' : ' Gestión de Bienes va a definir el responsable.'}
+                            {esPatrimonio ? ' Definí quién lo recibe para poder emitir la ficha de firmas.' : ' Gestión de Bienes va a definir el responsable.'}
 
-                            {esAdmin && (responsables.length > 0 ? (
+                            {esPatrimonio && (responsables.length > 0 ? (
                                 <form onSubmit={asignarResponsable} className="mt-3 flex flex-wrap items-end gap-3">
                                     <Select
                                         nombre="responsable_nuevo_id"

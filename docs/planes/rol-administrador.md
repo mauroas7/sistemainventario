@@ -33,15 +33,19 @@ Configuración (áreas y usuarios), sin área y sin el control patrimonial.
   «todos los de Gestión de Bienes» (activos). El admin no recibe avisos.
 - **`usuarios:crear-administrador` crea el admin nuevo.** En producción el
   primer admin da de alta a Gestión de Bienes desde Configuración.
-- **Demo**: Silvana y Gustavo pasan a `gestor1.patrimonio@` / `gestor2.patrimonio@`
-  con rol `patrimonio`; se suma `admin@hospital.test` («Admin Test», sin área).
+- **Demo: una cuenta por rol y por área, y el área en el dominio del correo**
+  (`coordinador@sistemas.test`, `usuario@sistemas.test`). Se entra sin recordar
+  números. Enfermería conserva un segundo usuario (`usuario2@enfermeria.test`)
+  para mostrar que un usuario no ve lo de su compañero. Gestión de Bienes es
+  `gestor@patrimonio.test`, la cuenta dada de baja `baja@farmacia.test` y el
+  admin nuevo `admin@hospital.test` («Admin Test», sin área).
 
-Dos unidades: primero el renombre puro (el sistema hace lo mismo que hoy), después
-el rol nuevo. Así el diff del renombre se revisa sin lógica nueva mezclada.
+Tres unidades: primero el renombre puro (el sistema hace lo mismo que hoy), después
+la demo nueva y al final el rol nuevo. Así cada diff se revisa sin lo otro mezclado.
 
 ## U1 — `admin` pasa a `patrimonio`
 
-Estado: pendiente
+Estado: hecha
 
 Renombre puro: el caso del enum, cada uso y la demo. El comportamiento no cambia;
 Gestión de Bienes conserva Configuración hasta U2.
@@ -79,7 +83,29 @@ patrimonial, Localizador, Directorio y Configuración; el tablero, el localizado
 y Configuración abren; en Configuración, el rol se llama «Gestión de Bienes» y
 elegirlo deshabilita el área.
 
-## U2 — el admin nuevo, dueño de Configuración
+## U2 — la demo, una cuenta por rol
+
+Estado: hecha
+
+- `database/seeders/Demo/DemoSeeder.php`: `correo()` arma `<puesto>@<área>.test`;
+  por área un coordinador y un usuario (`usuario`), más `usuario2@enfermeria.test`
+  (Pedro); Patrimonio sólo `gestor@patrimonio.test` (Silvana); la dada de baja,
+  `baja@farmacia.test` (Elena).
+- `BienesSeeder`: los bienes de los `usuario2` que se van pasan al `usuario` del
+  área; `MPM001` sigue con Pedro.
+- `MovimientosSeeder`: Pablo pasa a María, Martín a Carlos y Gustavo a Silvana; los
+  diez movimientos y sus pasos no cambian.
+- Tests: los correos nuevos; la bandeja de María pasa a `[3, 1, 2]` y la de Carlos
+  a `[4, 0, 2]`, el resto igual; la guarda de Gestión de Bienes crea al segundo
+  gestor con la factory; `DatosInicialesTest` cuenta un usuario por área y dos en
+  Enfermería.
+- Docs: `README.md` (usuarios de prueba y el ejemplo de Enfermería),
+  `docs/arquitectura.md` (*Datos*).
+
+Revisar: `/login` con `gestor@patrimonio.test`, `coordinador@enfermeria.test` y
+`usuario@sistemas.test` (clave `demo1234`); `baja@farmacia.test` no entra.
+
+## U3 — el admin nuevo, dueño de Configuración
 
 Estado: pendiente
 
@@ -115,6 +141,6 @@ rutas se revisan juntos (`docs/arquitectura.md`).
 Revisar: con `admin@hospital.test`, el menú muestra sólo Inicio, Configuración y
 Mi cuenta; `/patrimonio/dashboard`, `/envio/crear-ticket` y `/recepcion/bandeja`
 dan 403; puede dar de alta un usuario de cada rol, y el área se pide sólo para
-coordinador y usuario. Con `gestor1.patrimonio@`, Configuración ya no está en el
+coordinador y usuario. Con `gestor@patrimonio.test`, Configuración ya no está en el
 menú y su URL da 403. Darse de baja o quitarse el rol siendo el único admin
 muestra el error.

@@ -19,7 +19,7 @@ class InicioController extends Controller
     {
         $user = $request->user();
 
-        if ($user->tieneRol(Rol::Admin)) {
+        if ($user->tieneRol(Rol::Patrimonio)) {
             return Inertia::render('Inicio/Index');
         }
 

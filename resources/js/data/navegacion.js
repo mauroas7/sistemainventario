@@ -20,9 +20,9 @@ export const SECCIONES = [
         icono: 'monitoring',
         ruta: 'patrimonio.dashboard',
         activaEn: ['patrimonio.dashboard', 'patrimonio.movimientos.'],
-        roles: ['admin'],
+        roles: ['patrimonio'],
     },
-    { etiqueta: 'Localizador de bienes', icono: 'travel_explore', ruta: 'patrimonio.localizador.index', roles: ['admin'] },
-    { etiqueta: 'Directorio de bienes', icono: 'inventory_2', ruta: 'patrimonio.bienes.index', activaEn: 'patrimonio.bienes.', roles: ['admin'] },
-    { etiqueta: 'Configuración', icono: 'settings', ruta: 'patrimonio.configuracion.index', roles: ['admin'] },
+    { etiqueta: 'Localizador de bienes', icono: 'travel_explore', ruta: 'patrimonio.localizador.index', roles: ['patrimonio'] },
+    { etiqueta: 'Directorio de bienes', icono: 'inventory_2', ruta: 'patrimonio.bienes.index', activaEn: 'patrimonio.bienes.', roles: ['patrimonio'] },
+    { etiqueta: 'Configuración', icono: 'settings', ruta: 'patrimonio.configuracion.index', roles: ['patrimonio'] },
 ];

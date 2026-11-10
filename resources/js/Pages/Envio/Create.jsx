@@ -20,7 +20,7 @@ const pares = (lista, etiqueta = (item) => item.nombre) => lista.map((item) => [
 
 export default function Create({ bienes = [], areas = [], tiposMovimiento = [], motivos = [], responsables = [] }) {
     const usuario = usePage().props.auth.usuario;
-    const esAdmin = usuario.rol === 'admin';
+    const esPatrimonio = usuario.rol === 'patrimonio';
 
     const [form, setForm] = useState(FORM_VACIO);
     const [imagen, setImagen] = useState(null);
@@ -53,7 +53,7 @@ export default function Create({ bienes = [], areas = [], tiposMovimiento = [], 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [responsables, form.area_destino_id]);
 
-    const areasDestino = (esAdmin ? areas : areas.filter((a) => String(a.nombre).toLowerCase() !== 'dirección'))
+    const areasDestino = (esPatrimonio ? areas : areas.filter((a) => String(a.nombre).toLowerCase() !== 'dirección'))
         .filter((a) => String(a.id) !== String(form.area_origen_id));
 
     const bien = porId(bienes, form.bien_id);

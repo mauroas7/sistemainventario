@@ -1,14 +1,14 @@
 import { Alerta, Boton, Campo, claseControl, descritoPor, Input, PasswordInput, Rotulo, Select } from 'hu-kit/componentes';
 
 const AYUDA_ROL = {
-    admin: 'Ve todos los bienes y movimientos del hospital, y administra el sistema.',
+    patrimonio: 'Ve todos los bienes y movimientos del hospital, y administra el sistema.',
     coordinador: 'Ve e informa movimientos de los bienes de su área.',
     usuario: 'Ve e informa movimientos de los bienes de su área.',
 };
 
 /** El alta o la edición de una cuenta, en el lugar de la lista. */
 export default function FormularioUsuario({ esNuevo, form, onCambiar, roles, areas, errors, errorGeneral, guardando, onGuardar, onCancelar }) {
-    const esAdmin = form.rol === 'admin';
+    const esPatrimonio = form.rol === 'patrimonio';
 
     return (
         <form onSubmit={onGuardar} className="mb-6 rounded-xl bg-canvas p-5 dark:bg-white/5">
@@ -33,14 +33,14 @@ export default function FormularioUsuario({ esNuevo, form, onCambiar, roles, are
                 <Select
                     nombre="area_id"
                     etiqueta="Área"
-                    requerido={! esAdmin}
+                    requerido={! esPatrimonio}
                     opciones={areas.map((a) => [a.id, a.nombre])}
                     valor={form.area_id}
                     onChange={onCambiar}
                     error={errors.area_id}
                     ayuda="Define qué bienes va a ver."
-                    disabled={esAdmin}
-                    vacio={esAdmin ? 'Ve todas las áreas' : 'Elegí un área'}
+                    disabled={esPatrimonio}
+                    vacio={esPatrimonio ? 'Ve todas las áreas' : 'Elegí un área'}
                 />
                 <div className="md:col-span-2">
                     <Campo id="password" etiqueta={esNuevo ? 'Contraseña' : 'Contraseña (vacía para no cambiarla)'} requerido={esNuevo} error={errors.password}>

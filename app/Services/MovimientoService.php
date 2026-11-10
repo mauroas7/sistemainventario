@@ -34,7 +34,7 @@ class MovimientoService
      */
     public function puedeVer(User $usuario, Movimiento $movimiento): bool
     {
-        if ($usuario->tieneRol(Rol::Admin)) {
+        if ($usuario->tieneRol(Rol::Patrimonio)) {
             return true;
         }
 
@@ -59,7 +59,7 @@ class MovimientoService
     {
         $query = Movimiento::query();
 
-        if ($usuario && ! $usuario->tieneRol(Rol::Admin)) {
+        if ($usuario && ! $usuario->tieneRol(Rol::Patrimonio)) {
             $query->where(function ($q) use ($usuario) {
                 if ($usuario->tieneRol(Rol::Coordinador)) {
                     $q->where('area_origen_id', $usuario->area_id)
@@ -106,7 +106,7 @@ class MovimientoService
             $query->whereNull('recibido_por')
                 ->whereHas('estadoMovimiento', fn ($q) => $q->where('nombre', '!=', 'Anulado'));
 
-            if (! $usuario->tieneRol(Rol::Admin)) {
+            if (! $usuario->tieneRol(Rol::Patrimonio)) {
                 $query->where(function ($q) use ($usuario) {
                     $q->where('responsable_nuevo_id', $usuario->id);
 

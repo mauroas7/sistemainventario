@@ -8,17 +8,17 @@ const mismo = (a, b) => a != null && b != null && String(a) === String(b);
 export const puedeAcusar = (m, usuario) =>
     m.estado_movimiento?.nombre !== 'Anulado'
     && ! m.recibido_por
-    && (usuario.rol === 'admin'
+    && (usuario.rol === 'patrimonio'
         || mismo(m.responsable_nuevo?.id, usuario.id)
         || (usuario.rol === 'coordinador' && mismo(m.area_destino?.id, usuario.area?.id)));
 
 /** Anula quien lo informó o Patrimonio, sólo mientras no esté volcado a Diaguita. */
 export const puedeAnular = (m, usuario) =>
-    m.estado_movimiento?.nombre === 'Informado' && (usuario.rol === 'admin' || mismo(m.creado_por?.id, usuario.id));
+    m.estado_movimiento?.nombre === 'Informado' && (usuario.rol === 'patrimonio' || mismo(m.creado_por?.id, usuario.id));
 
 /** Cómo se relaciona el usuario con el movimiento. */
 export const relacion = (m, usuario) => {
-    if (usuario.rol === 'admin') return 'Admin';
+    if (usuario.rol === 'patrimonio') return 'Patrimonio';
     if (mismo(m.area_origen?.id, usuario.area?.id)) return 'Enviado';
     if (mismo(m.area_destino?.id, usuario.area?.id)) return 'A recibir';
     return '—';

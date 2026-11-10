@@ -32,7 +32,7 @@ const ACCESOS = [
         ruta: 'patrimonio.dashboard',
         icono: 'monitoring',
         descripcion: 'Consultá y filtrá el historial completo de movimientos.',
-        roles: ['admin'],
+        roles: ['patrimonio'],
     },
 ];
 
