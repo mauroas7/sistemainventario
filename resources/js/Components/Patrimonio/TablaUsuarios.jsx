@@ -1,6 +1,7 @@
 import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, renglonTabla } from 'hu-kit/componentes';
+import { ROLES_SIN_AREA } from '@/Components/Patrimonio/FormularioUsuario';
 
-const TONO_ROL = { admin: 'info', coordinador: 'aviso', usuario: 'neutro' };
+const TONO_ROL = { admin: 'info', patrimonio: 'info', coordinador: 'aviso', usuario: 'neutro' };
 
 /** Las cuentas de acceso, con editar y dar de baja o reactivar. Nadie se da de baja a sí mismo. */
 export default function TablaUsuarios({ usuarios, usuarioActualId, onEditar, onCambiarEstado }) {
@@ -31,8 +32,8 @@ export default function TablaUsuarios({ usuarios, usuarioActualId, onEditar, onC
                                         <p className="text-xs text-brandText-muted dark:text-brandText-mutedDark">{u.email}</p>
                                     </td>
                                     <td className="px-3 py-3">
-                                        {u.area?.nombre ?? (u.rol === 'admin' ? (
-                                            <span className="text-xs italic text-brandText-muted dark:text-brandText-mutedDark">Todas</span>
+                                        {u.area?.nombre ?? (ROLES_SIN_AREA.includes(u.rol) ? (
+                                            <span className="text-xs italic text-brandText-muted dark:text-brandText-mutedDark">{u.rol === 'patrimonio' ? 'Todas' : 'Sin área'}</span>
                                         ) : (
                                             <Estado tono="aviso" icono="warning">Sin asignar</Estado>
                                         ))}

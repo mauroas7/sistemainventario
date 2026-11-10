@@ -50,9 +50,9 @@ class GuardarUsuarioRequest extends FormRequest
             ],
 
             // El área define qué bienes ve la persona: sin ella la cuenta queda ciega.
-            // Solo Patrimonio (admin), que ve todo, puede quedar sin área asignada.
+            // El admin y Gestión de Bienes no tienen área: uno no ve bienes y el otro ve todos.
             'area_id' => [
-                'exclude_if:rol,admin',
+                'exclude_if:rol,admin,patrimonio',
                 'required',
                 'integer',
                 'exists:areas,id',

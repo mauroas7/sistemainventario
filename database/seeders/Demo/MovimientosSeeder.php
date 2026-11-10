@@ -31,18 +31,15 @@ class MovimientosSeeder extends SeederDePrueba
         $this->call(DemoSeeder::class);
 
         $cuenta = fn (string $puesto, string $area) => User::where('email', DemoSeeder::correo($puesto, $area))->firstOrFail();
-        $silvana = $cuenta('admin1', 'Patrimonio');
-        $gustavo = $cuenta('admin2', 'Patrimonio');
+        $silvana = $cuenta('gestor', 'Patrimonio');
         $juan = $cuenta('coordinador', 'Sistemas');
-        $nicolas = $cuenta('usuario1', 'Sistemas');
-        $maria = $cuenta('usuario1', 'Administración');
-        $pablo = $cuenta('usuario2', 'Administración');
-        $ana = $cuenta('usuario1', 'Enfermería');
+        $nicolas = $cuenta('usuario', 'Sistemas');
+        $maria = $cuenta('usuario', 'Administración');
+        $ana = $cuenta('usuario', 'Enfermería');
         $sofia = $cuenta('coordinador', 'Laboratorio');
-        $carlos = $cuenta('usuario1', 'Laboratorio');
-        $martin = $cuenta('usuario2', 'Laboratorio');
+        $carlos = $cuenta('usuario', 'Laboratorio');
         $roberto = $cuenta('coordinador', 'Mantenimiento');
-        $sergio = $cuenta('usuario1', 'Mantenimiento');
+        $sergio = $cuenta('usuario', 'Mantenimiento');
 
         // Cada paso pasa el día que dice y lo hace quien lo firma, así fechas e historial cuentan la misma historia.
         $hoy = now();
@@ -65,16 +62,16 @@ class MovimientosSeeder extends SeederDePrueba
         try {
             // Préstamo cerrado: Mantenimiento presta el taladro a Laboratorio.
             $el(20, $sergio);
-            $prestamo = $informar($sergio, 'TAL001', 'Laboratorio', $martin, 'Préstamo', 'Préstamo');
-            $el(19, $martin);
-            $servicio->acusarRecibo($prestamo, $martin);
+            $prestamo = $informar($sergio, 'TAL001', 'Laboratorio', $carlos, 'Préstamo', 'Préstamo');
+            $el(19, $carlos);
+            $servicio->acusarRecibo($prestamo, $carlos);
             $el(18, $silvana);
             $prestamo = $servicio->marcarRegistradoEnDiaguita($prestamo, $silvana);
             $el(15, $silvana);
             $servicio->cerrarTramite($prestamo);
 
             // Olvidado: hace más de dos semanas que nadie acusa la balanza ni la carga en Diaguita.
-            $el(16, $cuenta('usuario1', 'Farmacia'));
+            $el(16, $cuenta('usuario', 'Farmacia'));
             $informar(Auth::user(), 'BAL001', 'Laboratorio', $sofia, 'Préstamo', 'Préstamo');
 
             // Circuito completo: la tablet pasa a Sistemas, Juan acusa y Patrimonio cierra.
@@ -88,22 +85,22 @@ class MovimientosSeeder extends SeederDePrueba
             $servicio->cerrarTramite($tablet);
 
             // Devolución del taladro: acusa el coordinador en lugar del responsable.
-            $el(7, $martin);
-            $devolucion = $informar($martin, 'TAL001', 'Mantenimiento', $sergio, 'Devolución', 'Devolución');
+            $el(7, $carlos);
+            $devolucion = $informar($carlos, 'TAL001', 'Mantenimiento', $sergio, 'Devolución', 'Devolución');
             $el(6, $roberto);
             $servicio->acusarRecibo($devolucion, $roberto);
-            $el(5, $gustavo);
-            $servicio->marcarRegistradoEnDiaguita($devolucion, $gustavo);
+            $el(5, $silvana);
+            $servicio->marcarRegistradoEnDiaguita($devolucion, $silvana);
 
-            // Registrado en Diaguita y todavía sin acuse: Pablo lo tiene para acusar.
-            $el(5, $cuenta('usuario1', 'Recursos Humanos'));
-            $pc = $informar(Auth::user(), 'PC001', 'Administración', $pablo, 'Transferencia', 'Cambio de área');
+            // Registrado en Diaguita y todavía sin acuse: María lo tiene para acusar.
+            $el(5, $cuenta('usuario', 'Recursos Humanos'));
+            $pc = $informar(Auth::user(), 'PC001', 'Administración', $maria, 'Transferencia', 'Cambio de área');
             $el(4, $silvana);
             $servicio->marcarRegistradoEnDiaguita($pc, $silvana);
 
             // Informado por error y anulado: la impresora vuelve a Administración.
-            $el(4, $pablo);
-            $impresora = $informar($pablo, 'IMP001', 'Laboratorio', $carlos, 'Transferencia', 'Cambio de área', [
+            $el(4, $maria);
+            $impresora = $informar($maria, 'IMP001', 'Laboratorio', $carlos, 'Transferencia', 'Cambio de área', [
                 'observaciones_salida' => 'Se cargó por error: la impresora no se movió.',
             ]);
             $servicio->anularMovimiento($impresora);

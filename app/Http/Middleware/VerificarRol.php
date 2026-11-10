@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Restringe una ruta a uno o más roles: `->middleware('rol:admin')`.
+ * Restringe una ruta a uno o más roles: `->middleware('rol:patrimonio')`.
  * Acepta slugs y etiquetas de `App\Enums\Rol`.
  */
 class VerificarRol

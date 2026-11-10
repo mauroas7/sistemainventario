@@ -54,7 +54,7 @@ class UsuarioController extends Controller
             unset($datos['password']);
         }
 
-        // Nadie puede quitarse a sí mismo el acceso o el rol de admin y quedar afuera.
+        // Nadie puede quitarse a sí mismo el acceso o el rol de administrador y quedar afuera.
         if ($request->user()->is($usuario)) {
             if (array_key_exists('activo', $datos) && ! $datos['activo']) {
                 throw ValidationException::withMessages(['general' => 'No podés desactivar tu propia cuenta.']);

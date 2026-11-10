@@ -43,7 +43,7 @@ class TicketController extends Controller
         $bienesQuery = Bien::query()
             ->with(['ubicacionActual', 'responsable']);
 
-        if (! $user->tieneRol(Rol::Admin)) {
+        if (! $user->tieneRol(Rol::Patrimonio)) {
             $bienesQuery->where('area_id', $user->area_id);
         }
 
@@ -82,7 +82,7 @@ class TicketController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
-        if (! $user->tieneRol(Rol::Admin) && (int) $user->area_id !== (int) $validated['area_origen_id']) {
+        if (! $user->tieneRol(Rol::Patrimonio) && (int) $user->area_id !== (int) $validated['area_origen_id']) {
             abort(403, 'No puede informar movimientos desde un área distinta a la suya.');
         }
 
@@ -160,7 +160,7 @@ class TicketController extends Controller
             'movimiento' => (new MovimientoResource($movimiento))->resolve($request),
             // Sólo Patrimonio define el responsable de un movimiento que se informó sin
             // uno, y sólo entre el personal del área que recibió el bien.
-            'responsables' => $user->tieneRol(Rol::Admin)
+            'responsables' => $user->tieneRol(Rol::Patrimonio)
                 ? User::query()
                     ->activos()
                     ->where('area_id', $movimiento->area_destino_id)
@@ -195,7 +195,7 @@ class TicketController extends Controller
         $esCoordinadorDestino = $user->tieneRol(Rol::Coordinador)
             && (int) $user->area_id === (int) $movimiento->area_destino_id;
 
-        abort_unless($user->tieneRol(Rol::Admin) || $esNuevoResponsable || $esCoordinadorDestino, 403);
+        abort_unless($user->tieneRol(Rol::Patrimonio) || $esNuevoResponsable || $esCoordinadorDestino, 403);
 
         if ($movimiento->recibido_por) {
             return back()->with('exito', 'El ticket ya tenía acuse de recibo.');
@@ -221,7 +221,7 @@ class TicketController extends Controller
         }
 
         abort_unless(
-            $user->tieneRol(Rol::Admin) || (int) $user->id === (int) $movimiento->creado_por,
+            $user->tieneRol(Rol::Patrimonio) || (int) $user->id === (int) $movimiento->creado_por,
             403,
             'Solo quien informó el movimiento o Patrimonio pueden anularlo.'
         );

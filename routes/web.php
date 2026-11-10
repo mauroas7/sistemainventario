@@ -26,23 +26,26 @@ Route::middleware('auth')->group(function () {
         ->middleware('rol:coordinador,usuario')
         ->name('mis-bienes');
 
-    Route::get('/envio/crear-ticket', [TicketController::class, 'create'])
-        ->name('envio.crear');
-    Route::post('/envio/crear-ticket', [TicketController::class, 'store'])
-        ->name('envio.store');
+    // El admin no tiene área: no informa ni recibe traslados.
+    Route::middleware('rol:patrimonio,coordinador,usuario')->group(function () {
+        Route::get('/envio/crear-ticket', [TicketController::class, 'create'])
+            ->name('envio.crear');
+        Route::post('/envio/crear-ticket', [TicketController::class, 'store'])
+            ->name('envio.store');
 
-    Route::get('/recepcion/bandeja', [TicketController::class, 'index'])
-        ->name('recepcion.bandeja');
-    Route::get('/recepcion/movimientos/{movimiento}', [TicketController::class, 'show'])
-        ->name('recepcion.show');
-    Route::get('/recepcion/movimientos/{movimiento}/foto', [TicketController::class, 'foto'])
-        ->name('recepcion.movimientos.foto');
-    Route::post('/recepcion/movimientos/{movimiento}/confirmar', [TicketController::class, 'confirmar'])
-        ->name('recepcion.confirmar');
-    Route::post('/recepcion/movimientos/{movimiento}/anular', [TicketController::class, 'anular'])
-        ->name('recepcion.anular');
+        Route::get('/recepcion/bandeja', [TicketController::class, 'index'])
+            ->name('recepcion.bandeja');
+        Route::get('/recepcion/movimientos/{movimiento}', [TicketController::class, 'show'])
+            ->name('recepcion.show');
+        Route::get('/recepcion/movimientos/{movimiento}/foto', [TicketController::class, 'foto'])
+            ->name('recepcion.movimientos.foto');
+        Route::post('/recepcion/movimientos/{movimiento}/confirmar', [TicketController::class, 'confirmar'])
+            ->name('recepcion.confirmar');
+        Route::post('/recepcion/movimientos/{movimiento}/anular', [TicketController::class, 'anular'])
+            ->name('recepcion.anular');
+    });
 
-    Route::middleware('rol:admin')->prefix('patrimonio')->name('patrimonio.')->group(function () {
+    Route::middleware('rol:patrimonio')->prefix('patrimonio')->name('patrimonio.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/exportar', [DashboardController::class, 'exportar'])->name('dashboard.exportar');
 
@@ -58,7 +61,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/bienes', [BienController::class, 'store'])->name('bienes.store');
         Route::get('/bienes/{bien}', [BienController::class, 'show'])->name('bienes.show');
         Route::put('/bienes/{bien}', [BienController::class, 'update'])->name('bienes.update');
+    });
 
+    // Configuración conserva el prefijo y los nombres `patrimonio.*`, pero es sólo del admin.
+    Route::middleware('rol:admin')->prefix('patrimonio')->name('patrimonio.')->group(function () {
         Route::get('/configuracion', [UsuarioController::class, 'index'])->name('configuracion.index');
         Route::post('/areas', [AreaController::class, 'store'])->name('areas.store');
         Route::put('/areas/{area}', [AreaController::class, 'update'])->name('areas.update');

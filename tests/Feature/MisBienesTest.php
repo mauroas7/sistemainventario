@@ -16,7 +16,7 @@ beforeEach(function () {
 test('el coordinador y el usuario ven todos los bienes de su área y ninguno de otra', function () {
     $codigos = Bien::where('area_id', $this->enfermeria->id)->orderBy('codigo')->pluck('codigo')->all();
 
-    foreach (['coordinador.enfermeria@hospital.test', 'usuario2.enfermeria@hospital.test'] as $email) {
+    foreach (['coordinador@enfermeria.test', 'usuario2@enfermeria.test'] as $email) {
         $this->actingAs(User::where('email', $email)->firstOrFail())
             ->get(route('mis-bienes'))
             ->assertInertia(fn (AssertableInertia $pagina) => $pagina
@@ -27,7 +27,7 @@ test('el coordinador y el usuario ven todos los bienes de su área y ninguno de 
 });
 
 test('mis bienes busca sólo dentro del área', function () {
-    $this->actingAs(User::where('email', 'coordinador.enfermeria@hospital.test')->firstOrFail());
+    $this->actingAs(User::where('email', 'coordinador@enfermeria.test')->firstOrFail());
 
     $this->get(route('mis-bienes', ['busqueda' => 'tab001']))->assertInertia(fn (AssertableInertia $pagina) => $pagina
         ->has('bienes.data', 1)
@@ -40,7 +40,7 @@ test('mis bienes busca sólo dentro del área', function () {
 });
 
 test('patrimonio no entra a mis bienes: tiene el directorio', function () {
-    $this->actingAs(User::where('email', 'admin1.patrimonio@hospital.test')->firstOrFail())
+    $this->actingAs(User::where('email', 'gestor@patrimonio.test')->firstOrFail())
         ->get(route('mis-bienes'))
         ->assertForbidden();
 });

@@ -40,18 +40,19 @@ abierta o con «recordarme», la pierde en el pedido siguiente
 a sí mismo y siempre queda al menos un administrador activo.
 
 `App\Enums\Rol` guarda un **slug** en `users.rol` y `etiqueta()` da el nombre que
-se muestra. Las rutas declaran `rol:admin` (alias de `VerificarRol`); el código
+se muestra. Las rutas declaran `rol:admin`, `rol:patrimonio`… (alias de `VerificarRol`); el código
 pregunta con `User::tieneRol()`, que acepta el enum, el slug o la etiqueta.
 
 | Rol | Qué ve | Qué hace |
 |---|---|---|
-| Administrador (Gestión de Bienes) | Todo el hospital, sin área | Informa, recibe y anula como cualquiera; además el control patrimonial: tablero, estados, responsables, localizador, el alta de bienes, áreas y usuarios |
+| Administrador | Sólo Configuración, sin área | Da de alta y edita áreas y usuarios. No informa ni recibe movimientos y no recibe avisos |
+| Gestión de Bienes | Todo el hospital, sin área | Informa, recibe y anula como cualquiera; además el control patrimonial: tablero, estados, responsables, localizador y el alta de bienes |
 | Coordinador / Jefe de área | Los bienes de su área (Mis bienes) y todo lo que sale de su área o llega a ella | Informa traslados de los bienes del área, acusa recibo de lo que llega al área y anula lo que informó |
 | Usuario | Los bienes de su área (Mis bienes); de los movimientos, sólo lo suyo: lo que informó y lo que lo nombra responsable, saliente o nuevo | Informa traslados de los bienes del área, acusa recibo de lo que queda a su cargo y anula lo que informó |
 
 **Qué ve cada uno lo decide `MovimientoService::puedeVer()`**, y la consulta de
 la bandeja aplica la misma regla. Las dos cuentas informan traslados de cualquier
-bien de su área, por eso toda cuenta que no es administrador necesita área. Un
+bien de su área, por eso toda cuenta que no es administrador ni de Gestión de Bienes necesita área. Un
 movimiento sin responsable, en cambio, sólo lo ve y lo acusa el coordinador del
 área que recibe, hasta que Gestión de Bienes define el responsable.
 
@@ -69,7 +70,7 @@ El menú sale de `resources/js/data/navegacion.js`; quién entra a cada ruta, de
    constancia; no cambia ni la ubicación ni el estado. La bandeja se ordena por
    lo que le toca a cada uno: «Para acusar recibo», «Enviados por mí» y
    «Todos», y abre en la primera si tiene algo. Inicio muestra lo mismo para
-   quien no es administrador. Quién puede acusar está escrito tres veces:
+   quien tiene área. Quién puede acusar está escrito tres veces:
    `TicketController::confirmar()`, el filtro `por_acusar` de
    `MovimientoService` y `puedeAcusar()` en `utils/movimientos.js`. Si se toca
    uno, hay que revisar los otros dos.
@@ -108,7 +109,8 @@ borran: las sostienen sus bienes y movimientos.
 el momento y sin cola:
 
 - a **Gestión de Bienes** (`MovimientoInformadoPatrimonio`): las casillas de
-  `PATRIMONIO_NOTIFICACIONES_EMAIL` o, si está vacío, todos los administradores;
+  `PATRIMONIO_NOTIFICACIONES_EMAIL` o, si está vacío, las cuentas activas de
+  Gestión de Bienes (el administrador no recibe avisos);
 - a **quien lo informó** (`MovimientoAcuseCreador`), como constancia;
 - al **responsable saliente** (`MovimientoAvisoResponsableSaliente`), salvo que
   sea quien lo informó.
@@ -133,9 +135,9 @@ los entornos:
 - `SistemaSeeder`: los estados de movimiento, que el código busca por nombre;
 - `ListasSeeder`: estados de bien, tipos de movimiento y motivos.
 
-**La demo** (`Demo/DemoSeeder`) inventa las nueve áreas, un coordinador y dos
-usuarios por área (Patrimonio, dos administradores), una cuenta dada de baja y
-22 bienes repartidos, sin movimientos; todas las claves son `demo1234`.
+**La demo** (`Demo/DemoSeeder`) inventa las nueve áreas, un coordinador y un
+usuario por área (Enfermería, dos usuarios; Patrimonio, una cuenta de Gestión de
+Bienes), el administrador sin área, una cuenta dada de baja y 22 bienes repartidos, sin movimientos; todas las claves son `demo1234`.
 `Demo/MovimientosSeeder` la siembra y le suma diez movimientos fechados en las
 últimas tres semanas: un préstamo y su devolución, un trámite cerrado, uno
 registrado sin acuse, uno anulado, uno sin responsable, uno con foto y uno

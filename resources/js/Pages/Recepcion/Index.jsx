@@ -25,7 +25,7 @@ const PESTANAS = [
 ];
 
 const SUBTITULO = {
-    admin: 'Los tickets de todo el hospital.',
+    patrimonio: 'Los tickets de todo el hospital.',
     coordinador: 'Los tickets que salen de tu sector o llegan a él.',
     usuario: 'Los tickets que informaste y los de bienes que estuvieron o quedan a tu cargo.',
 };

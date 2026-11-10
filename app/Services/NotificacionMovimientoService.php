@@ -50,8 +50,8 @@ class NotificacionMovimientoService
 
     /**
      * Casillas de Gestión de Bienes. Se puede fijar una lista explícita por config
-     * (patrimonio.notificaciones_email); si no hay ninguna, se cae a los usuarios
-     * con rol admin, para que el sistema nunca quede sin avisar a nadie.
+     * (patrimonio.notificaciones_email); si no hay ninguna, se cae a las cuentas
+     * activas de Gestión de Bienes, para que el sistema nunca quede sin avisar a nadie.
      */
     public function destinatariosPatrimonio(): array
     {
@@ -65,7 +65,8 @@ class NotificacionMovimientoService
         }
 
         return User::query()
-            ->where('rol', Rol::Admin)
+            ->where('rol', Rol::Patrimonio)
+            ->activos()
             ->whereNotNull('email')
             ->pluck('email')
             ->all();
