@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Boton, Buscador, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, Paginador, renglonTabla, Tarjeta } from 'hu-kit/componentes';
+import { Boton, Buscador, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, Modal, Paginador, renglonTabla, Tarjeta } from 'hu-kit/componentes';
 import FormularioBien from '@/Components/Patrimonio/FormularioBien';
 import AppLayout from '@/Components/UI/AppLayout';
 import { useBusquedaEnServidor } from '@/utils/busqueda';
@@ -10,6 +10,8 @@ const ATENUADO = 'text-xs italic text-brandText-muted dark:text-brandText-mutedD
 export default function Index({ bienes, busqueda: busquedaDelServidor = '', areas = [], estados = [], responsables = [] }) {
     const [editando, setEditando] = useState(null); // null | 'nuevo' | id
     const [busqueda, setBusqueda] = useBusquedaEnServidor('patrimonio.bienes.index', busquedaDelServidor);
+    const bienEditado = bienes.data.find((b) => b.id === editando) ?? null;
+    const cerrar = () => setEditando(null);
 
     return (
         <AppLayout titulo="Directorio de bienes" subtitulo="Consulta y carga del inventario general.">
@@ -17,11 +19,11 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                 titulo="Bienes"
                 icono="inventory_2"
                 contador={bienes.total}
-                acciones={editando === null && (
+                acciones={
                     <Boton icono="add" forma="grupo" tipo="button" onClick={() => setEditando('nuevo')}>
                         Nuevo bien
                     </Boton>
-                )}
+                }
             >
                 <div className="mb-4">
                     <Buscador
@@ -32,17 +34,6 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                         placeholder="Inventario, Diaguita, descripción o detalle"
                     />
                 </div>
-
-                {editando !== null && (
-                    <FormularioBien
-                        key={editando}
-                        bien={editando === 'nuevo' ? null : bienes.data.find((b) => b.id === editando)}
-                        areas={areas}
-                        estados={estados}
-                        responsables={responsables}
-                        onCerrar={() => setEditando(null)}
-                    />
-                )}
 
                 <div className="-mx-5 overflow-x-auto">
                     <table className="w-full min-w-[56rem] text-sm">
@@ -100,6 +91,24 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                     <Paginador paginador={bienes} />
                 </div>
             </Tarjeta>
+
+            <Modal
+                abierto={editando !== null}
+                onCerrar={cerrar}
+                titulo={bienEditado ? `Editar el bien ${bienEditado.codigo}` : 'Nuevo bien'}
+                ancho="max-w-2xl"
+            >
+                {editando !== null && (
+                    <FormularioBien
+                        key={editando}
+                        bien={bienEditado}
+                        areas={areas}
+                        estados={estados}
+                        responsables={responsables}
+                        onCerrar={cerrar}
+                    />
+                )}
+            </Modal>
         </AppLayout>
     );
 }

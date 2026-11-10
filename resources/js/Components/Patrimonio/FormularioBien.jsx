@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { Boton, Input, Rotulo, Select, Textarea } from 'hu-kit/componentes';
+import { Boton, Input, Select, Textarea } from 'hu-kit/componentes';
 
 const VACIO = { codigo: '', numero_diaguita: '', nombre: '', descripcion: '', area_id: '', responsable_id: '', estado_id: '' };
 
@@ -13,7 +13,7 @@ const desdeBien = (bien) => ({
     estado_id: String(bien.estado.id),
 });
 
-/** El alta o la edición de un bien, en el lugar de la lista. `bien` en null es un alta. */
+/** El alta o la edición de un bien, adentro de un modal. `bien` en null es un alta. */
 export default function FormularioBien({ bien, areas, estados, responsables, onCerrar }) {
     const esNuevo = bien === null;
     // El área y el responsable de un bien que ya se movió los define su último traslado.
@@ -35,9 +35,7 @@ export default function FormularioBien({ bien, areas, estados, responsables, onC
     };
 
     return (
-        <form onSubmit={guardar} className="mb-6 rounded-xl bg-canvas p-5 dark:bg-white/5">
-            <Rotulo como="h3" className="mb-4 block">{esNuevo ? 'Nuevo bien' : `Editar el bien ${bien.codigo}`}</Rotulo>
-
+        <form onSubmit={guardar}>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Input nombre="codigo" etiqueta="N° Inventario" requerido valor={data.codigo} onChange={cambiar} error={errors.codigo} />
                 <Input
