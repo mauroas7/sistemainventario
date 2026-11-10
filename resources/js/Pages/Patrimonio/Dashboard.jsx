@@ -25,7 +25,6 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
 
     // `filtros` es lo que el usuario está tipeando; `aplicados` es lo que ya se consultó.
     const [filtros, setFiltros] = useState(aplicados);
-    const [elegidos, setElegidos] = useState({});
     const [errorEstado, setErrorEstado] = useState('');
     const { confirmar, props: modal } = useConfirmacion();
     const errorFiltros = Object.keys(FILTROS_VACIOS).map((clave) => errors?.[clave]).filter(Boolean).join(' ');
@@ -36,21 +35,17 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
         router.get(route('patrimonio.dashboard'), soloConValor(params), { preserveState: true, preserveScroll: true });
     };
 
-    const estadoElegido = (m) => elegidos[m.id] ?? m.estado_movimiento.id;
-
     // El cambio de estado puede mover los totales y la página del movimiento: vuelve
     // la vista entera en vez de parchear la fila.
-    const guardarEstado = (m) => {
+    const cambiarEstado = (m, estadoId) => {
         setErrorEstado('');
-        const estadoId = estadoElegido(m);
         const accion = (r) =>
             r.patch(route('patrimonio.movimientos.estado', { movimiento: m.id }), { estado_movimiento_id: estadoId }, {
                 preserveScroll: true,
-                onSuccess: () => setElegidos({}),
                 onError: (errores) => setErrorEstado(Object.values(errores)[0] || 'No se pudo actualizar el estado'),
             });
 
-        if (estados.find((estado) => String(estado.id) === String(estadoId))?.nombre !== 'Anulado') {
+        if (estados.find((estado) => estado.id === estadoId)?.nombre !== 'Anulado') {
             accion(router);
             return;
         }
@@ -101,9 +96,7 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
                 <TablaControl
                     movimientos={movimientos.data}
                     estados={estados}
-                    estadoElegido={estadoElegido}
-                    onElegirEstado={(id, valor) => setElegidos((prev) => ({ ...prev, [id]: valor }))}
-                    onGuardarEstado={guardarEstado}
+                    onCambiarEstado={cambiarEstado}
                     hayFiltrosActivos={hayFiltrosActivos}
                 />
 
