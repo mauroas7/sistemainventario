@@ -83,11 +83,10 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                 {error && <Alerta tipo="error" className="mb-4">{error}</Alerta>}
 
                 <div className="-mx-5 overflow-x-auto">
-                    <table className="w-full min-w-[68rem] text-sm">
+                    <table className="w-full min-w-[60rem] text-sm">
                         <thead>
                             <tr className={encabezadoTabla}>
                                 <th className="px-5 pb-2 font-semibold">Ticket</th>
-                                <th className="px-3 pb-2 font-semibold">Fecha</th>
                                 <th className="px-3 pb-2 font-semibold">Bien</th>
                                 <th className="px-3 pb-2 font-semibold">Traslado</th>
                                 <th className="px-3 pb-2 font-semibold">Responsable</th>
@@ -100,9 +99,11 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                             {movimientos.data.length > 0 ? (
                                 movimientos.data.map((m) => (
                                     <tr key={m.id} className={renglonTabla}>
-                                        <td className="px-5 py-3 font-semibold text-primary dark:text-gray-100">TK-{m.id}</td>
-                                        <td className="whitespace-nowrap px-3 py-3">{fechaYHora(m.fecha_movimiento)}</td>
-                                        <td className="min-w-56 px-3 py-3">
+                                        <td className="whitespace-nowrap px-5 py-3">
+                                            <p className="font-semibold text-primary dark:text-gray-100">TK-{m.id}</p>
+                                            <p className="text-xs text-brandText-muted dark:text-brandText-mutedDark">{fechaYHora(m.fecha_movimiento)}</p>
+                                        </td>
+                                        <td className="min-w-48 px-3 py-3">
                                             <p className="text-brandText dark:text-brandText-dark">
                                                 <span className="font-semibold">{m.bien.codigo}</span> - {m.bien.nombre}
                                             </p>
@@ -110,8 +111,8 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                                                 Diaguita: {m.bien.numero_diaguita || 'sin cargar'}
                                             </p>
                                         </td>
-                                        <td className="whitespace-nowrap px-3 py-3">{m.area_origen.nombre} → {m.area_destino.nombre}</td>
-                                        <td className="whitespace-nowrap px-3 py-3">
+                                        <td className="px-3 py-3">{m.area_origen.nombre} → {m.area_destino.nombre}</td>
+                                        <td className="px-3 py-3">
                                             {m.responsable_anterior?.nombre || '—'} →{' '}
                                             {m.responsable_nuevo ? (
                                                 <span className="font-semibold">{m.responsable_nuevo.nombre}</span>
@@ -123,7 +124,7 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                                             <td className="px-3 py-3 text-brandText-muted dark:text-brandText-mutedDark">{relacion(m, usuario)}</td>
                                         )}
                                         <td className="px-3 py-3">
-                                            <Estado tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>
+                                            <Estado partible tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>
                                             {m.recibido_por && (
                                                 <p className="mt-1 text-xs text-brandText-muted dark:text-brandText-mutedDark">
                                                     Acusado por {m.recibido_por.nombre}
@@ -132,11 +133,16 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                                         </td>
                                         <td className="px-5 py-3">
                                             <div className="flex items-center justify-end gap-2">
-                                                <Boton variante="fantasma" forma="grupo" icono="visibility" href={route('recepcion.show', { movimiento: m.id })}>
-                                                    Ver
-                                                </Boton>
+                                                <Boton
+                                                    variante="fantasma"
+                                                    forma="grupo"
+                                                    tamano="icono"
+                                                    icono="visibility"
+                                                    href={route('recepcion.show', { movimiento: m.id })}
+                                                    aria-label={`Ver el ticket TK-${m.id}`}
+                                                />
                                                 {puedeAcusar(m, usuario) && (
-                                                    <Boton tipo="button" variante="contorno" forma="grupo" icono="task_alt" disabled={acusando} onClick={() => acusar(m)}>
+                                                    <Boton tipo="button" variante="contorno" forma="grupo" disabled={acusando} onClick={() => acusar(m)}>
                                                         Acusar recibo
                                                     </Boton>
                                                 )}
@@ -153,7 +159,7 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={conRelacion ? 8 : 7}>
+                                    <td colSpan={conRelacion ? 7 : 6}>
                                         <EstadoVacio enTarjeta icono="inbox">{PESTANAS.find((p) => p.clave === pestana)?.vacia}</EstadoVacio>
                                     </td>
                                 </tr>
