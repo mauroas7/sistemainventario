@@ -7,9 +7,12 @@ import {
     encabezadoTabla,
     Estado,
     EstadoVacio,
+    ItemDeMenu,
+    MenuDeAcciones,
     ModalConfirmar,
     Paginador,
     renglonTabla,
+    Solapas,
     Tarjeta,
     useConfirmacion,
 } from 'hu-kit/componentes';
@@ -26,7 +29,7 @@ const PESTANAS = [
 
 const SUBTITULO = {
     patrimonio: 'Los tickets de todo el hospital.',
-    coordinador: 'Los tickets que salen de tu sector o llegan a él.',
+    coordinador: 'Los tickets que salen de tu área o llegan a él.',
     usuario: 'Los tickets que informaste y los de bienes que estuvieron o quedan a tu cargo.',
 };
 
@@ -34,16 +37,17 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
     const usuario = usePage().props.auth.usuario;
     const { confirmar, props: modal } = useConfirmacion();
     const [error, setError] = useState('');
+    const [acusando, setAcusando] = useState(false);
+    const conRelacion = usuario.rol !== 'patrimonio';
 
     const avisoDeError = (mensajePorDefecto) => (errores) => setError(Object.values(errores)[0] || mensajePorDefecto);
-
-    // El filtrado y el conteo los hace la base: cada pestaña es una visita.
-    const irA = (clave) => router.get(route('recepcion.bandeja'), { ver: clave }, { preserveScroll: true });
 
     const acusar = (m) => {
         setError('');
         router.post(route('recepcion.confirmar', { movimiento: m.id }), {}, {
             preserveScroll: true,
+            onStart: () => setAcusando(true),
+            onFinish: () => setAcusando(false),
             onError: avisoDeError('No se pudo confirmar la recepción'),
         });
     };
@@ -63,23 +67,19 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
 
     return (
         <AppLayout titulo="Bandeja de recepción" subtitulo={SUBTITULO[usuario.rol]}>
-            <Tarjeta
-                titulo="Tickets"
-                icono="move_to_inbox"
-                contador={movimientos.total}
-                acciones={PESTANAS.map(({ clave, etiqueta }) => (
-                    <Boton
-                        key={clave}
-                        tipo="button"
-                        forma="grupo"
-                        variante={pestana === clave ? 'primario' : 'fantasma'}
-                        aria-pressed={pestana === clave}
-                        onClick={() => irA(clave)}
-                    >
-                        {etiqueta} ({contadores[clave]})
-                    </Boton>
-                ))}
-            >
+            {/* El filtrado y el conteo los hace la base: cada solapa es una visita. */}
+            <Solapas
+                etiqueta="Qué tickets se muestran"
+                actual={pestana}
+                opciones={PESTANAS.map(({ clave, etiqueta }) => ({
+                    clave,
+                    etiqueta: `${etiqueta} (${contadores[clave]})`,
+                    href: route('recepcion.bandeja', { ver: clave }),
+                }))}
+                className="mb-4"
+            />
+
+            <Tarjeta titulo="Tickets" icono="move_to_inbox" contador={movimientos.total}>
                 {error && <Alerta tipo="error" className="mb-4">{error}</Alerta>}
 
                 <div className="-mx-5 overflow-x-auto">
@@ -91,9 +91,9 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                                 <th className="px-3 pb-2 font-semibold">Bien</th>
                                 <th className="px-3 pb-2 font-semibold">Traslado</th>
                                 <th className="px-3 pb-2 font-semibold">Responsable</th>
-                                <th className="px-3 pb-2 font-semibold">Relación</th>
+                                {conRelacion && <th className="px-3 pb-2 font-semibold">Relación</th>}
                                 <th className="px-3 pb-2 font-semibold">Estado</th>
-                                <th className="w-px px-5 pb-2 font-semibold">Acciones</th>
+                                <th className="w-px px-5 pb-2 text-right font-semibold">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className={cuerpoTabla}>
@@ -119,7 +119,9 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                                                 <span className="font-semibold text-secondary-dark dark:text-secondary">A definir</span>
                                             )}
                                         </td>
-                                        <td className="px-3 py-3 text-brandText-muted dark:text-brandText-mutedDark">{relacion(m, usuario)}</td>
+                                        {conRelacion && (
+                                            <td className="px-3 py-3 text-brandText-muted dark:text-brandText-mutedDark">{relacion(m, usuario)}</td>
+                                        )}
                                         <td className="px-3 py-3">
                                             <Estado tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>
                                             {m.recibido_por && (
@@ -129,19 +131,21 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                                             )}
                                         </td>
                                         <td className="px-5 py-3">
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center justify-end gap-2">
                                                 <Boton variante="fantasma" forma="grupo" icono="visibility" href={route('recepcion.show', { movimiento: m.id })}>
                                                     Ver
                                                 </Boton>
                                                 {puedeAcusar(m, usuario) && (
-                                                    <Boton tipo="button" variante="contorno" forma="grupo" icono="task_alt" onClick={() => acusar(m)}>
+                                                    <Boton tipo="button" variante="contorno" forma="grupo" icono="task_alt" disabled={acusando} onClick={() => acusar(m)}>
                                                         Acusar recibo
                                                     </Boton>
                                                 )}
                                                 {puedeAnular(m, usuario) && (
-                                                    <Boton tipo="button" variante="peligro" forma="grupo" icono="block" onClick={() => anular(m)}>
-                                                        Anular
-                                                    </Boton>
+                                                    <MenuDeAcciones etiqueta={`Más acciones del ticket TK-${m.id}`}>
+                                                        <ItemDeMenu icono="block" peligro onClick={() => anular(m)}>
+                                                            Anular
+                                                        </ItemDeMenu>
+                                                    </MenuDeAcciones>
                                                 )}
                                             </div>
                                         </td>
@@ -149,7 +153,7 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={8}>
+                                    <td colSpan={conRelacion ? 8 : 7}>
                                         <EstadoVacio enTarjeta icono="inbox">{PESTANAS.find((p) => p.clave === pestana)?.vacia}</EstadoVacio>
                                     </td>
                                 </tr>

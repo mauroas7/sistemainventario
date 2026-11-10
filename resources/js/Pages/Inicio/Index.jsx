@@ -66,11 +66,14 @@ export default function Index({ porAcusar = null, ultimos = null }) {
     const usuario = usePage().props.auth.usuario;
     const accesos = ACCESOS.filter((acceso) => acceso.roles.length === 0 || acceso.roles.includes(usuario.rol));
     const [error, setError] = useState('');
+    const [acusando, setAcusando] = useState(false);
 
     const acusar = (m) => {
         setError('');
         router.post(route('recepcion.confirmar', { movimiento: m.id }), {}, {
             preserveScroll: true,
+            onStart: () => setAcusando(true),
+            onFinish: () => setAcusando(false),
             onError: (errores) => setError(Object.values(errores)[0] || 'No se pudo confirmar la recepción'),
         });
     };
@@ -120,7 +123,7 @@ export default function Index({ porAcusar = null, ultimos = null }) {
                                         <Boton variante="fantasma" forma="grupo" icono="visibility" href={route('recepcion.show', { movimiento: m.id })}>
                                             Ver
                                         </Boton>
-                                        <Boton tipo="button" variante="contorno" forma="grupo" icono="task_alt" onClick={() => acusar(m)}>
+                                        <Boton tipo="button" variante="contorno" forma="grupo" icono="task_alt" disabled={acusando} onClick={() => acusar(m)}>
                                             Acusar recibo
                                         </Boton>
                                     </Renglon>
