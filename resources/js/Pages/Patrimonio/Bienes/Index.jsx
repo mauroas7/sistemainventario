@@ -46,7 +46,7 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                                 <th className="px-3 pb-2 font-semibold">Ubicación</th>
                                 <th className="px-3 pb-2 font-semibold">Responsable</th>
                                 <th className="px-3 pb-2 font-semibold">Estado</th>
-                                <th className="w-px px-5 pb-2 font-semibold">Acciones</th>
+                                <th className="w-px px-5 pb-2 text-right font-semibold">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className={cuerpoTabla}>
@@ -60,16 +60,21 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                                         <td className="px-3 py-3">{bien.ubicacion_actual?.nombre || '—'}</td>
                                         <td className="px-3 py-3">{bien.responsable?.nombre || <span className={ATENUADO}>sin asignar</span>}</td>
                                         <td className="px-3 py-3">
-                                            <Estado tono={tonoEstadoBien(bien.estado?.nombre)}>{bien.estado?.nombre || '—'}</Estado>
+                                            <Estado partible tono={tonoEstadoBien(bien.estado?.nombre)}>{bien.estado?.nombre || '—'}</Estado>
                                         </td>
                                         <td className="px-5 py-3">
-                                            <div className="flex items-center gap-2">
-                                                <Boton tipo="button" variante="fantasma" forma="grupo" icono="edit" onClick={() => setEditando(bien.id)}>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Boton tipo="button" variante="contorno" forma="grupo" onClick={() => setEditando(bien.id)}>
                                                     Editar
                                                 </Boton>
-                                                <Boton variante="fantasma" forma="grupo" icono="history" href={route('patrimonio.bienes.show', { bien: bien.id })}>
-                                                    Ver historial
-                                                </Boton>
+                                                <Boton
+                                                    variante="fantasma"
+                                                    forma="grupo"
+                                                    tamano="icono"
+                                                    icono="history"
+                                                    href={route('patrimonio.bienes.show', { bien: bien.id })}
+                                                    aria-label={`Ver el historial del bien ${bien.codigo}`}
+                                                />
                                             </div>
                                         </td>
                                     </tr>

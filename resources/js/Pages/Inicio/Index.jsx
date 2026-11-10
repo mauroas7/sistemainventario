@@ -17,14 +17,14 @@ const ACCESOS = [
         etiqueta: 'Crear ticket de envío',
         ruta: 'envio.crear',
         icono: 'send',
-        descripcion: 'Registrá el traslado de un bien hacia otro sector.',
+        descripcion: 'Registrá el traslado de un bien hacia otra área.',
         roles: ['patrimonio', 'coordinador', 'usuario'],
     },
     {
         etiqueta: 'Bandeja de recepción',
         ruta: 'recepcion.bandeja',
         icono: 'move_to_inbox',
-        descripcion: 'Seguí los movimientos de tu sector, acusá recibo y anulá lo que informaste por error.',
+        descripcion: 'Seguí los movimientos de tu área, acusá recibo y anulá lo que informaste por error.',
         roles: ['patrimonio', 'coordinador', 'usuario'],
     },
     {
