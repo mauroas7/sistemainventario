@@ -10,7 +10,8 @@ use Illuminate\Support\Str;
 /**
  * Áreas, cuentas y bienes de prueba, todas con la clave `demo1234`; se puede volver
  * a correr. El correo dice el puesto y el área: `coordinador@enfermeria.test`,
- * `usuario@enfermeria.test`, `gestor@patrimonio.test`.
+ * `usuario@enfermeria.test`, `gestor@patrimonio.test`. El admin, sin área, es
+ * `admin@hospital.test`.
  */
 class DemoSeeder extends SeederDePrueba
 {
@@ -39,6 +40,15 @@ class DemoSeeder extends SeederDePrueba
         foreach ([...array_keys(self::PERSONAL), 'Patrimonio'] as $nombre) {
             Area::firstOrCreate(['nombre' => $nombre]);
         }
+
+        // Da de alta áreas y usuarios; no tiene área ni ve bienes.
+        User::updateOrCreate(['email' => 'admin@hospital.test'], [
+            'name' => 'Admin Test',
+            'password' => self::CLAVE,
+            'rol' => Rol::Admin,
+            'area_id' => null,
+            'activo' => true,
+        ]);
 
         // Patrimonio es Gestión de Bienes e Insumos: recibe los avisos y vuelca todo a Diaguita.
         $this->cuenta('Silvana', 'gestor', Rol::Patrimonio, 'Patrimonio');

@@ -48,7 +48,7 @@ class ActualizarUsuarioRequest extends FormRequest
 
             // Ver GuardarUsuarioRequest: sin área la cuenta no ve ningún bien.
             'area_id' => [
-                'exclude_if:rol,patrimonio',
+                'exclude_if:rol,admin,patrimonio',
                 'sometimes',
                 'required',
                 'integer',

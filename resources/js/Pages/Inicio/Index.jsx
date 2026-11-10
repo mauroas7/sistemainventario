@@ -18,14 +18,14 @@ const ACCESOS = [
         ruta: 'envio.crear',
         icono: 'send',
         descripcion: 'Registrá el traslado de un bien hacia otro sector.',
-        roles: [],
+        roles: ['patrimonio', 'coordinador', 'usuario'],
     },
     {
         etiqueta: 'Bandeja de recepción',
         ruta: 'recepcion.bandeja',
         icono: 'move_to_inbox',
         descripcion: 'Seguí los movimientos de tu sector, acusá recibo y anulá lo que informaste por error.',
-        roles: [],
+        roles: ['patrimonio', 'coordinador', 'usuario'],
     },
     {
         etiqueta: 'Control patrimonial',
@@ -33,6 +33,13 @@ const ACCESOS = [
         icono: 'monitoring',
         descripcion: 'Consultá y filtrá el historial completo de movimientos.',
         roles: ['patrimonio'],
+    },
+    {
+        etiqueta: 'Configuración',
+        ruta: 'patrimonio.configuracion.index',
+        icono: 'settings',
+        descripcion: 'Dá de alta áreas y usuarios, y elegí qué ve cada uno.',
+        roles: ['admin'],
     },
 ];
 

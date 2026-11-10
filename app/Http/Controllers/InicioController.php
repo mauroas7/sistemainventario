@@ -14,12 +14,12 @@ class InicioController extends Controller
 {
     public function __construct(private MovimientoService $movimientoService) {}
 
-    /** Los accesos y, para quien no es de Patrimonio, lo que tiene para acusar y sus últimos tickets. */
+    /** Los accesos y, para quien tiene área, lo que tiene para acusar y sus últimos tickets. */
     public function index(Request $request): Response
     {
         $user = $request->user();
 
-        if ($user->tieneRol(Rol::Patrimonio)) {
+        if ($user->tieneRol(Rol::Admin, Rol::Patrimonio)) {
             return Inertia::render('Inicio/Index');
         }
 

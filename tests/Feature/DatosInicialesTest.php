@@ -39,7 +39,8 @@ test('la demo tiene un coordinador y un usuario por area, dos en Enfermeria, y P
 
     expect(User::all())->each(fn ($usuario) => $usuario->name->toEndWith(' Test'))
         ->and(Hash::check(DemoSeeder::CLAVE, User::where('email', 'gestor@patrimonio.test')->value('password')))->toBeTrue()
-        ->and(User::where('email', 'baja@farmacia.test')->firstOrFail()->activo)->toBeFalse();
+        ->and(User::where('email', 'baja@farmacia.test')->firstOrFail()->activo)->toBeFalse()
+        ->and(User::where('email', 'admin@hospital.test')->firstOrFail())->rol->toBe(Rol::Admin)->area_id->toBeNull();
 });
 
 test('crea el primer administrador desde la consola', function () {
@@ -50,7 +51,8 @@ test('crea el primer administrador desde la consola', function () {
 
     $usuario = User::where('email', 'silvana@hospital.test')->firstOrFail();
 
-    $this->assertSame(Rol::Patrimonio, $usuario->rol);
+    $this->assertSame(Rol::Admin, $usuario->rol);
+    $this->assertNull($usuario->area_id);
     $this->assertTrue($usuario->activo);
 });
 

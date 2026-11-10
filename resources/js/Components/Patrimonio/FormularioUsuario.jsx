@@ -1,14 +1,18 @@
 import { Alerta, Boton, Campo, claseControl, descritoPor, Input, PasswordInput, Rotulo, Select } from 'hu-kit/componentes';
 
+/** El admin no ve bienes y Gestión de Bienes los ve todos: ninguno lleva área. */
+export const ROLES_SIN_AREA = ['admin', 'patrimonio'];
+
 const AYUDA_ROL = {
-    patrimonio: 'Ve todos los bienes y movimientos del hospital, y administra el sistema.',
+    admin: 'Da de alta áreas y usuarios. No ve bienes ni movimientos.',
+    patrimonio: 'Ve todos los bienes y movimientos del hospital y lleva el control patrimonial.',
     coordinador: 'Ve e informa movimientos de los bienes de su área.',
     usuario: 'Ve e informa movimientos de los bienes de su área.',
 };
 
 /** El alta o la edición de una cuenta, en el lugar de la lista. */
 export default function FormularioUsuario({ esNuevo, form, onCambiar, roles, areas, errors, errorGeneral, guardando, onGuardar, onCancelar }) {
-    const esPatrimonio = form.rol === 'patrimonio';
+    const sinArea = ROLES_SIN_AREA.includes(form.rol);
 
     return (
         <form onSubmit={onGuardar} className="mb-6 rounded-xl bg-canvas p-5 dark:bg-white/5">
@@ -33,14 +37,14 @@ export default function FormularioUsuario({ esNuevo, form, onCambiar, roles, are
                 <Select
                     nombre="area_id"
                     etiqueta="Área"
-                    requerido={! esPatrimonio}
+                    requerido={! sinArea}
                     opciones={areas.map((a) => [a.id, a.nombre])}
                     valor={form.area_id}
                     onChange={onCambiar}
                     error={errors.area_id}
                     ayuda="Define qué bienes va a ver."
-                    disabled={esPatrimonio}
-                    vacio={esPatrimonio ? 'Ve todas las áreas' : 'Elegí un área'}
+                    disabled={sinArea}
+                    vacio={form.rol === 'patrimonio' ? 'Ve todas las áreas' : sinArea ? 'No lleva área' : 'Elegí un área'}
                 />
                 <div className="md:col-span-2">
                     <Campo id="password" etiqueta={esNuevo ? 'Contraseña' : 'Contraseña (vacía para no cambiarla)'} requerido={esNuevo} error={errors.password}>

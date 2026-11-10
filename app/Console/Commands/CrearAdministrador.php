@@ -40,7 +40,7 @@ class CrearAdministrador extends Command
             return self::FAILURE;
         }
 
-        $usuario = User::create([...$validador->validated(), 'rol' => Rol::Patrimonio]);
+        $usuario = User::create([...$validador->validated(), 'rol' => Rol::Admin]);
 
         $this->components->info("Administrador creado: {$usuario->name} ({$usuario->email}).");
 

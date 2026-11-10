@@ -8,6 +8,7 @@ use App\Models\Motivo;
 use App\Models\Movimiento;
 use App\Models\TipoMovimiento;
 use App\Models\User;
+use App\Services\NotificacionMovimientoService;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\Demo\DemoSeeder;
 use Illuminate\Http\UploadedFile;
@@ -19,6 +20,7 @@ beforeEach(function () {
 
     $this->patrimonio = User::where('email', 'gestor@patrimonio.test')->firstOrFail();
     $this->juan = User::where('email', 'coordinador@sistemas.test')->firstOrFail(); // Sistemas
+    $this->admin = User::where('email', 'admin@hospital.test')->firstOrFail();
 });
 
 /** Informa el traslado de NB001 (Sistemas) a Laboratorio, como Juan. */
@@ -70,7 +72,7 @@ test('las pantallas de patrimonio llegan con sus datos y sin api', function () {
         ->where('movimiento.id', $movimiento->id)
         ->has('movimiento.historial_estados', 1));
 
-    $this->get(route('patrimonio.configuracion.index'))->assertInertia(fn (AssertableInertia $pagina) => $pagina
+    $this->actingAs($this->admin)->get(route('patrimonio.configuracion.index'))->assertInertia(fn (AssertableInertia $pagina) => $pagina
         ->component('Patrimonio/Configuracion/Index')
         ->has('usuarios', User::count())
         ->has('areas', Area::count()));
@@ -125,8 +127,38 @@ test('un coordinador no entra a ninguna pantalla de patrimonio', function () {
     }
 });
 
-test('patrimonio da de alta y de baja una cuenta', function () {
-    $this->actingAs($this->patrimonio)
+test('el admin entra a configuracion y a nada del circuito de bienes', function () {
+    $movimiento = informarTraslado();
+
+    $this->actingAs($this->admin);
+
+    foreach ([
+        route('patrimonio.dashboard'),
+        route('patrimonio.bienes.index'),
+        route('patrimonio.localizador.index'),
+        route('patrimonio.movimientos.show', $movimiento),
+        route('envio.crear'),
+        route('recepcion.bandeja'),
+        route('recepcion.show', $movimiento),
+        route('mis-bienes'),
+    ] as $url) {
+        $this->get($url)->assertForbidden();
+    }
+
+    $this->get(route('inicio'))->assertInertia(fn (AssertableInertia $pagina) => $pagina->missing('porAcusar'));
+    $this->get(route('patrimonio.configuracion.index'))->assertOk();
+});
+
+test('gestion de bienes no entra a configuracion', function () {
+    $this->actingAs($this->patrimonio);
+
+    $this->get(route('patrimonio.configuracion.index'))->assertForbidden();
+    $this->post(route('patrimonio.areas.store'), ['nombre' => 'Kinesiología'])->assertForbidden();
+    $this->put(route('patrimonio.usuarios.update', $this->juan), ['activo' => false])->assertForbidden();
+});
+
+test('el admin da de alta y de baja una cuenta', function () {
+    $this->actingAs($this->admin)
         ->post(route('patrimonio.usuarios.store'), [
             'name' => 'Rosa Díaz',
             'email' => 'rosa@hospital.test',
@@ -144,19 +176,43 @@ test('patrimonio da de alta y de baja una cuenta', function () {
     expect($rosa->fresh()->activo)->toBeFalse();
 });
 
-test('nadie se da de baja a sí mismo ni deja el sistema sin Gestion de Bienes', function () {
-    $this->actingAs($this->patrimonio)
-        ->put(route('patrimonio.usuarios.update', $this->patrimonio), ['activo' => false])
-        ->assertSessionHasErrors('general');
+test('nadie se da de baja ni se quita el rol de administrador a sí mismo', function () {
+    $this->actingAs($this->admin);
 
-    $otroGestor = User::factory()->create(['rol' => Rol::Patrimonio]);
-    $this->put(route('patrimonio.usuarios.update', $otroGestor), ['activo' => false])->assertSessionHasNoErrors();
+    $this->put(route('patrimonio.usuarios.update', $this->admin), ['activo' => false])->assertSessionHasErrors('general');
+    $this->put(route('patrimonio.usuarios.update', $this->admin), ['rol' => 'patrimonio'])->assertSessionHasErrors('general');
 
-    $this->actingAs($otroGestor->fresh())
-        ->put(route('patrimonio.usuarios.update', $this->patrimonio), ['rol' => 'coordinador', 'area_id' => Area::value('id')])
+    $otroAdmin = User::factory()->create(['rol' => Rol::Admin]);
+    $this->put(route('patrimonio.usuarios.update', $otroAdmin), ['activo' => false])->assertSessionHasNoErrors();
+
+    $this->actingAs($otroAdmin->fresh())
+        ->put(route('patrimonio.usuarios.update', $this->admin), ['activo' => false])
         ->assertRedirect(route('login'));
 
-    expect($this->patrimonio->fresh()->tieneRol('patrimonio'))->toBeTrue();
+    expect($this->admin->fresh())->activo->toBeTrue()->tieneRol('admin')->toBeTrue();
+});
+
+test('el admin y gestion de bienes se dan de alta sin area', function () {
+    $this->actingAs($this->admin);
+
+    foreach (['admin' => 'otro.admin@hospital.test', 'patrimonio' => 'otro.gestor@hospital.test'] as $rol => $email) {
+        $this->post(route('patrimonio.usuarios.store'), [
+            'name' => 'Sin Área',
+            'email' => $email,
+            'password' => 'una-clave-larga',
+            'rol' => $rol,
+            'area_id' => Area::value('id'),
+        ])->assertSessionHasNoErrors();
+
+        expect(User::where('email', $email)->value('area_id'))->toBeNull();
+    }
+
+    $this->post(route('patrimonio.usuarios.store'), [
+        'name' => 'Sin Área',
+        'email' => 'otro.usuario@hospital.test',
+        'password' => 'una-clave-larga',
+        'rol' => 'usuario',
+    ])->assertSessionHasErrors('area_id');
 });
 
 test('la foto del movimiento es privada y la ve sólo quien puede ver el movimiento', function () {
@@ -251,8 +307,8 @@ test('un bien sin movimientos se edita entero y uno con movimientos no cambia de
         ->numero_diaguita->toBe('DG-9002');
 });
 
-test('patrimonio da de alta y renombra un área sin repetir nombres', function () {
-    $this->actingAs($this->patrimonio)
+test('el admin da de alta y renombra un área sin repetir nombres', function () {
+    $this->actingAs($this->admin)
         ->post(route('patrimonio.areas.store'), ['nombre' => 'Kinesiología'])
         ->assertSessionHasNoErrors();
 
@@ -264,7 +320,7 @@ test('patrimonio da de alta y renombra un área sin repetir nombres', function (
     expect($area->fresh()->nombre)->toBe('Kinesiología y Fisiatría');
 });
 
-test('sólo patrimonio da de alta bienes y áreas', function () {
+test('un coordinador no da de alta bienes ni áreas', function () {
     $this->actingAs($this->juan);
 
     $this->post(route('patrimonio.bienes.store'), datosDeBien())->assertForbidden();
@@ -338,4 +394,11 @@ test('el directorio de bienes busca por inventario, descripción y detalle', fun
     $this->get(route('patrimonio.bienes.index', ['busqueda' => 'no-existe']))->assertInertia(fn (AssertableInertia $pagina) => $pagina
         ->has('bienes.data', 0)
         ->where('bienes.total', 0));
+});
+
+test('sin casillas configuradas, el aviso va a gestion de bienes activa y no al admin', function () {
+    config(['patrimonio.notificaciones_email' => '']);
+    User::factory()->create(['rol' => Rol::Patrimonio, 'email' => 'gestor.baja@hospital.test'])->update(['activo' => false]);
+
+    expect(app(NotificacionMovimientoService::class)->destinatariosPatrimonio())->toBe(['gestor@patrimonio.test']);
 });

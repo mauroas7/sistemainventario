@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { Alerta, Boton, ModalConfirmar, Tarjeta, useConfirmacion } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
-import FormularioUsuario from '@/Components/Patrimonio/FormularioUsuario';
+import FormularioUsuario, { ROLES_SIN_AREA } from '@/Components/Patrimonio/FormularioUsuario';
 import ListaDeAreas from '@/Components/Patrimonio/ListaDeAreas';
 import TablaUsuarios from '@/Components/Patrimonio/TablaUsuarios';
 
@@ -20,7 +20,7 @@ export default function Index({ areas = [], roles = [], usuarios = [] }) {
     const [errorEstado, setErrorEstado] = useState('');
 
     // Una cuenta sin área no ve ningún bien: hay que poder detectarlas de un vistazo.
-    const sinArea = usuarios.filter((u) => u.rol !== 'patrimonio' && ! u.area_id);
+    const sinArea = usuarios.filter((u) => ! ROLES_SIN_AREA.includes(u.rol) && ! u.area_id);
     const activos = usuarios.filter((u) => u.activo).length;
 
     const abrir = (id, datos) => {
@@ -56,8 +56,7 @@ export default function Index({ areas = [], roles = [], usuarios = [] }) {
 
         // Al editar, la contraseña vacía significa "no cambiarla".
         if (! esNuevo && ! datos.password) delete datos.password;
-        // Patrimonio ve todo el hospital: no se le asigna un área operativa.
-        if (datos.rol === 'patrimonio') delete datos.area_id;
+        if (ROLES_SIN_AREA.includes(datos.rol)) delete datos.area_id;
 
         const opciones = {
             preserveScroll: true,

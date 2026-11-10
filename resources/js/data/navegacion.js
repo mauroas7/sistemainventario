@@ -5,14 +5,14 @@
 export const SECCIONES = [
     { etiqueta: 'Inicio', icono: 'home', ruta: 'inicio', roles: [] },
     { etiqueta: 'Mis bienes', icono: 'inventory_2', ruta: 'mis-bienes', roles: ['coordinador', 'usuario'] },
-    { titulo: 'Envío', etiqueta: 'Crear ticket de envío', icono: 'send', ruta: 'envio.crear', roles: [] },
+    { titulo: 'Envío', etiqueta: 'Crear ticket de envío', icono: 'send', ruta: 'envio.crear', roles: ['patrimonio', 'coordinador', 'usuario'] },
     {
         titulo: 'Recepción',
         etiqueta: 'Bandeja de recepción',
         icono: 'move_to_inbox',
         ruta: 'recepcion.bandeja',
         activaEn: ['recepcion.bandeja', 'recepcion.show'],
-        roles: [],
+        roles: ['patrimonio', 'coordinador', 'usuario'],
     },
     {
         titulo: 'Control patrimonial',
@@ -24,5 +24,5 @@ export const SECCIONES = [
     },
     { etiqueta: 'Localizador de bienes', icono: 'travel_explore', ruta: 'patrimonio.localizador.index', roles: ['patrimonio'] },
     { etiqueta: 'Directorio de bienes', icono: 'inventory_2', ruta: 'patrimonio.bienes.index', activaEn: 'patrimonio.bienes.', roles: ['patrimonio'] },
-    { etiqueta: 'Configuración', icono: 'settings', ruta: 'patrimonio.configuracion.index', roles: ['patrimonio'] },
+    { etiqueta: 'Configuración', icono: 'settings', ruta: 'patrimonio.configuracion.index', roles: ['admin'] },
 ];

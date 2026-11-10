@@ -19,8 +19,10 @@ Laravel 12 · PHP 8.2 · React 18 + Inertia 2 · Vite 7 + Tailwind 3.
   separada en lo que hay para acusar recibo, lo enviado y todo, con el acuse y la
   anulación. Inicio muestra lo pendiente de acusar y los últimos tickets.
 - **Control patrimonial** (sólo Gestión de Bienes): el tablero de movimientos con
-  filtros, cambio de estado y exportación a CSV; el localizador, el directorio de
-  bienes con su alta y edición, y la configuración de áreas y usuarios.
+  filtros, cambio de estado y exportación a CSV; el localizador y el directorio de
+  bienes con su alta y edición.
+- **Configuración** (sólo el administrador): el alta de áreas y de usuarios. El
+  administrador no tiene área ni ve bienes o movimientos.
 - Una suite de tests (Pest): `php artisan test`.
 
 ---
@@ -83,13 +85,13 @@ La base de producción nace vacía: no se copia de ninguna otra.
 
 ```bash
 php artisan migrate --seed --force                                  # el esquema y sólo Catalogos/
-php artisan usuarios:crear-administrador patrimonio@hospital.edu.ar # el primer admin
+php artisan usuarios:crear-administrador sistemas@hospital.edu.ar   # el primer admin
 ```
 
-El comando pide nombre y contraseña. Desde ahí, el administrador carga todo lo
-demás: las áreas y los usuarios desde Configuración, y los bienes desde el
-Directorio de bienes. Sin áreas no se puede dar de alta a nadie que no sea
-administrador.
+El comando pide nombre y contraseña. Desde ahí, el administrador da de alta las
+áreas y los usuarios desde Configuración, empezando por Gestión de Bienes, que
+carga los bienes desde el Directorio de bienes. Sin áreas no se puede dar de alta
+a coordinadores ni usuarios.
 
 - En producción `migrate:fresh`, `migrate:rollback` y `db:wipe` no corren, y la
   demo tampoco aunque se la pida a mano.
@@ -131,6 +133,7 @@ Existen sólo con la demo sembrada. Todas las cuentas usan la contraseña
 
 | correo                        | rol               | cuántas                                   |
 | ----------------------------- | ----------------- | ----------------------------------------- |
+| `admin@hospital.test`         | Administrador     | una, sin área                             |
 | `gestor@patrimonio.test`      | Gestión de Bienes | Silvana                                   |
 | `coordinador@<área>.test`     | Coordinador       | una por área                              |
 | `usuario@<área>.test`         | Usuario           | una por área; Enfermería suma `usuario2`  |
