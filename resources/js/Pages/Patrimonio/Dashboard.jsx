@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
-import { Alerta, Metrica, ModalConfirmar, Paginador, Tarjeta, useConfirmacion } from 'hu-kit/componentes';
+import { Alerta, Boton, Metrica, ModalConfirmar, Paginador, Tarjeta, useConfirmacion } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import FiltrosDashboard from '@/Components/Patrimonio/FiltrosDashboard';
 import TablaControl from '@/Components/Patrimonio/TablaControl';
@@ -60,28 +60,6 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
 
     return (
         <AppLayout titulo="Control patrimonial" subtitulo={`${auth.usuario.nombre} · ${auth.usuario.rolEtiqueta}`}>
-            <FiltrosDashboard
-                filtros={filtros}
-                setFiltro={(clave, valor) => setFiltros((f) => ({ ...f, [clave]: valor }))}
-                areas={areas}
-                estados={estados}
-                motivos={motivos}
-                error={errorFiltros}
-                total={resumen.total}
-                hayFiltrosActivos={hayFiltrosActivos}
-                onAplicar={(e) => {
-                    e.preventDefault();
-                    visitar(filtros);
-                }}
-                onLimpiar={() => {
-                    setFiltros(FILTROS_VACIOS);
-                    visitar(FILTROS_VACIOS);
-                }}
-                onExportar={() => {
-                    window.location.href = route('patrimonio.dashboard.exportar', soloConValor(aplicados));
-                }}
-            />
-
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 <Metrica valor={resumen.total} etiqueta="Total" icono="list_alt" />
                 <Metrica valor={resumen.informados} etiqueta="A cargar en Diaguita" icono="schedule" tono="aviso" />
@@ -90,7 +68,41 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
                 <Metrica valor={resumen.anulados} etiqueta="Anulados" icono="cancel" tono="error" />
             </div>
 
-            <Tarjeta titulo="Movimientos" icono="swap_horiz" contador={movimientos.total}>
+            <FiltrosDashboard
+                filtros={filtros}
+                setFiltro={(clave, valor) => setFiltros((f) => ({ ...f, [clave]: valor }))}
+                areas={areas}
+                estados={estados}
+                motivos={motivos}
+                error={errorFiltros}
+                onAplicar={(e) => {
+                    e.preventDefault();
+                    visitar(filtros);
+                }}
+                onLimpiar={() => {
+                    setFiltros(FILTROS_VACIOS);
+                    visitar(FILTROS_VACIOS);
+                }}
+            />
+
+            <Tarjeta
+                titulo="Movimientos"
+                icono="swap_horiz"
+                contador={movimientos.total}
+                acciones={
+                    <Boton
+                        tipo="button"
+                        variante="contorno"
+                        forma="grupo"
+                        icono="download"
+                        onClick={() => {
+                            window.location.href = route('patrimonio.dashboard.exportar', soloConValor(aplicados));
+                        }}
+                    >
+                        Exportar CSV
+                    </Boton>
+                }
+            >
                 {errorEstado && <Alerta tipo="error" className="mb-4">{errorEstado}</Alerta>}
 
                 <TablaControl
