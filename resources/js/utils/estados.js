@@ -15,6 +15,15 @@ const TONO_MOVIMIENTO = {
     anulado: 'neutro',
 };
 
+const TONO_ROL = {
+    admin: 'info',
+    patrimonio: 'info',
+    coordinador: 'aviso',
+    usuario: 'neutro',
+};
+
+export const tonoRol = (rol) => TONO_ROL[rol] ?? 'neutro';
+
 export const tonoEstadoBien = (nombre) => TONO_BIEN[String(nombre ?? '').toLowerCase()] ?? 'neutro';
 
 export const tonoEstadoMovimiento = (nombre) => TONO_MOVIMIENTO[String(nombre ?? '').toLowerCase()] ?? 'neutro';

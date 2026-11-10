@@ -7,7 +7,9 @@ import { fechaYHora } from '@/utils/fechas';
 import { puedeAcusar, puedeAnular, relacion } from '@/utils/movimientos';
 
 export default function Show({ movimiento: m, responsables = [] }) {
-    const usuario = usePage().props.auth.usuario;
+    const { props, url } = usePage();
+    const usuario = props.auth.usuario;
+    const solapaDeOrigen = new URL(url, 'http://localhost').searchParams.get('ver');
     const esPatrimonio = usuario.rol === 'patrimonio';
     const { confirmar, props: modal } = useConfirmacion();
 
@@ -61,7 +63,7 @@ export default function Show({ movimiento: m, responsables = [] }) {
         <AppLayout
             titulo={`Ticket TK-${m.id}`}
             subtitulo={`${m.bien.codigo} · Diaguita ${m.bien.numero_diaguita || 'sin cargar'} · ${m.bien.nombre}`}
-            volver={{ href: route('recepcion.bandeja'), etiqueta: 'Volver a la bandeja' }}
+            volver={{ href: route('recepcion.bandeja', solapaDeOrigen ? { ver: solapaDeOrigen } : {}), etiqueta: 'Volver a la bandeja' }}
             estado={<Estado tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>}
         >
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -135,12 +137,12 @@ export default function Show({ movimiento: m, responsables = [] }) {
                         {acusa || anula ? (
                             <div className="flex flex-wrap gap-3">
                                 {acusa && (
-                                    <Boton tipo="button" icono="task_alt" onClick={acusar} disabled={acusando}>
+                                    <Boton tipo="button" variante="contorno" forma="grupo" icono="task_alt" onClick={acusar} disabled={acusando}>
                                         Acusar recibo
                                     </Boton>
                                 )}
                                 {anula && (
-                                    <Boton tipo="button" variante="peligro" icono="block" onClick={anular}>
+                                    <Boton tipo="button" variante="peligro" forma="grupo" icono="block" onClick={anular}>
                                         Anular ticket
                                     </Boton>
                                 )}

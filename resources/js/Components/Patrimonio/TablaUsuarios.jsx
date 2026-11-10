@@ -1,13 +1,12 @@
 import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, renglonTabla } from 'hu-kit/componentes';
 import { ROLES_SIN_AREA } from '@/Components/Patrimonio/FormularioUsuario';
-
-const TONO_ROL = { admin: 'info', patrimonio: 'info', coordinador: 'aviso', usuario: 'neutro' };
+import { tonoRol } from '@/utils/estados';
 
 /** Las cuentas de acceso, con editar y dar de baja o reactivar. Nadie se da de baja a sí mismo. */
 export default function TablaUsuarios({ usuarios, usuarioActualId, onEditar, onCambiarEstado }) {
     return (
         <div className="-mx-5 overflow-x-auto">
-            <table className="w-full min-w-[48rem] text-sm">
+            <table className="w-full min-w-[44rem] text-sm">
                 <thead>
                     <tr className={encabezadoTabla}>
                         <th className="px-5 pb-2 font-semibold">Usuario</th>
@@ -39,7 +38,7 @@ export default function TablaUsuarios({ usuarios, usuarioActualId, onEditar, onC
                                         ))}
                                     </td>
                                     <td className="px-3 py-3">
-                                        <Estado tono={TONO_ROL[u.rol] ?? 'neutro'}>{u.rolEtiqueta ?? 'Sin rol'}</Estado>
+                                        <Estado tono={tonoRol(u.rol)}>{u.rolEtiqueta ?? 'Sin rol'}</Estado>
                                     </td>
                                     <td className="px-3 py-3">
                                         <Estado tono={u.activo ? 'exito' : 'neutro'}>{u.activo ? 'Activo' : 'Desactivado'}</Estado>

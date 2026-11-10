@@ -36,7 +36,7 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                 </div>
 
                 <div className="-mx-5 overflow-x-auto">
-                    <table className="w-full min-w-[56rem] text-sm">
+                    <table className="w-full min-w-[64rem] text-sm">
                         <thead>
                             <tr className={encabezadoTabla}>
                                 <th className="px-5 pb-2 font-semibold">N° Inventario</th>

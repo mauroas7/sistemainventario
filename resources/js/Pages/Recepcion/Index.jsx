@@ -138,7 +138,7 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                                                     forma="grupo"
                                                     tamano="icono"
                                                     icono="visibility"
-                                                    href={route('recepcion.show', { movimiento: m.id })}
+                                                    href={route('recepcion.show', { movimiento: m.id, ver: pestana })}
                                                     aria-label={`Ver el ticket TK-${m.id}`}
                                                 />
                                                 {puedeAcusar(m, usuario) && (
