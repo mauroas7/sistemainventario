@@ -24,9 +24,11 @@ export default function Index({ bienes, ultimosMovimientos = {}, busqueda: busqu
 
             <div className="space-y-4">
                 {bienes.data.length === 0 && (
-                    <EstadoVacio icono="search_off">
-                        {busquedaDelServidor ? `No se encontraron bienes para «${busquedaDelServidor}».` : 'No hay bienes cargados.'}
-                    </EstadoVacio>
+                    <Tarjeta>
+                        <EstadoVacio enTarjeta icono="search_off">
+                            {busquedaDelServidor ? `No se encontraron bienes para «${busquedaDelServidor}».` : 'No hay bienes cargados.'}
+                        </EstadoVacio>
+                    </Tarjeta>
                 )}
 
                 {bienes.data.map((bien) => (

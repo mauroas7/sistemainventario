@@ -1,14 +1,22 @@
+import { usePage } from '@inertiajs/react';
 import { Dato, Estado, EstadoVacio, Rotulo, Tarjeta } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import { tonoEstadoMovimiento } from '@/utils/estados';
 import { fechaYHora } from '@/utils/fechas';
 
 export default function Show({ movimiento: m }) {
+    const { url } = usePage();
+    const vieneDeLaFicha = new URL(url, 'http://localhost').searchParams.get('desde') === 'bien';
+
     return (
         <AppLayout
             titulo={`Auditoría del ticket TK-${m.id}`}
             subtitulo={`${m.bien.codigo} · ${m.bien.nombre}`}
-            volver={{ href: route('patrimonio.dashboard'), etiqueta: 'Volver al dashboard' }}
+            volver={
+                vieneDeLaFicha
+                    ? { href: route('patrimonio.bienes.show', { bien: m.bien.id }), etiqueta: 'Volver a la ficha del bien' }
+                    : { href: route('patrimonio.dashboard'), etiqueta: 'Volver al dashboard' }
+            }
             estado={<Estado tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>}
         >
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
