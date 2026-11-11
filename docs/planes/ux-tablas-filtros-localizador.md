@@ -111,7 +111,7 @@ Rama: `feat/auditoria-frontend` (**decidido**). Al aprobarse, el plan se copia a
 - Cuatro archivos: va a `implementador`.
 - Revisar: Anular y Desactivar sólo desde el ⋮ y piden confirmación; Editar abre el
   modal (o el renombre en el lugar) sin navegar.
-- Estado: pendiente
+- Estado: hecha
 
 ### U3 — Filtros del dashboard
 - `Components/Patrimonio/FiltrosDashboard.jsx`: sin `Tarjeta` ni `form`; grilla

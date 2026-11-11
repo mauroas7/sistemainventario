@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from '@inertiajs/react';
 import { Boton, Buscador, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, Modal, Paginador, renglonTabla, Tarjeta } from 'hu-kit/componentes';
 import FormularioBien from '@/Components/Patrimonio/FormularioBien';
 import AppLayout from '@/Components/UI/AppLayout';
@@ -52,8 +53,16 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                         <tbody className={cuerpoTabla}>
                             {bienes.data.length > 0 ? (
                                 bienes.data.map((bien) => (
-                                    <tr key={bien.id} className={renglonTabla}>
-                                        <td className="px-5 py-3 font-semibold text-primary dark:text-gray-100">{bien.codigo}</td>
+                                    <tr key={bien.id} className={`relative ${renglonTabla}`}>
+                                        <td className="px-5 py-3">
+                                            {/* Sin el `after:` del enlace, sólo el código abre la ficha. */}
+                                            <Link
+                                                href={route('patrimonio.bienes.show', { bien: bien.id })}
+                                                className="font-semibold text-primary after:absolute after:inset-0 dark:text-gray-100"
+                                            >
+                                                {bien.codigo}
+                                            </Link>
+                                        </td>
                                         <td className="px-3 py-3">{bien.numero_diaguita || <span className={ATENUADO}>sin cargar</span>}</td>
                                         <td className="px-3 py-3 font-semibold">{bien.nombre}</td>
                                         <td className="px-3 py-3">{bien.area?.nombre || '—'}</td>
@@ -63,18 +72,10 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                                             <Estado partible tono={tonoEstadoBien(bien.estado?.nombre)}>{bien.estado?.nombre || '—'}</Estado>
                                         </td>
                                         <td className="px-5 py-3">
-                                            <div className="flex items-center justify-end gap-2">
+                                            <div className="relative z-10 flex items-center justify-end gap-2">
                                                 <Boton tipo="button" variante="contorno" forma="grupo" onClick={() => setEditando(bien.id)}>
                                                     Editar
                                                 </Boton>
-                                                <Boton
-                                                    variante="fantasma"
-                                                    forma="grupo"
-                                                    tamano="icono"
-                                                    icono="history"
-                                                    href={route('patrimonio.bienes.show', { bien: bien.id })}
-                                                    aria-label={`Ver el historial del bien ${bien.codigo}`}
-                                                />
                                             </div>
                                         </td>
                                     </tr>

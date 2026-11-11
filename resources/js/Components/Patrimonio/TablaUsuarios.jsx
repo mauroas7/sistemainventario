@@ -1,4 +1,4 @@
-import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, renglonTabla } from 'hu-kit/componentes';
+import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, ItemDeMenu, MenuDeAcciones, renglonTabla } from 'hu-kit/componentes';
 import { ROLES_SIN_AREA } from '@/Components/Patrimonio/FormularioUsuario';
 import { tonoRol } from '@/utils/estados';
 
@@ -13,7 +13,7 @@ export default function TablaUsuarios({ usuarios, usuarioActualId, onEditar, onC
                         <th className="px-3 pb-2 font-semibold">Área</th>
                         <th className="px-3 pb-2 font-semibold">Rol</th>
                         <th className="px-3 pb-2 font-semibold">Estado</th>
-                        <th className="w-px px-5 pb-2 font-semibold">Acciones</th>
+                        <th className="w-px px-5 pb-2 text-right font-semibold">Acciones</th>
                     </tr>
                 </thead>
                 <tbody className={cuerpoTabla}>
@@ -44,20 +44,18 @@ export default function TablaUsuarios({ usuarios, usuarioActualId, onEditar, onC
                                         <Estado tono={u.activo ? 'exito' : 'neutro'}>{u.activo ? 'Activo' : 'Desactivado'}</Estado>
                                     </td>
                                     <td className="px-5 py-3">
-                                        <div className="flex items-center gap-2">
-                                            <Boton tipo="button" variante="fantasma" forma="grupo" icono="edit" onClick={() => onEditar(u)}>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Boton tipo="button" variante="contorno" forma="grupo" onClick={() => onEditar(u)}>
                                                 Editar
                                             </Boton>
-                                            {! esUsuarioActual && (
-                                                <Boton
-                                                    tipo="button"
-                                                    variante={u.activo ? 'peligro' : 'contorno'}
-                                                    forma="grupo"
-                                                    icono={u.activo ? 'block' : 'restore'}
-                                                    onClick={() => onCambiarEstado(u)}
-                                                >
-                                                    {u.activo ? 'Desactivar' : 'Reactivar'}
-                                                </Boton>
+                                            {esUsuarioActual ? (
+                                                <span className="size-control shrink-0" aria-hidden="true" />
+                                            ) : (
+                                                <MenuDeAcciones etiqueta={`Más acciones de ${u.name}`}>
+                                                    <ItemDeMenu icono={u.activo ? 'block' : 'restore'} peligro={u.activo} onClick={() => onCambiarEstado(u)}>
+                                                        {u.activo ? 'Desactivar' : 'Reactivar'}
+                                                    </ItemDeMenu>
+                                                </MenuDeAcciones>
                                             )}
                                         </div>
                                     </td>

@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, ItemDeMenu, MenuDeAcciones, renglonTabla } from 'hu-kit/componentes';
 import { tonoEstadoMovimiento } from '@/utils/estados';
 import { fechaYHora } from '@/utils/fechas';
@@ -31,11 +32,18 @@ export default function TablaControl({ movimientos, estados, onCambiarEstado, ha
                             const paso = PASO_SIGUIENTE[m.estado_movimiento.nombre];
                             const estadoDelPaso = paso && estados.find((estado) => estado.nombre === paso.estado);
                             const otrosEstados = estados.filter((estado) => estado.id !== m.estado_movimiento.id && estado.id !== estadoDelPaso?.id);
+                            const estadoAnulado = otrosEstados.find((estado) => estado.nombre === 'Anulado');
 
                             return (
-                                <tr key={m.id} className={renglonTabla}>
+                                <tr key={m.id} className={`relative ${renglonTabla}`}>
                                     <td className="whitespace-nowrap px-5 py-3">
-                                        <p className="font-semibold text-primary dark:text-gray-100">TK-{m.id}</p>
+                                        {/* Sin el `after:` del enlace, sólo el identificador abre la auditoría. */}
+                                        <Link
+                                            href={route('patrimonio.movimientos.show', { movimiento: m.id })}
+                                            className="font-semibold text-primary after:absolute after:inset-0 dark:text-gray-100"
+                                        >
+                                            TK-{m.id}
+                                        </Link>
                                         <p className={ATENUADO}>{fechaYHora(m.fecha_movimiento)}</p>
                                     </td>
                                     <td className="min-w-48 px-3 py-3">
@@ -67,7 +75,7 @@ export default function TablaControl({ movimientos, estados, onCambiarEstado, ha
                                         </Estado>
                                     </td>
                                     <td className="px-5 py-3">
-                                        <div className="flex items-center justify-end gap-2">
+                                        <div className="relative z-10 flex items-center justify-end gap-2">
                                             {estadoDelPaso && (
                                                 <Boton
                                                     tipo="button"
@@ -78,25 +86,21 @@ export default function TablaControl({ movimientos, estados, onCambiarEstado, ha
                                                     {paso.texto}
                                                 </Boton>
                                             )}
-                                            <Boton
-                                                variante="fantasma"
-                                                forma="grupo"
-                                                tamano="icono"
-                                                icono="visibility"
-                                                href={route('patrimonio.movimientos.show', { movimiento: m.id })}
-                                                aria-label={`Ver la auditoría del ticket TK-${m.id}`}
-                                            />
                                             <MenuDeAcciones etiqueta={`Más acciones del ticket TK-${m.id}`}>
-                                                {otrosEstados.map((estado) =>
-                                                    estado.nombre === 'Anulado' ? (
-                                                        <ItemDeMenu key={estado.id} icono="block" peligro separado onClick={() => onCambiarEstado(m, estado.id)}>
-                                                            Anular
-                                                        </ItemDeMenu>
-                                                    ) : (
+                                                {otrosEstados
+                                                    .filter((estado) => estado.nombre !== 'Anulado')
+                                                    .map((estado) => (
                                                         <ItemDeMenu key={estado.id} onClick={() => onCambiarEstado(m, estado.id)}>
                                                             Pasar a {estado.nombre}
                                                         </ItemDeMenu>
-                                                    ),
+                                                    ))}
+                                                <ItemDeMenu icono="inventory_2" href={route('patrimonio.bienes.show', { bien: m.bien.id })}>
+                                                    Ver ficha del bien
+                                                </ItemDeMenu>
+                                                {estadoAnulado && (
+                                                    <ItemDeMenu icono="block" peligro separado onClick={() => onCambiarEstado(m, estadoAnulado.id)}>
+                                                        Anular
+                                                    </ItemDeMenu>
                                                 )}
                                             </MenuDeAcciones>
                                         </div>
