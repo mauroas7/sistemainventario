@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
-import { Alerta, Boton, Input, Select, Tarjeta, Textarea } from 'hu-kit/componentes';
+import { Alerta, Boton, Dato, Select, Tarjeta, Textarea } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import FotoDelBien from '@/Components/Envio/FotoDelBien';
 import ResumenMovimiento from '@/Components/Envio/ResumenMovimiento';
@@ -117,59 +117,35 @@ export default function Create({ bienes = [], areas = [], tiposMovimiento = [], 
     const ayudaResponsable = ! form.area_destino_id
         ? null
         : responsablesDestino.length === 0
-            ? `${areaDestino?.nombre} no tiene usuarios registrados en el sistema. El movimiento se informa igual y Gestión de Bienes define el responsable.`
-            : `Personal de ${areaDestino?.nombre}. Es quien deberá firmar la nueva ficha de inventario; si todavía no está definido, dejá la opción por defecto.`;
+            ? `${areaDestino?.nombre} no tiene usuarios cargados: lo define Gestión de Bienes.`
+            : 'Quien firma la nueva ficha de inventario. Si no lo sabés, dejalo sin elegir.';
 
     return (
-        <AppLayout titulo="Crear ticket de envío" subtitulo="Registrá el traslado de un bien hacia otro sector.">
+        <AppLayout titulo="Crear ticket de envío" subtitulo="Registrá el traslado de un bien hacia otra área.">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <Tarjeta titulo="Datos del traslado" icono="local_shipping" className="lg:col-span-2">
                     <form className="space-y-5" onSubmit={enviar} noValidate>
                         {errorGeneral && <Alerta tipo="error">{errorGeneral}</Alerta>}
 
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <Select
-                                nombre="bien_id"
-                                etiqueta="Bien"
-                                requerido
-                                opciones={pares(bienes, (b) => `${b.codigo} - ${b.nombre}`)}
-                                valor={form.bien_id}
-                                onChange={cambiar}
-                                error={errors.bien_id}
-                                vacio="Elegí un bien"
-                            />
-                            <Input
-                                nombre="responsable_actual"
-                                etiqueta="Responsable actual del bien"
-                                valor={responsableActual?.name || (bien ? 'Sin responsable asignado' : 'Se completa al elegir el bien')}
-                                readOnly
-                            />
-                        </div>
+                        <Select
+                            nombre="bien_id"
+                            etiqueta="Bien"
+                            requerido
+                            opciones={pares(bienes, (b) => `${b.codigo} - ${b.nombre}`)}
+                            valor={form.bien_id}
+                            onChange={cambiar}
+                            error={errors.bien_id}
+                            vacio="Elegí un bien"
+                        />
 
                         {bien && (
-                            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                                <Input nombre="codigo" etiqueta="N° inventario (interno)" valor={bien.codigo || '—'} readOnly />
-                                <Input nombre="numero_diaguita" etiqueta="N° Diaguita" valor={bien.numero_diaguita || 'Sin cargar en Diaguita'} readOnly />
+                            <div className="grid grid-cols-1 gap-4 rounded-xl bg-canvas p-4 sm:grid-cols-2 xl:grid-cols-4 dark:bg-white/5">
+                                <Dato etiqueta="Ubicación actual" valor={areaOrigen?.nombre} />
+                                <Dato etiqueta="Responsable actual" valor={responsableActual?.name} siFalta="Sin asignar" />
+                                <Dato etiqueta="N° inventario" valor={bien.codigo} />
+                                <Dato etiqueta="N° Diaguita" valor={bien.numero_diaguita} siFalta="Sin cargar" />
                             </div>
                         )}
-
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <Input
-                                nombre="area_origen"
-                                etiqueta="Origen (ubicación actual del bien)"
-                                valor={areaOrigen?.nombre || 'Se completa al elegir el bien'}
-                                readOnly
-                            />
-                            <Select
-                                nombre="tipo_movimiento_id"
-                                etiqueta="Tipo de movimiento"
-                                requerido
-                                opciones={pares(tiposMovimiento)}
-                                valor={form.tipo_movimiento_id}
-                                onChange={cambiar}
-                                error={errors.tipo_movimiento_id}
-                            />
-                        </div>
 
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                             <Select
@@ -184,6 +160,29 @@ export default function Create({ bienes = [], areas = [], tiposMovimiento = [], 
                                 vacio={form.area_origen_id ? 'Elegí una opción' : 'Elegí primero un bien'}
                             />
                             <Select
+                                nombre="responsable_nuevo_id"
+                                etiqueta="Nuevo responsable (opcional)"
+                                opciones={pares(responsablesDestino, (r) => r.name)}
+                                valor={form.responsable_nuevo_id}
+                                onChange={cambiar}
+                                error={errors.responsable_nuevo_id}
+                                ayuda={ayudaResponsable}
+                                disabled={! form.area_destino_id}
+                                vacio={form.area_destino_id ? 'A definir por Gestión de Bienes' : 'Elegí primero el destino'}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                            <Select
+                                nombre="tipo_movimiento_id"
+                                etiqueta="Tipo de movimiento"
+                                requerido
+                                opciones={pares(tiposMovimiento)}
+                                valor={form.tipo_movimiento_id}
+                                onChange={cambiar}
+                                error={errors.tipo_movimiento_id}
+                            />
+                            <Select
                                 nombre="motivo_id"
                                 etiqueta="Motivo"
                                 requerido
@@ -193,18 +192,6 @@ export default function Create({ bienes = [], areas = [], tiposMovimiento = [], 
                                 error={errors.motivo_id}
                             />
                         </div>
-
-                        <Select
-                            nombre="responsable_nuevo_id"
-                            etiqueta="Nuevo responsable"
-                            opciones={pares(responsablesDestino, (r) => r.name)}
-                            valor={form.responsable_nuevo_id}
-                            onChange={cambiar}
-                            error={errors.responsable_nuevo_id}
-                            ayuda={ayudaResponsable}
-                            disabled={! form.area_destino_id}
-                            vacio={form.area_destino_id ? 'A definir por Gestión de Bienes' : 'Elegí primero el destino'}
-                        />
 
                         <FotoDelBien
                             imagen={imagen}

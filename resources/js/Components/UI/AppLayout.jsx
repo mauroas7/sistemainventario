@@ -7,9 +7,10 @@ const SISTEMA = { nombre: 'Bienes HU', bajada: 'Gestión de bienes patrimoniales
 /**
  * El marco de todas las pantallas con sesión: el `MarcoApp` de hu-kit con lo
  * propio de este sistema, el menú del rol, el área bajo el nombre y «Mi
- * cuenta». Las páginas pasan sólo `titulo`, `subtitulo` y `ancho`.
+ * cuenta». Las páginas pasan `titulo`, `subtitulo` y `ancho`; una ficha suma
+ * `volver` y `estado`.
  */
-export default function AppLayout({ titulo = 'Inicio', subtitulo = null, ancho = 'completo', children }) {
+export default function AppLayout({ titulo = 'Inicio', subtitulo = null, ancho = 'completo', volver = null, estado = null, children }) {
     const { usuario } = usePage().props.auth;
 
     const secciones = seccionesDelRol(usuario?.rol).map((seccion) => ({
@@ -23,6 +24,8 @@ export default function AppLayout({ titulo = 'Inicio', subtitulo = null, ancho =
             titulo={titulo}
             subtitulo={subtitulo}
             ancho={ancho}
+            volver={volver}
+            estado={estado}
             secciones={secciones}
             inicio={route('inicio')}
             sistema={SISTEMA}

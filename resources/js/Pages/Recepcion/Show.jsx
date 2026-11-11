@@ -7,12 +7,15 @@ import { fechaYHora } from '@/utils/fechas';
 import { puedeAcusar, puedeAnular, relacion } from '@/utils/movimientos';
 
 export default function Show({ movimiento: m, responsables = [] }) {
-    const usuario = usePage().props.auth.usuario;
+    const { props, url } = usePage();
+    const usuario = props.auth.usuario;
+    const solapaDeOrigen = new URL(url, 'http://localhost').searchParams.get('ver');
     const esPatrimonio = usuario.rol === 'patrimonio';
     const { confirmar, props: modal } = useConfirmacion();
 
     const [nuevoResponsable, setNuevoResponsable] = useState('');
     const [asignando, setAsignando] = useState(false);
+    const [acusando, setAcusando] = useState(false);
     const [error, setError] = useState('');
 
     const avisoDeError = (mensajePorDefecto) => (errores) => setError(Object.values(errores)[0] || mensajePorDefecto);
@@ -37,7 +40,9 @@ export default function Show({ movimiento: m, responsables = [] }) {
         setError('');
         router.post(route('recepcion.confirmar', { movimiento: m.id }), {}, {
             preserveScroll: true,
-            onError: avisoDeError('No se pudo completar la acción'),
+            onStart: () => setAcusando(true),
+            onError: avisoDeError('No se pudo confirmar la recepción'),
+            onFinish: () => setAcusando(false),
         });
     };
 
@@ -49,7 +54,7 @@ export default function Show({ movimiento: m, responsables = [] }) {
             textoAceptar: 'Anular',
             accion: (r) => r.post(route('recepcion.anular', { movimiento: m.id }), {}, {
                 preserveScroll: true,
-                onError: avisoDeError('No se pudo completar la acción'),
+                onError: avisoDeError('No se pudo anular el ticket'),
             }),
         });
     };
@@ -58,17 +63,12 @@ export default function Show({ movimiento: m, responsables = [] }) {
         <AppLayout
             titulo={`Ticket TK-${m.id}`}
             subtitulo={`${m.bien.codigo} · Diaguita ${m.bien.numero_diaguita || 'sin cargar'} · ${m.bien.nombre}`}
+            volver={{ href: route('recepcion.bandeja', solapaDeOrigen ? { ver: solapaDeOrigen } : {}), etiqueta: 'Volver a la bandeja' }}
+            estado={<Estado tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>}
         >
-            <div className="mb-4">
-                <Boton variante="fantasma" forma="grupo" icono="arrow_back" href={route('recepcion.bandeja')}>
-                    Volver a la bandeja
-                </Boton>
-            </div>
-
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <Tarjeta titulo="Estado del ticket" icono="flag" className="h-fit">
+                <Tarjeta titulo="Traslado" icono="swap_horiz" className="h-fit">
                     <div className="space-y-4 text-sm">
-                        <Dato etiqueta="Estado" valor={<Estado tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>} />
                         <Dato etiqueta="Relación" valor={relacion(m, usuario)} />
                         <Dato etiqueta="Origen" valor={m.area_origen.nombre} />
                         <Dato etiqueta="Destino" valor={m.area_destino.nombre} />
@@ -137,23 +137,23 @@ export default function Show({ movimiento: m, responsables = [] }) {
                         {acusa || anula ? (
                             <div className="flex flex-wrap gap-3">
                                 {acusa && (
-                                    <Boton tipo="button" icono="task_alt" onClick={acusar}>
+                                    <Boton tipo="button" variante="contorno" forma="grupo" icono="task_alt" onClick={acusar} disabled={acusando}>
                                         Acusar recibo
                                     </Boton>
                                 )}
                                 {anula && (
-                                    <Boton tipo="button" variante="peligro" icono="block" onClick={anular}>
-                                        Anular movimiento
+                                    <Boton tipo="button" variante="peligro" forma="grupo" icono="block" onClick={anular}>
+                                        Anular ticket
                                     </Boton>
                                 )}
                             </div>
                         ) : (
                             <p className="text-sm text-brandText-muted dark:text-brandText-mutedDark">
                                 {m.estado_movimiento.nombre === 'Anulado'
-                                    ? 'Este movimiento fue anulado.'
+                                    ? 'Este ticket fue anulado.'
                                     : m.recibido_por
-                                        ? 'El movimiento ya tiene acuse de recibo.'
-                                        : 'Sin acciones disponibles para tu rol.'}
+                                        ? 'El ticket ya tiene acuse de recibo.'
+                                        : 'El acuse de recibo lo da quien recibe el bien.'}
                             </p>
                         )}
                     </div>

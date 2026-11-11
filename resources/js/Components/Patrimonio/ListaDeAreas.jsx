@@ -72,7 +72,8 @@ export default function ListaDeAreas({ areas }) {
                                         forma="grupo"
                                         tamano="icono"
                                         icono="edit"
-                                        aria-label={`Cambiar el nombre de ${a.nombre}`}
+                                        aria-label={`Editar el nombre de ${a.nombre}`}
+                                        title="Editar"
                                         onClick={() => abrir(a.id, a.nombre)}
                                     />
                                 </div>

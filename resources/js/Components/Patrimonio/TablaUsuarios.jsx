@@ -1,20 +1,19 @@
 import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, renglonTabla } from 'hu-kit/componentes';
 import { ROLES_SIN_AREA } from '@/Components/Patrimonio/FormularioUsuario';
-
-const TONO_ROL = { admin: 'info', patrimonio: 'info', coordinador: 'aviso', usuario: 'neutro' };
+import { tonoRol } from '@/utils/estados';
 
 /** Las cuentas de acceso, con editar y dar de baja o reactivar. Nadie se da de baja a sí mismo. */
 export default function TablaUsuarios({ usuarios, usuarioActualId, onEditar, onCambiarEstado }) {
     return (
         <div className="-mx-5 overflow-x-auto">
-            <table className="w-full min-w-[48rem] text-sm">
+            <table className="w-full min-w-[44rem] text-sm">
                 <thead>
                     <tr className={encabezadoTabla}>
                         <th className="px-5 pb-2 font-semibold">Usuario</th>
                         <th className="px-3 pb-2 font-semibold">Área</th>
                         <th className="px-3 pb-2 font-semibold">Rol</th>
                         <th className="px-3 pb-2 font-semibold">Estado</th>
-                        <th className="w-px px-5 pb-2 font-semibold">Acciones</th>
+                        <th className="w-px px-5 pb-2 text-right font-semibold">Acciones</th>
                     </tr>
                 </thead>
                 <tbody className={cuerpoTabla}>
@@ -39,26 +38,36 @@ export default function TablaUsuarios({ usuarios, usuarioActualId, onEditar, onC
                                         ))}
                                     </td>
                                     <td className="px-3 py-3">
-                                        <Estado tono={TONO_ROL[u.rol] ?? 'neutro'}>{u.rolEtiqueta ?? 'Sin rol'}</Estado>
+                                        <Estado tono={tonoRol(u.rol)}>{u.rolEtiqueta ?? 'Sin rol'}</Estado>
                                     </td>
                                     <td className="px-3 py-3">
                                         <Estado tono={u.activo ? 'exito' : 'neutro'}>{u.activo ? 'Activo' : 'Desactivado'}</Estado>
                                     </td>
                                     <td className="px-5 py-3">
-                                        <div className="flex items-center gap-2">
-                                            <Boton tipo="button" variante="fantasma" forma="grupo" icono="edit" onClick={() => onEditar(u)}>
-                                                Editar
-                                            </Boton>
-                                            {! esUsuarioActual && (
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Boton
+                                                tipo="button"
+                                                variante="fantasma"
+                                                forma="grupo"
+                                                tamano="icono"
+                                                icono="edit"
+                                                aria-label={`Editar a ${u.name}`}
+                                                title="Editar"
+                                                onClick={() => onEditar(u)}
+                                            />
+                                            {esUsuarioActual ? (
+                                                <span className="size-control shrink-0" aria-hidden="true" />
+                                            ) : (
                                                 <Boton
                                                     tipo="button"
-                                                    variante={u.activo ? 'peligro' : 'contorno'}
+                                                    variante={u.activo ? 'fantasmaPeligro' : 'fantasma'}
                                                     forma="grupo"
+                                                    tamano="icono"
                                                     icono={u.activo ? 'block' : 'restore'}
+                                                    aria-label={`${u.activo ? 'Desactivar' : 'Reactivar'} a ${u.name}`}
+                                                    title={u.activo ? 'Desactivar' : 'Reactivar'}
                                                     onClick={() => onCambiarEstado(u)}
-                                                >
-                                                    {u.activo ? 'Desactivar' : 'Reactivar'}
-                                                </Boton>
+                                                />
                                             )}
                                         </div>
                                     </td>

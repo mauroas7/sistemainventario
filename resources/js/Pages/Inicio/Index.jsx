@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
-import { Alerta, Boton, Estado, EstadoVacio, Icono, marcoTarjeta, Tarjeta } from 'hu-kit/componentes';
+import { Alerta, Boton, Estado, EstadoVacio, Icono, marcoTarjeta, renglonTabla, Tarjeta } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import { tonoEstadoMovimiento } from '@/utils/estados';
 import { fechaYHora } from '@/utils/fechas';
@@ -17,14 +17,14 @@ const ACCESOS = [
         etiqueta: 'Crear ticket de envío',
         ruta: 'envio.crear',
         icono: 'send',
-        descripcion: 'Registrá el traslado de un bien hacia otro sector.',
+        descripcion: 'Registrá el traslado de un bien hacia otra área.',
         roles: ['patrimonio', 'coordinador', 'usuario'],
     },
     {
         etiqueta: 'Bandeja de recepción',
         ruta: 'recepcion.bandeja',
         icono: 'move_to_inbox',
-        descripcion: 'Seguí los movimientos de tu sector, acusá recibo y anulá lo que informaste por error.',
+        descripcion: 'Seguí los movimientos de tu área, acusá recibo y anulá lo que informaste por error.',
         roles: ['patrimonio', 'coordinador', 'usuario'],
     },
     {
@@ -43,19 +43,26 @@ const ACCESOS = [
     },
 ];
 
-/** Un ticket en las listas del inicio, con sus acciones a la derecha. */
+/** Un ticket en las listas del inicio: todo el renglón abre el ticket, y sus acciones van a la derecha. */
 function Renglon({ m, children }) {
     return (
-        <li className="flex flex-col gap-3 py-3 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
+        <li className={`relative -mx-2 flex flex-col gap-3 rounded-lg px-2 py-3 sm:flex-row sm:items-center sm:justify-between ${renglonTabla}`}>
             <div className="min-w-0">
                 <p className="text-sm text-brandText dark:text-brandText-dark">
-                    <span className="font-semibold text-primary dark:text-gray-100">TK-{m.id}</span> · {m.bien.codigo} - {m.bien.nombre}
+                    {/* Sin el `after:` del enlace, sólo el identificador abre el ticket. */}
+                    <Link
+                        href={route('recepcion.show', { movimiento: m.id })}
+                        className="font-semibold text-primary after:absolute after:inset-0 dark:text-gray-100"
+                    >
+                        TK-{m.id}
+                    </Link>{' '}
+                    · {m.bien.codigo} - {m.bien.nombre}
                 </p>
                 <p className="text-xs text-brandText-muted dark:text-brandText-mutedDark">
                     {m.area_origen.nombre} → {m.area_destino.nombre} · {fechaYHora(m.fecha_movimiento)}
                 </p>
             </div>
-            <div className="flex shrink-0 items-center gap-2">{children}</div>
+            <div className="relative z-10 flex shrink-0 items-center gap-2">{children}</div>
         </li>
     );
 }
@@ -66,11 +73,14 @@ export default function Index({ porAcusar = null, ultimos = null }) {
     const usuario = usePage().props.auth.usuario;
     const accesos = ACCESOS.filter((acceso) => acceso.roles.length === 0 || acceso.roles.includes(usuario.rol));
     const [error, setError] = useState('');
+    const [acusando, setAcusando] = useState(false);
 
     const acusar = (m) => {
         setError('');
         router.post(route('recepcion.confirmar', { movimiento: m.id }), {}, {
             preserveScroll: true,
+            onStart: () => setAcusando(true),
+            onFinish: () => setAcusando(false),
             onError: (errores) => setError(Object.values(errores)[0] || 'No se pudo confirmar la recepción'),
         });
     };
@@ -117,12 +127,17 @@ export default function Index({ porAcusar = null, ultimos = null }) {
                             <ul className={LISTA}>
                                 {porAcusar.data.map((m) => (
                                     <Renglon key={m.id} m={m}>
-                                        <Boton variante="fantasma" forma="grupo" icono="visibility" href={route('recepcion.show', { movimiento: m.id })}>
-                                            Ver
-                                        </Boton>
-                                        <Boton tipo="button" variante="contorno" forma="grupo" icono="task_alt" onClick={() => acusar(m)}>
-                                            Acusar recibo
-                                        </Boton>
+                                        <Boton
+                                            tipo="button"
+                                            variante="fantasma"
+                                            forma="grupo"
+                                            tamano="icono"
+                                            icono="task_alt"
+                                            aria-label={`Acusar recibo del ticket TK-${m.id}`}
+                                            title="Acusar recibo"
+                                            disabled={acusando}
+                                            onClick={() => acusar(m)}
+                                        />
                                     </Renglon>
                                 ))}
                             </ul>
@@ -145,14 +160,6 @@ export default function Index({ porAcusar = null, ultimos = null }) {
                                 {ultimos.data.map((m) => (
                                     <Renglon key={m.id} m={m}>
                                         <Estado tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>
-                                        <Boton
-                                            variante="fantasma"
-                                            forma="grupo"
-                                            tamano="icono"
-                                            icono="visibility"
-                                            href={route('recepcion.show', { movimiento: m.id })}
-                                            aria-label={`Ver el ticket TK-${m.id}`}
-                                        />
                                     </Renglon>
                                 ))}
                             </ul>

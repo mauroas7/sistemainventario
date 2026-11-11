@@ -100,6 +100,13 @@ claro y se resetea cuando cambia el usuario. Todo componente nace con sus pares
 - **Tablas** → adentro de una `Tarjeta`, en un `-mx-5 overflow-x-auto` con un
   `min-w-*` en la tabla, y las clases de tabla de `hu-kit`. La primera y la
   última columna van a `px-5`.
+- **Una fila con ficha** → su identificador (`TK-12`) es el enlace y cubre la fila
+  (`relative` en la fila, `after:absolute after:inset-0` en el enlace).
+- **Las acciones de una fila** → íconos sueltos a la derecha, en un `relative z-10`:
+  `Boton tamano="icono" forma="grupo"` `fantasma` (lo destructivo, `fantasmaPeligro`,
+  al final), con `aria-label` (qué y sobre qué) y `title`. Donde falta una acción y
+  la de su derecha no, queda `<span className="size-control shrink-0" aria-hidden="true" />`.
+  El `MenuDeAcciones` es sólo del control patrimonial, con ícono en cada ítem.
 - **Una lista vacía** → `EstadoVacio` con `enTarjeta`.
 - **Una etiqueta con su valor** → `Dato`. **Un subtítulo dentro de una
   tarjeta** → `Rotulo`.
@@ -147,6 +154,10 @@ confirmar({
 
 - **Carga inicial** → props de Inertia. No hay API ni `axios` a rutas propias:
   una acción es un `router.post/patch` o un `useForm` que vuelve con la página.
+- **Filtros** → un buscador solo se aplica al tipear (300 ms,
+  `useBusquedaEnServidor`); una barra de varios campos, con «Filtrar» (o Enter) y
+  «Limpiar filtros» en una columna `auto` del renglón, éste sólo con filtros
+  activos. Desde la página 1 y en la URL.
 - **Listados largos** → el paginador de Laravel tal cual (`data`, `links`,
   `total`), que `Paginador` sabe dibujar.
 - **Fechas** → viajan en ISO 8601 con huso, nunca formateadas; las formatea

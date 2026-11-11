@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
-import { Alerta, Metrica, ModalConfirmar, Paginador, Tarjeta, useConfirmacion } from 'hu-kit/componentes';
+import { Alerta, Boton, Metrica, ModalConfirmar, Paginador, Tarjeta, useConfirmacion } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import FiltrosDashboard from '@/Components/Patrimonio/FiltrosDashboard';
 import TablaControl from '@/Components/Patrimonio/TablaControl';
@@ -18,14 +18,13 @@ const soloConValor = (filtros) =>
     Object.fromEntries(Object.entries(filtros).filter(([, valor]) => valor !== '' && valor !== null && valor !== undefined));
 
 export default function Dashboard({ movimientos, resumen, filtros: filtrosDelServidor = {}, estados = [], areas = [], motivos = [] }) {
-    const { auth, errors } = usePage().props;
+    const { errors } = usePage().props;
     const aplicados = Object.fromEntries(
         Object.entries({ ...FILTROS_VACIOS, ...filtrosDelServidor }).map(([clave, valor]) => [clave, valor ?? '']),
     );
 
     // `filtros` es lo que el usuario está tipeando; `aplicados` es lo que ya se consultó.
     const [filtros, setFiltros] = useState(aplicados);
-    const [elegidos, setElegidos] = useState({});
     const [errorEstado, setErrorEstado] = useState('');
     const { confirmar, props: modal } = useConfirmacion();
     const errorFiltros = Object.keys(FILTROS_VACIOS).map((clave) => errors?.[clave]).filter(Boolean).join(' ');
@@ -33,24 +32,30 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
 
     // Filtros y página viajan en la URL: una vista filtrada se puede recargar o compartir.
     const visitar = (params) => {
-        router.get(route('patrimonio.dashboard'), soloConValor(params), { preserveState: true, preserveScroll: true });
+        router.get(route('patrimonio.dashboard'), soloConValor(params), { preserveState: true, preserveScroll: true, replace: true });
     };
 
-    const estadoElegido = (m) => elegidos[m.id] ?? m.estado_movimiento.id;
+    const onFiltrar = (e) => {
+        e.preventDefault();
+        visitar(filtros);
+    };
+
+    const onLimpiar = () => {
+        setFiltros(FILTROS_VACIOS);
+        visitar(FILTROS_VACIOS);
+    };
 
     // El cambio de estado puede mover los totales y la página del movimiento: vuelve
     // la vista entera en vez de parchear la fila.
-    const guardarEstado = (m) => {
+    const cambiarEstado = (m, estadoId) => {
         setErrorEstado('');
-        const estadoId = estadoElegido(m);
         const accion = (r) =>
             r.patch(route('patrimonio.movimientos.estado', { movimiento: m.id }), { estado_movimiento_id: estadoId }, {
                 preserveScroll: true,
-                onSuccess: () => setElegidos({}),
                 onError: (errores) => setErrorEstado(Object.values(errores)[0] || 'No se pudo actualizar el estado'),
             });
 
-        if (estados.find((estado) => String(estado.id) === String(estadoId))?.nombre !== 'Anulado') {
+        if (estados.find((estado) => estado.id === estadoId)?.nombre !== 'Anulado') {
             accion(router);
             return;
         }
@@ -64,29 +69,7 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
     };
 
     return (
-        <AppLayout titulo="Control patrimonial" subtitulo={`${auth.usuario.nombre} · ${auth.usuario.rolEtiqueta}`}>
-            <FiltrosDashboard
-                filtros={filtros}
-                setFiltro={(clave, valor) => setFiltros((f) => ({ ...f, [clave]: valor }))}
-                areas={areas}
-                estados={estados}
-                motivos={motivos}
-                error={errorFiltros}
-                total={resumen.total}
-                hayFiltrosActivos={hayFiltrosActivos}
-                onAplicar={(e) => {
-                    e.preventDefault();
-                    visitar(filtros);
-                }}
-                onLimpiar={() => {
-                    setFiltros(FILTROS_VACIOS);
-                    visitar(FILTROS_VACIOS);
-                }}
-                onExportar={() => {
-                    window.location.href = route('patrimonio.dashboard.exportar', soloConValor(aplicados));
-                }}
-            />
-
+        <AppLayout titulo="Dashboard patrimonial" subtitulo="Los traslados de bienes de todo el hospital, para volcarlos a Diaguita y cerrarlos.">
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 <Metrica valor={resumen.total} etiqueta="Total" icono="list_alt" />
                 <Metrica valor={resumen.informados} etiqueta="A cargar en Diaguita" icono="schedule" tono="aviso" />
@@ -95,15 +78,42 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
                 <Metrica valor={resumen.anulados} etiqueta="Anulados" icono="cancel" tono="error" />
             </div>
 
-            <Tarjeta titulo="Movimientos" icono="swap_horiz" contador={movimientos.total}>
+            <Tarjeta
+                titulo="Movimientos"
+                icono="swap_horiz"
+                contador={movimientos.total}
+                acciones={
+                    <Boton
+                        tipo="button"
+                        variante="contorno"
+                        forma="grupo"
+                        icono="download"
+                        onClick={() => {
+                            window.location.href = route('patrimonio.dashboard.exportar', soloConValor(aplicados));
+                        }}
+                    >
+                        Exportar CSV
+                    </Boton>
+                }
+            >
+                <FiltrosDashboard
+                    filtros={filtros}
+                    setFiltro={(clave, valor) => setFiltros((f) => ({ ...f, [clave]: valor }))}
+                    areas={areas}
+                    estados={estados}
+                    motivos={motivos}
+                    hayFiltrosActivos={hayFiltrosActivos}
+                    onFiltrar={onFiltrar}
+                    onLimpiar={onLimpiar}
+                />
+
+                {errorFiltros && <Alerta tipo="error" className="mb-4">{errorFiltros}</Alerta>}
                 {errorEstado && <Alerta tipo="error" className="mb-4">{errorEstado}</Alerta>}
 
                 <TablaControl
                     movimientos={movimientos.data}
                     estados={estados}
-                    estadoElegido={estadoElegido}
-                    onElegirEstado={(id, valor) => setElegidos((prev) => ({ ...prev, [id]: valor }))}
-                    onGuardarEstado={guardarEstado}
+                    onCambiarEstado={cambiarEstado}
                     hayFiltrosActivos={hayFiltrosActivos}
                 />
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Boton, Buscador, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, Paginador, renglonTabla, Tarjeta } from 'hu-kit/componentes';
+import { Link } from '@inertiajs/react';
+import { Boton, Buscador, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, Modal, Paginador, renglonTabla, Tarjeta } from 'hu-kit/componentes';
 import FormularioBien from '@/Components/Patrimonio/FormularioBien';
 import AppLayout from '@/Components/UI/AppLayout';
 import { useBusquedaEnServidor } from '@/utils/busqueda';
@@ -10,6 +11,8 @@ const ATENUADO = 'text-xs italic text-brandText-muted dark:text-brandText-mutedD
 export default function Index({ bienes, busqueda: busquedaDelServidor = '', areas = [], estados = [], responsables = [] }) {
     const [editando, setEditando] = useState(null); // null | 'nuevo' | id
     const [busqueda, setBusqueda] = useBusquedaEnServidor('patrimonio.bienes.index', busquedaDelServidor);
+    const bienEditado = bienes.data.find((b) => b.id === editando) ?? null;
+    const cerrar = () => setEditando(null);
 
     return (
         <AppLayout titulo="Directorio de bienes" subtitulo="Consulta y carga del inventario general.">
@@ -17,11 +20,11 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                 titulo="Bienes"
                 icono="inventory_2"
                 contador={bienes.total}
-                acciones={editando === null && (
+                acciones={
                     <Boton icono="add" forma="grupo" tipo="button" onClick={() => setEditando('nuevo')}>
                         Nuevo bien
                     </Boton>
-                )}
+                }
             >
                 <div className="mb-4">
                     <Buscador
@@ -33,19 +36,8 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                     />
                 </div>
 
-                {editando !== null && (
-                    <FormularioBien
-                        key={editando}
-                        bien={editando === 'nuevo' ? null : bienes.data.find((b) => b.id === editando)}
-                        areas={areas}
-                        estados={estados}
-                        responsables={responsables}
-                        onCerrar={() => setEditando(null)}
-                    />
-                )}
-
                 <div className="-mx-5 overflow-x-auto">
-                    <table className="w-full min-w-[56rem] text-sm">
+                    <table className="w-full min-w-[64rem] text-sm">
                         <thead>
                             <tr className={encabezadoTabla}>
                                 <th className="px-5 pb-2 font-semibold">N° Inventario</th>
@@ -55,30 +47,42 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                                 <th className="px-3 pb-2 font-semibold">Ubicación</th>
                                 <th className="px-3 pb-2 font-semibold">Responsable</th>
                                 <th className="px-3 pb-2 font-semibold">Estado</th>
-                                <th className="w-px px-5 pb-2 font-semibold">Acciones</th>
+                                <th className="w-px px-5 pb-2 text-right font-semibold">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className={cuerpoTabla}>
                             {bienes.data.length > 0 ? (
                                 bienes.data.map((bien) => (
-                                    <tr key={bien.id} className={renglonTabla}>
-                                        <td className="px-5 py-3 font-semibold text-primary dark:text-gray-100">{bien.codigo}</td>
+                                    <tr key={bien.id} className={`relative ${renglonTabla}`}>
+                                        <td className="px-5 py-3">
+                                            {/* Sin el `after:` del enlace, sólo el código abre la ficha. */}
+                                            <Link
+                                                href={route('patrimonio.bienes.show', { bien: bien.id })}
+                                                className="font-semibold text-primary after:absolute after:inset-0 dark:text-gray-100"
+                                            >
+                                                {bien.codigo}
+                                            </Link>
+                                        </td>
                                         <td className="px-3 py-3">{bien.numero_diaguita || <span className={ATENUADO}>sin cargar</span>}</td>
                                         <td className="px-3 py-3 font-semibold">{bien.nombre}</td>
                                         <td className="px-3 py-3">{bien.area?.nombre || '—'}</td>
                                         <td className="px-3 py-3">{bien.ubicacion_actual?.nombre || '—'}</td>
                                         <td className="px-3 py-3">{bien.responsable?.nombre || <span className={ATENUADO}>sin asignar</span>}</td>
                                         <td className="px-3 py-3">
-                                            <Estado tono={tonoEstadoBien(bien.estado?.nombre)}>{bien.estado?.nombre || '—'}</Estado>
+                                            <Estado partible tono={tonoEstadoBien(bien.estado?.nombre)}>{bien.estado?.nombre || '—'}</Estado>
                                         </td>
                                         <td className="px-5 py-3">
-                                            <div className="flex items-center gap-2">
-                                                <Boton tipo="button" variante="fantasma" forma="grupo" icono="edit" onClick={() => setEditando(bien.id)}>
-                                                    Editar
-                                                </Boton>
-                                                <Boton variante="fantasma" forma="grupo" icono="history" href={route('patrimonio.bienes.show', { bien: bien.id })}>
-                                                    Ver historial
-                                                </Boton>
+                                            <div className="relative z-10 flex items-center justify-end gap-2">
+                                                <Boton
+                                                    tipo="button"
+                                                    variante="fantasma"
+                                                    forma="grupo"
+                                                    tamano="icono"
+                                                    icono="edit"
+                                                    aria-label={`Editar el bien ${bien.codigo}`}
+                                                    title="Editar"
+                                                    onClick={() => setEditando(bien.id)}
+                                                />
                                             </div>
                                         </td>
                                     </tr>
@@ -100,6 +104,24 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                     <Paginador paginador={bienes} />
                 </div>
             </Tarjeta>
+
+            <Modal
+                abierto={editando !== null}
+                onCerrar={cerrar}
+                titulo={bienEditado ? `Editar el bien ${bienEditado.codigo}` : 'Nuevo bien'}
+                ancho="max-w-2xl"
+            >
+                {editando !== null && (
+                    <FormularioBien
+                        key={editando}
+                        bien={bienEditado}
+                        areas={areas}
+                        estados={estados}
+                        responsables={responsables}
+                        onCerrar={cerrar}
+                    />
+                )}
+            </Modal>
         </AppLayout>
     );
 }

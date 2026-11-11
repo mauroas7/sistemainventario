@@ -1,29 +1,32 @@
-import { Boton, Dato, Estado, Rotulo, Tarjeta } from 'hu-kit/componentes';
+import { usePage } from '@inertiajs/react';
+import { Dato, Estado, EstadoVacio, Rotulo, Tarjeta } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import { tonoEstadoMovimiento } from '@/utils/estados';
 import { fechaYHora } from '@/utils/fechas';
 
 export default function Show({ movimiento: m }) {
-    return (
-        <AppLayout titulo={`Auditoría del ticket TK-${m.id}`} subtitulo={`${m.bien.codigo} · ${m.bien.nombre}`}>
-            <div className="mb-4">
-                <Boton variante="fantasma" forma="grupo" icono="arrow_back" href={route('patrimonio.dashboard')}>
-                    Volver al dashboard
-                </Boton>
-            </div>
+    const { url } = usePage();
+    const vieneDeLaFicha = new URL(url, 'http://localhost').searchParams.get('desde') === 'bien';
 
+    return (
+        <AppLayout
+            titulo={`Auditoría del ticket TK-${m.id}`}
+            subtitulo={`${m.bien.codigo} · ${m.bien.nombre}`}
+            volver={
+                vieneDeLaFicha
+                    ? { href: route('patrimonio.bienes.show', { bien: m.bien.id }), etiqueta: 'Volver a la ficha del bien' }
+                    : { href: route('patrimonio.dashboard'), etiqueta: 'Volver al dashboard' }
+            }
+            estado={<Estado tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>}
+        >
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <div className="space-y-6 lg:col-span-2">
                     <Tarjeta titulo="Identificación del bien" icono="inventory_2">
-                        <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                        <div className="text-sm">
                             <Dato
                                 etiqueta="Bien"
                                 valor={`${m.bien.codigo} - ${m.bien.nombre}`}
                                 detalle={`Diaguita: ${m.bien.numero_diaguita || 'sin cargar'}`}
-                            />
-                            <Dato
-                                etiqueta="Estado"
-                                valor={<Estado tono={tonoEstadoMovimiento(m.estado_movimiento.nombre)}>{m.estado_movimiento.nombre}</Estado>}
                             />
                         </div>
                     </Tarjeta>
@@ -80,7 +83,7 @@ export default function Show({ movimiento: m }) {
                                 ))}
                             </ol>
                         ) : (
-                            <p className="text-sm text-brandText-muted dark:text-brandText-mutedDark">Sin cambios de estado registrados.</p>
+                            <EstadoVacio enTarjeta icono="history">Sin cambios de estado registrados.</EstadoVacio>
                         )}
                     </div>
                 </Tarjeta>
