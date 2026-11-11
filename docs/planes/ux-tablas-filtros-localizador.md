@@ -126,7 +126,7 @@ Rama: `feat/auditoria-frontend` (**decidido**). Al aprobarse, el plan se copia a
 - Revisar: un select filtra sin botón; tipear no dispara una visita por letra; un rango
   inválido muestra el error y no entra en bucle; recargar conserva los filtros (URL); el
   CSV coincide con la tabla; a 375 px no hay scroll de costado.
-- Estado: pendiente
+- Estado: hecha
 
 ### U4 — Localizador y fichas
 - Nuevo `Components/Patrimonio/ResumenTraslado.jsx`: el bloque de D4, con `TK-` enlazado

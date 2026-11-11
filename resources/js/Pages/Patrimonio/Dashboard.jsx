@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { Alerta, Boton, Metrica, ModalConfirmar, Paginador, Tarjeta, useConfirmacion } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import FiltrosDashboard from '@/Components/Patrimonio/FiltrosDashboard';
 import TablaControl from '@/Components/Patrimonio/TablaControl';
+import { ESPERA_MS } from '@/utils/busqueda';
 
 const FILTROS_VACIOS = {
     area_id: '',
@@ -18,7 +19,7 @@ const soloConValor = (filtros) =>
     Object.fromEntries(Object.entries(filtros).filter(([, valor]) => valor !== '' && valor !== null && valor !== undefined));
 
 export default function Dashboard({ movimientos, resumen, filtros: filtrosDelServidor = {}, estados = [], areas = [], motivos = [] }) {
-    const { auth, errors } = usePage().props;
+    const { errors } = usePage().props;
     const aplicados = Object.fromEntries(
         Object.entries({ ...FILTROS_VACIOS, ...filtrosDelServidor }).map(([clave, valor]) => [clave, valor ?? '']),
     );
@@ -32,8 +33,19 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
 
     // Filtros y página viajan en la URL: una vista filtrada se puede recargar o compartir.
     const visitar = (params) => {
-        router.get(route('patrimonio.dashboard'), soloConValor(params), { preserveState: true, preserveScroll: true });
+        router.get(route('patrimonio.dashboard'), soloConValor(params), { preserveState: true, preserveScroll: true, replace: true });
     };
+
+    // Depende sólo de `filtros`: si el servidor rechaza un rango, `aplicados` no cambia y no se reintenta.
+    // Se compara como texto porque el servidor puede devolver números.
+    useEffect(() => {
+        const cambiaron = Object.keys(FILTROS_VACIOS).some((clave) => String(filtros[clave]) !== String(aplicados[clave]));
+        if (! cambiaron) return undefined;
+
+        const temporizador = setTimeout(() => visitar(filtros), ESPERA_MS);
+
+        return () => clearTimeout(temporizador);
+    }, [filtros]);
 
     // El cambio de estado puede mover los totales y la página del movimiento: vuelve
     // la vista entera en vez de parchear la fila.
@@ -59,7 +71,7 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
     };
 
     return (
-        <AppLayout titulo="Control patrimonial" subtitulo={`${auth.usuario.nombre} · ${auth.usuario.rolEtiqueta}`}>
+        <AppLayout titulo="Dashboard patrimonial" subtitulo="Los traslados de bienes de todo el hospital, para volcarlos a Diaguita y cerrarlos.">
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 <Metrica valor={resumen.total} etiqueta="Total" icono="list_alt" />
                 <Metrica valor={resumen.informados} etiqueta="A cargar en Diaguita" icono="schedule" tono="aviso" />
@@ -68,41 +80,40 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
                 <Metrica valor={resumen.anulados} etiqueta="Anulados" icono="cancel" tono="error" />
             </div>
 
-            <FiltrosDashboard
-                filtros={filtros}
-                setFiltro={(clave, valor) => setFiltros((f) => ({ ...f, [clave]: valor }))}
-                areas={areas}
-                estados={estados}
-                motivos={motivos}
-                error={errorFiltros}
-                onAplicar={(e) => {
-                    e.preventDefault();
-                    visitar(filtros);
-                }}
-                onLimpiar={() => {
-                    setFiltros(FILTROS_VACIOS);
-                    visitar(FILTROS_VACIOS);
-                }}
-            />
-
             <Tarjeta
                 titulo="Movimientos"
                 icono="swap_horiz"
                 contador={movimientos.total}
                 acciones={
-                    <Boton
-                        tipo="button"
-                        variante="contorno"
-                        forma="grupo"
-                        icono="download"
-                        onClick={() => {
-                            window.location.href = route('patrimonio.dashboard.exportar', soloConValor(aplicados));
-                        }}
-                    >
-                        Exportar CSV
-                    </Boton>
+                    <div className="flex flex-wrap items-center gap-2">
+                        {hayFiltrosActivos && (
+                            <Boton tipo="button" variante="fantasma" forma="grupo" icono="filter_alt_off" onClick={() => setFiltros(FILTROS_VACIOS)}>
+                                Limpiar filtros
+                            </Boton>
+                        )}
+                        <Boton
+                            tipo="button"
+                            variante="contorno"
+                            forma="grupo"
+                            icono="download"
+                            onClick={() => {
+                                window.location.href = route('patrimonio.dashboard.exportar', soloConValor(aplicados));
+                            }}
+                        >
+                            Exportar CSV
+                        </Boton>
+                    </div>
                 }
             >
+                <FiltrosDashboard
+                    filtros={filtros}
+                    setFiltro={(clave, valor) => setFiltros((f) => ({ ...f, [clave]: valor }))}
+                    areas={areas}
+                    estados={estados}
+                    motivos={motivos}
+                />
+
+                {errorFiltros && <Alerta tipo="error" className="mb-4">{errorFiltros}</Alerta>}
                 {errorEstado && <Alerta tipo="error" className="mb-4">{errorEstado}</Alerta>}
 
                 <TablaControl

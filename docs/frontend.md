@@ -151,6 +151,9 @@ confirmar({
 
 - **Carga inicial** → props de Inertia. No hay API ni `axios` a rutas propias:
   una acción es un `router.post/patch` o un `useForm` que vuelve con la página.
+- **Filtros** → se aplican al cambiar, sin botón: una visita tras 300 ms de
+  quietud, desde la página 1 (`useBusquedaEnServidor` para un buscador solo; el
+  Dashboard patrimonial, con varios campos). Viajan en la URL.
 - **Listados largos** → el paginador de Laravel tal cual (`data`, `links`,
   `total`), que `Paginador` sabe dibujar.
 - **Fechas** → viajan en ISO 8601 con huso, nunca formateadas; las formatea
