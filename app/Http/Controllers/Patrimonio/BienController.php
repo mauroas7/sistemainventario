@@ -42,8 +42,9 @@ class BienController extends Controller
             'responsables' => User::query()
                 ->activos()
                 ->whereNotNull('area_id')
-                ->orderBy('name')
-                ->get(['id', 'name', 'area_id']),
+                ->orderBy('nombre')
+                ->orderBy('apellido')
+                ->get(['id', 'nombre', 'apellido', 'area_id']),
         ]);
     }
 

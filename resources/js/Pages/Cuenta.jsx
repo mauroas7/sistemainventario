@@ -6,7 +6,7 @@ import AppLayout from '@/Components/UI/AppLayout';
 export default function Cuenta() {
     const usuario = usePage().props.auth.usuario;
 
-    const datos = useForm({ name: usuario.nombre, email: usuario.email });
+    const datos = useForm({ nombre: usuario.nombrePila, apellido: usuario.apellido, email: usuario.email });
     const clave = useForm({ current_password: '', password: '', password_confirmation: '' });
 
     const guardarDatos = (e) => {
@@ -43,13 +43,22 @@ export default function Cuenta() {
                 <Tarjeta titulo="Mis datos" icono="person">
                     <form onSubmit={guardarDatos} className="space-y-4">
                         <Input
-                            nombre="name"
-                            etiqueta="Nombre y apellido"
-                            valor={datos.data.name}
-                            onChange={(e) => datos.setData('name', e.target.value)}
-                            error={datos.errors.name}
+                            nombre="nombre"
+                            etiqueta="Nombre"
+                            valor={datos.data.nombre}
+                            onChange={(e) => datos.setData('nombre', e.target.value)}
+                            error={datos.errors.nombre}
                             requerido
-                            autoComplete="name"
+                            autoComplete="given-name"
+                        />
+                        <Input
+                            nombre="apellido"
+                            etiqueta="Apellido"
+                            valor={datos.data.apellido}
+                            onChange={(e) => datos.setData('apellido', e.target.value)}
+                            error={datos.errors.apellido}
+                            requerido
+                            autoComplete="family-name"
                         />
                         <Input
                             nombre="email"

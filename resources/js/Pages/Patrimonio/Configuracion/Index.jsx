@@ -6,7 +6,7 @@ import FormularioUsuario, { ROLES_SIN_AREA } from '@/Components/Patrimonio/Formu
 import ListaDeAreas from '@/Components/Patrimonio/ListaDeAreas';
 import TablaUsuarios from '@/Components/Patrimonio/TablaUsuarios';
 
-const FORM_VACIO = { name: '', email: '', password: '', rol: 'coordinador', area_id: '' };
+const FORM_VACIO = { nombre: '', apellido: '', email: '', password: '', rol: 'coordinador', area_id: '' };
 
 export default function Index({ areas = [], roles = [], usuarios = [] }) {
     const usuarioActualId = usePage().props.auth.usuario.id;
@@ -32,7 +32,8 @@ export default function Index({ areas = [], roles = [], usuarios = [] }) {
 
     const abrirEdicion = (usuario) =>
         abrir(usuario.id, {
-            name: usuario.name,
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
             email: usuario.email,
             password: '',
             rol: usuario.rol || 'usuario',

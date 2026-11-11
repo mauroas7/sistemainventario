@@ -39,6 +39,8 @@ test('la pantalla recibe el usuario armado, sin el modelo entero', function () {
             ->where('auth.usuario', [
                 'id' => $usuario->id,
                 'nombre' => $usuario->name,
+                'nombrePila' => $usuario->nombre,
+                'apellido' => $usuario->apellido,
                 'email' => $usuario->email,
                 'rol' => 'coordinador',
                 'rolEtiqueta' => 'Coordinador / Jefe de área',

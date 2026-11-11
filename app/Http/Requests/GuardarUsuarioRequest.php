@@ -25,7 +25,13 @@ class GuardarUsuarioRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => [
+            'nombre' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'apellido' => [
                 'required',
                 'string',
                 'max:255',
@@ -68,7 +74,8 @@ class GuardarUsuarioRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Ingresá el nombre y apellido.',
+            'nombre.required' => 'Ingresá el nombre.',
+            'apellido.required' => 'Ingresá el apellido.',
             'email.required' => 'Ingresá el correo institucional.',
             'email.unique' => 'Ya existe un usuario con ese correo.',
             'password.required' => 'Asigná una contraseña inicial.',

@@ -43,7 +43,8 @@ class DemoSeeder extends SeederDePrueba
 
         // Da de alta áreas y usuarios; no tiene área ni ve bienes.
         User::updateOrCreate(['email' => 'admin@hospital.test'], [
-            'name' => 'Admin Test',
+            'nombre' => 'Admin',
+            'apellido' => 'Test',
             'password' => self::CLAVE,
             'rol' => Rol::Admin,
             'area_id' => null,
@@ -70,7 +71,8 @@ class DemoSeeder extends SeederDePrueba
     private function cuenta(string $nombre, string $puesto, Rol $rol, string $area, bool $activa = true): void
     {
         User::updateOrCreate(['email' => self::correo($puesto, $area)], [
-            'name' => "{$nombre} Test",
+            'nombre' => $nombre,
+            'apellido' => 'Test',
             'password' => self::CLAVE,
             'rol' => $rol,
             'area_id' => Area::where('nombre', $area)->value('id'),

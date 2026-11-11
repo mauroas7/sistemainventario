@@ -18,7 +18,14 @@ class ActualizarUsuarioRequest extends FormRequest
         $usuario = $this->route('usuario');
 
         return [
-            'name' => [
+            'nombre' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'apellido' => [
                 'sometimes',
                 'required',
                 'string',
@@ -65,6 +72,8 @@ class ActualizarUsuarioRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'nombre.required' => 'Ingresá el nombre.',
+            'apellido.required' => 'Ingresá el apellido.',
             'email.unique' => 'Ya existe un usuario con ese correo.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
             'area_id.required' => 'Seleccioná el área. Es lo que determina qué bienes va a ver.',

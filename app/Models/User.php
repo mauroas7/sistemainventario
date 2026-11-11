@@ -22,7 +22,8 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'nombre',
+        'apellido',
         'email',
         'password',
         'rol',
@@ -40,7 +41,7 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    protected $appends = ['activo'];
+    protected $appends = ['activo', 'name'];
 
     /**
      * @return array<string, mixed>
@@ -64,6 +65,14 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    /** Nombre completo, "nombre apellido". Tolera consultas que no traen alguna de las dos columnas. */
+    protected function name(): Attribute
+    {
+        return Attribute::get(fn ($valor, array $atributos) => trim(
+            ($atributos['nombre'] ?? '').' '.($atributos['apellido'] ?? '')
+        ));
     }
 
     /** Sin baja. Dar de baja una cuenta que ya la tenía conserva la fecha original. */

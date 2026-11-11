@@ -19,7 +19,8 @@ test('profile information can be updated', function () {
     $response = $this
         ->actingAs($user)
         ->patch('/mi-cuenta', [
-            'name' => 'Test User',
+            'nombre' => 'Test',
+            'apellido' => 'User',
             'email' => 'test@example.com',
         ]);
 
@@ -31,6 +32,11 @@ test('profile information can be updated', function () {
 
     $this->assertSame('Test User', $user->name);
     $this->assertSame('test@example.com', $user->email);
+});
+
+test('el nombre completo une nombre y apellido y tolera que falte uno', function () {
+    expect((new User(['nombre' => 'Rosa', 'apellido' => 'Díaz']))->name)->toBe('Rosa Díaz')
+        ->and((new User(['nombre' => 'Rosa']))->name)->toBe('Rosa');
 });
 
 test('un usuario no puede eliminar su propia cuenta', function () {

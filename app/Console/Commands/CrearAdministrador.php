@@ -24,11 +24,13 @@ class CrearAdministrador extends Command
     {
         $validador = Validator::make([
             'email' => $this->argument('email'),
-            'name' => $this->ask('Nombre y apellido'),
+            'nombre' => $this->ask('Nombre'),
+            'apellido' => $this->ask('Apellido'),
             'password' => $this->secret('Contraseña (mínimo 8 caracteres)'),
         ], [
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
-            'name' => ['required', 'string', 'max:255'],
+            'nombre' => ['required', 'string', 'max:255'],
+            'apellido' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8'],
         ]);
 

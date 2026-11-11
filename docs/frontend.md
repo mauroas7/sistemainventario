@@ -165,8 +165,8 @@ confirmar({
 - **Rutas** → `route()` de Ziggy. Para saber en qué ruta estás, `rutaActiva` de
   hu-kit: un patrón terminado en `.` es un prefijo.
 - **Props compartidas** → `HandleInertiaRequests::share()` manda `auth.usuario`
-  (`id`, `nombre`, `email`, `rol`, `rolEtiqueta`, `area`) y `flash` (`exito`,
-  `error`), que muestra `Flash`.
+  (`id`, `nombre` —el nombre completo—, `nombrePila`, `apellido`, `email`, `rol`,
+  `rolEtiqueta`, `area`) y `flash` (`exito`, `error`), que muestra `Flash`.
 - **La foto de un movimiento** llega como `imagen_salida_url`, una ruta con
   permiso; nunca se arma a mano.
 
