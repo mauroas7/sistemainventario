@@ -100,6 +100,10 @@ claro y se resetea cuando cambia el usuario. Todo componente nace con sus pares
 - **Tablas** → adentro de una `Tarjeta`, en un `-mx-5 overflow-x-auto` con un
   `min-w-*` en la tabla, y las clases de tabla de `hu-kit`. La primera y la
   última columna van a `px-5`.
+- **Una fila con ficha** → su identificador (`TK-12`) es el enlace y cubre la fila
+  (`relative` en la fila, `after:absolute after:inset-0` en el enlace). Las
+  acciones van a la derecha, en un `relative z-10`: a lo sumo una con texto (el
+  paso que sigue) y el resto en `MenuDeAcciones`; lo destructivo, siempre ahí.
 - **Una lista vacía** → `EstadoVacio` con `enTarjeta`.
 - **Una etiqueta con su valor** → `Dato`. **Un subtítulo dentro de una
   tarjeta** → `Rotulo`.

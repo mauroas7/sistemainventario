@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { router, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import {
     Alerta,
     Boton,
@@ -98,9 +98,15 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                         <tbody className={cuerpoTabla}>
                             {movimientos.data.length > 0 ? (
                                 movimientos.data.map((m) => (
-                                    <tr key={m.id} className={renglonTabla}>
+                                    <tr key={m.id} className={`relative ${renglonTabla}`}>
                                         <td className="whitespace-nowrap px-5 py-3">
-                                            <p className="font-semibold text-primary dark:text-gray-100">TK-{m.id}</p>
+                                            {/* Sin el `after:` del enlace, sólo el identificador abre el ticket. */}
+                                            <Link
+                                                href={route('recepcion.show', { movimiento: m.id, ver: pestana })}
+                                                className="font-semibold text-primary after:absolute after:inset-0 dark:text-gray-100"
+                                            >
+                                                TK-{m.id}
+                                            </Link>
                                             <p className="text-xs text-brandText-muted dark:text-brandText-mutedDark">{fechaYHora(m.fecha_movimiento)}</p>
                                         </td>
                                         <td className="min-w-48 px-3 py-3">
@@ -132,26 +138,20 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                                             )}
                                         </td>
                                         <td className="px-5 py-3">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Boton
-                                                    variante="fantasma"
-                                                    forma="grupo"
-                                                    tamano="icono"
-                                                    icono="visibility"
-                                                    href={route('recepcion.show', { movimiento: m.id, ver: pestana })}
-                                                    aria-label={`Ver el ticket TK-${m.id}`}
-                                                />
+                                            <div className="relative z-10 flex items-center justify-end gap-2">
                                                 {puedeAcusar(m, usuario) && (
                                                     <Boton tipo="button" variante="contorno" forma="grupo" disabled={acusando} onClick={() => acusar(m)}>
                                                         Acusar recibo
                                                     </Boton>
                                                 )}
-                                                {puedeAnular(m, usuario) && (
+                                                {puedeAnular(m, usuario) ? (
                                                     <MenuDeAcciones etiqueta={`Más acciones del ticket TK-${m.id}`}>
                                                         <ItemDeMenu icono="block" peligro onClick={() => anular(m)}>
                                                             Anular
                                                         </ItemDeMenu>
                                                     </MenuDeAcciones>
+                                                ) : (
+                                                    <span className="size-control shrink-0" aria-hidden="true" />
                                                 )}
                                             </div>
                                         </td>
