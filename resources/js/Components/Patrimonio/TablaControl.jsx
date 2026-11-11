@@ -5,7 +5,9 @@ import { fechaYHora } from '@/utils/fechas';
 
 const ATENUADO = 'text-xs text-brandText-muted dark:text-brandText-mutedDark';
 
-// El paso que sigue en el circuito va como botón; los demás estados, en el menú.
+const ICONO_ESTADO = { Informado: 'schedule', Registrado: 'inventory', Cerrado: 'check_circle' };
+
+// El paso que sigue en el circuito va como ícono; los demás estados, en el menú.
 const PASO_SIGUIENTE = {
     Informado: { estado: 'Registrado', texto: 'Registrar en Diaguita' },
     Registrado: { estado: 'Cerrado', texto: 'Cerrar' },
@@ -79,18 +81,20 @@ export default function TablaControl({ movimientos, estados, onCambiarEstado, ha
                                             {estadoDelPaso && (
                                                 <Boton
                                                     tipo="button"
-                                                    variante="contorno"
+                                                    variante="fantasma"
                                                     forma="grupo"
+                                                    tamano="icono"
+                                                    icono={ICONO_ESTADO[paso.estado]}
+                                                    aria-label={`${paso.texto} el ticket TK-${m.id}`}
+                                                    title={paso.texto}
                                                     onClick={() => onCambiarEstado(m, estadoDelPaso.id)}
-                                                >
-                                                    {paso.texto}
-                                                </Boton>
+                                                />
                                             )}
                                             <MenuDeAcciones etiqueta={`Más acciones del ticket TK-${m.id}`}>
                                                 {otrosEstados
                                                     .filter((estado) => estado.nombre !== 'Anulado')
                                                     .map((estado) => (
-                                                        <ItemDeMenu key={estado.id} onClick={() => onCambiarEstado(m, estado.id)}>
+                                                        <ItemDeMenu key={estado.id} icono={ICONO_ESTADO[estado.nombre]} onClick={() => onCambiarEstado(m, estado.id)}>
                                                             Pasar a {estado.nombre}
                                                         </ItemDeMenu>
                                                     ))}

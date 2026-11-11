@@ -73,9 +73,16 @@ export default function Index({ bienes, busqueda: busquedaDelServidor = '', area
                                         </td>
                                         <td className="px-5 py-3">
                                             <div className="relative z-10 flex items-center justify-end gap-2">
-                                                <Boton tipo="button" variante="contorno" forma="grupo" onClick={() => setEditando(bien.id)}>
-                                                    Editar
-                                                </Boton>
+                                                <Boton
+                                                    tipo="button"
+                                                    variante="fantasma"
+                                                    forma="grupo"
+                                                    tamano="icono"
+                                                    icono="edit"
+                                                    aria-label={`Editar el bien ${bien.codigo}`}
+                                                    title="Editar"
+                                                    onClick={() => setEditando(bien.id)}
+                                                />
                                             </div>
                                         </td>
                                     </tr>

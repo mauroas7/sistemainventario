@@ -99,7 +99,7 @@ U1 y U3 tocan `docs/frontend.md` en secciones distintas (Layout y Datos).
   rojo; el ícono del paso cambia entre Informado y Registrado y no aparece en
   Cerrado/Anulado; Desactivar y Anular piden confirmación; Editar abre el modal (o
   el renombre en el lugar) sin navegar.
-- Estado: pendiente
+- Estado: hecha
 
 ### U3 — Filtros del dashboard con «Filtrar»
 - `Components/Patrimonio/FiltrosDashboard.jsx`: un `<form onSubmit={onFiltrar}>`

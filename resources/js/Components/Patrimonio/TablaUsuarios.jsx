@@ -1,4 +1,4 @@
-import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, ItemDeMenu, MenuDeAcciones, renglonTabla } from 'hu-kit/componentes';
+import { Boton, cuerpoTabla, encabezadoTabla, Estado, EstadoVacio, renglonTabla } from 'hu-kit/componentes';
 import { ROLES_SIN_AREA } from '@/Components/Patrimonio/FormularioUsuario';
 import { tonoRol } from '@/utils/estados';
 
@@ -45,17 +45,29 @@ export default function TablaUsuarios({ usuarios, usuarioActualId, onEditar, onC
                                     </td>
                                     <td className="px-5 py-3">
                                         <div className="flex items-center justify-end gap-2">
-                                            <Boton tipo="button" variante="contorno" forma="grupo" onClick={() => onEditar(u)}>
-                                                Editar
-                                            </Boton>
+                                            <Boton
+                                                tipo="button"
+                                                variante="fantasma"
+                                                forma="grupo"
+                                                tamano="icono"
+                                                icono="edit"
+                                                aria-label={`Editar a ${u.name}`}
+                                                title="Editar"
+                                                onClick={() => onEditar(u)}
+                                            />
                                             {esUsuarioActual ? (
                                                 <span className="size-control shrink-0" aria-hidden="true" />
                                             ) : (
-                                                <MenuDeAcciones etiqueta={`Más acciones de ${u.name}`}>
-                                                    <ItemDeMenu icono={u.activo ? 'block' : 'restore'} peligro={u.activo} onClick={() => onCambiarEstado(u)}>
-                                                        {u.activo ? 'Desactivar' : 'Reactivar'}
-                                                    </ItemDeMenu>
-                                                </MenuDeAcciones>
+                                                <Boton
+                                                    tipo="button"
+                                                    variante={u.activo ? 'fantasmaPeligro' : 'fantasma'}
+                                                    forma="grupo"
+                                                    tamano="icono"
+                                                    icono={u.activo ? 'block' : 'restore'}
+                                                    aria-label={`${u.activo ? 'Desactivar' : 'Reactivar'} a ${u.name}`}
+                                                    title={u.activo ? 'Desactivar' : 'Reactivar'}
+                                                    onClick={() => onCambiarEstado(u)}
+                                                />
                                             )}
                                         </div>
                                     </td>

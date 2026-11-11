@@ -68,13 +68,14 @@ export default function ListaDeAreas({ areas }) {
                                     <span>{a.nombre}</span>
                                     <Boton
                                         tipo="button"
-                                        variante="contorno"
+                                        variante="fantasma"
                                         forma="grupo"
+                                        tamano="icono"
+                                        icono="edit"
                                         aria-label={`Editar el nombre de ${a.nombre}`}
+                                        title="Editar"
                                         onClick={() => abrir(a.id, a.nombre)}
-                                    >
-                                        Editar
-                                    </Boton>
+                                    />
                                 </div>
                             )}
                         </li>
