@@ -127,9 +127,17 @@ export default function Index({ porAcusar = null, ultimos = null }) {
                             <ul className={LISTA}>
                                 {porAcusar.data.map((m) => (
                                     <Renglon key={m.id} m={m}>
-                                        <Boton tipo="button" variante="contorno" forma="grupo" icono="task_alt" disabled={acusando} onClick={() => acusar(m)}>
-                                            Acusar recibo
-                                        </Boton>
+                                        <Boton
+                                            tipo="button"
+                                            variante="fantasma"
+                                            forma="grupo"
+                                            tamano="icono"
+                                            icono="task_alt"
+                                            aria-label={`Acusar recibo del ticket TK-${m.id}`}
+                                            title="Acusar recibo"
+                                            disabled={acusando}
+                                            onClick={() => acusar(m)}
+                                        />
                                     </Renglon>
                                 ))}
                             </ul>

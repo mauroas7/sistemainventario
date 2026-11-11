@@ -7,8 +7,6 @@ import {
     encabezadoTabla,
     Estado,
     EstadoVacio,
-    ItemDeMenu,
-    MenuDeAcciones,
     ModalConfirmar,
     Paginador,
     renglonTabla,
@@ -140,16 +138,29 @@ export default function Bandeja({ movimientos, pestana = 'todos', contadores }) 
                                         <td className="px-5 py-3">
                                             <div className="relative z-10 flex items-center justify-end gap-2">
                                                 {puedeAcusar(m, usuario) && (
-                                                    <Boton tipo="button" variante="contorno" forma="grupo" disabled={acusando} onClick={() => acusar(m)}>
-                                                        Acusar recibo
-                                                    </Boton>
+                                                    <Boton
+                                                        tipo="button"
+                                                        variante="fantasma"
+                                                        forma="grupo"
+                                                        tamano="icono"
+                                                        icono="task_alt"
+                                                        aria-label={`Acusar recibo del ticket TK-${m.id}`}
+                                                        title="Acusar recibo"
+                                                        disabled={acusando}
+                                                        onClick={() => acusar(m)}
+                                                    />
                                                 )}
                                                 {puedeAnular(m, usuario) ? (
-                                                    <MenuDeAcciones etiqueta={`Más acciones del ticket TK-${m.id}`}>
-                                                        <ItemDeMenu icono="block" peligro onClick={() => anular(m)}>
-                                                            Anular
-                                                        </ItemDeMenu>
-                                                    </MenuDeAcciones>
+                                                    <Boton
+                                                        tipo="button"
+                                                        variante="fantasmaPeligro"
+                                                        forma="grupo"
+                                                        tamano="icono"
+                                                        icono="block"
+                                                        aria-label={`Anular el ticket TK-${m.id}`}
+                                                        title="Anular"
+                                                        onClick={() => anular(m)}
+                                                    />
                                                 ) : (
                                                     <span className="size-control shrink-0" aria-hidden="true" />
                                                 )}
