@@ -1,11 +1,14 @@
-import { Buscador, Select, SelectorFecha } from 'hu-kit/componentes';
+import { Boton, Buscador, Select, SelectorFecha } from 'hu-kit/componentes';
 
 const pares = (lista) => lista.map((item) => [item.id, item.nombre]);
 
-/** Los filtros del control patrimonial: cada cambio se aplica solo, desde `Dashboard`. */
-export default function FiltrosDashboard({ filtros, setFiltro, areas, estados, motivos }) {
+/** Los filtros del control patrimonial: se aplican con «Filtrar» o Enter, desde `Dashboard`. */
+export default function FiltrosDashboard({ filtros, setFiltro, areas, estados, motivos, hayFiltrosActivos, onFiltrar, onLimpiar }) {
     return (
-        <div className="mb-4 grid grid-cols-1 items-end gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+        <form
+            onSubmit={onFiltrar}
+            className="mb-4 grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-[repeat(6,minmax(0,1fr))_auto]"
+        >
             <Buscador
                 nombre="bien"
                 etiqueta="Bien (código o nombre)"
@@ -53,6 +56,14 @@ export default function FiltrosDashboard({ filtros, setFiltro, areas, estados, m
                 onChange={(valor) => setFiltro('hasta', valor)}
                 limpiable
             />
-        </div>
+            <div className="flex items-end gap-2 sm:col-span-2 2xl:col-span-1">
+                <Boton tipo="submit" forma="grupo">Filtrar</Boton>
+                {hayFiltrosActivos && (
+                    <Boton tipo="button" variante="fantasma" forma="grupo" icono="filter_alt_off" onClick={onLimpiar}>
+                        Limpiar filtros
+                    </Boton>
+                )}
+            </div>
+        </form>
     );
 }

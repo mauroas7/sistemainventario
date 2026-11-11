@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { router } from '@inertiajs/react';
 
-export const ESPERA_MS = 300;
+const ESPERA_MS = 300;
 
 /** El texto de un buscador que filtra en el servidor: consulta cuando se deja de tipear, desde la primera página. */
 export function useBusquedaEnServidor(ruta, busquedaDelServidor = '') {

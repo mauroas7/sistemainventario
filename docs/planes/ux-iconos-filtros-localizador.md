@@ -125,7 +125,7 @@ U1 y U3 tocan `docs/frontend.md` en secciones distintas (Layout y Datos).
   el error; recargar conserva los filtros; el CSV coincide con la tabla aunque haya
   algo tipeado sin aplicar; a 1536 px los botones van en el mismo renglón que los
   campos y a 375 px no hay scroll de costado.
-- Estado: pendiente
+- Estado: hecha
 
 ### U4 — Localizador en tabla
 - `Pages/Patrimonio/Localizador/Index.jsx`: la `Tarjeta` del buscador sigue;

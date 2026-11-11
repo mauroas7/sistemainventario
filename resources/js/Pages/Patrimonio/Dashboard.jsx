@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { Alerta, Boton, Metrica, ModalConfirmar, Paginador, Tarjeta, useConfirmacion } from 'hu-kit/componentes';
 import AppLayout from '@/Components/UI/AppLayout';
 import FiltrosDashboard from '@/Components/Patrimonio/FiltrosDashboard';
 import TablaControl from '@/Components/Patrimonio/TablaControl';
-import { ESPERA_MS } from '@/utils/busqueda';
 
 const FILTROS_VACIOS = {
     area_id: '',
@@ -36,16 +35,15 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
         router.get(route('patrimonio.dashboard'), soloConValor(params), { preserveState: true, preserveScroll: true, replace: true });
     };
 
-    // Depende sólo de `filtros`: si el servidor rechaza un rango, `aplicados` no cambia y no se reintenta.
-    // Se compara como texto porque el servidor puede devolver números.
-    useEffect(() => {
-        const cambiaron = Object.keys(FILTROS_VACIOS).some((clave) => String(filtros[clave]) !== String(aplicados[clave]));
-        if (! cambiaron) return undefined;
+    const onFiltrar = (e) => {
+        e.preventDefault();
+        visitar(filtros);
+    };
 
-        const temporizador = setTimeout(() => visitar(filtros), ESPERA_MS);
-
-        return () => clearTimeout(temporizador);
-    }, [filtros]);
+    const onLimpiar = () => {
+        setFiltros(FILTROS_VACIOS);
+        visitar(FILTROS_VACIOS);
+    };
 
     // El cambio de estado puede mover los totales y la página del movimiento: vuelve
     // la vista entera en vez de parchear la fila.
@@ -85,24 +83,17 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
                 icono="swap_horiz"
                 contador={movimientos.total}
                 acciones={
-                    <div className="flex flex-wrap items-center gap-2">
-                        {hayFiltrosActivos && (
-                            <Boton tipo="button" variante="fantasma" forma="grupo" icono="filter_alt_off" onClick={() => setFiltros(FILTROS_VACIOS)}>
-                                Limpiar filtros
-                            </Boton>
-                        )}
-                        <Boton
-                            tipo="button"
-                            variante="contorno"
-                            forma="grupo"
-                            icono="download"
-                            onClick={() => {
-                                window.location.href = route('patrimonio.dashboard.exportar', soloConValor(aplicados));
-                            }}
-                        >
-                            Exportar CSV
-                        </Boton>
-                    </div>
+                    <Boton
+                        tipo="button"
+                        variante="contorno"
+                        forma="grupo"
+                        icono="download"
+                        onClick={() => {
+                            window.location.href = route('patrimonio.dashboard.exportar', soloConValor(aplicados));
+                        }}
+                    >
+                        Exportar CSV
+                    </Boton>
                 }
             >
                 <FiltrosDashboard
@@ -111,6 +102,9 @@ export default function Dashboard({ movimientos, resumen, filtros: filtrosDelSer
                     areas={areas}
                     estados={estados}
                     motivos={motivos}
+                    hayFiltrosActivos={hayFiltrosActivos}
+                    onFiltrar={onFiltrar}
+                    onLimpiar={onLimpiar}
                 />
 
                 {errorFiltros && <Alerta tipo="error" className="mb-4">{errorFiltros}</Alerta>}
