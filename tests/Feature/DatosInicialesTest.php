@@ -45,12 +45,14 @@ test('la demo tiene un coordinador y un usuario por area, dos en Enfermeria, y P
 
 test('crea el primer administrador desde la consola', function () {
     $this->artisan('usuarios:crear-administrador', ['email' => 'silvana@hospital.test'])
-        ->expectsQuestion('Nombre y apellido', 'Silvana Gómez')
+        ->expectsQuestion('Nombre', 'Silvana')
+        ->expectsQuestion('Apellido', 'Gómez')
         ->expectsQuestion('Contraseña (mínimo 8 caracteres)', 'una-clave-larga')
         ->assertSuccessful();
 
     $usuario = User::where('email', 'silvana@hospital.test')->firstOrFail();
 
+    $this->assertSame('Silvana Gómez', $usuario->name);
     $this->assertSame(Rol::Admin, $usuario->rol);
     $this->assertNull($usuario->area_id);
     $this->assertTrue($usuario->activo);
@@ -60,7 +62,8 @@ test('no crea un administrador con un correo ya usado', function () {
     User::factory()->create(['email' => 'silvana@hospital.test']);
 
     $this->artisan('usuarios:crear-administrador', ['email' => 'silvana@hospital.test'])
-        ->expectsQuestion('Nombre y apellido', 'Silvana Gómez')
+        ->expectsQuestion('Nombre', 'Silvana')
+        ->expectsQuestion('Apellido', 'Gómez')
         ->expectsQuestion('Contraseña (mínimo 8 caracteres)', 'una-clave-larga')
         ->assertFailed();
 

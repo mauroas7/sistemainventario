@@ -21,7 +21,8 @@ export default function FormularioUsuario({ esNuevo, form, onCambiar, roles, are
             {errorGeneral && <Alerta tipo="error" className="mb-4">{errorGeneral}</Alerta>}
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Input nombre="name" etiqueta="Nombre y apellido" requerido valor={form.name} onChange={onCambiar} error={errors.name} />
+                <Input nombre="nombre" etiqueta="Nombre" requerido valor={form.nombre} onChange={onCambiar} error={errors.nombre} autoComplete="given-name" />
+                <Input nombre="apellido" etiqueta="Apellido" requerido valor={form.apellido} onChange={onCambiar} error={errors.apellido} autoComplete="family-name" />
                 <Input nombre="email" etiqueta="Correo institucional" tipo="email" requerido valor={form.email} onChange={onCambiar} error={errors.email} />
                 <Select
                     nombre="rol"

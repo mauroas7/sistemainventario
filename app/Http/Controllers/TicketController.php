@@ -65,8 +65,9 @@ class TicketController extends Controller
         $responsables = User::query()
             ->activos()
             ->with('area:id,nombre')
-            ->orderBy('name')
-            ->get(['id', 'name', 'area_id']);
+            ->orderBy('nombre')
+            ->orderBy('apellido')
+            ->get(['id', 'nombre', 'apellido', 'area_id']);
 
         return Inertia::render('Envio/Create', [
             'bienes' => $bienes,
@@ -164,8 +165,9 @@ class TicketController extends Controller
                 ? User::query()
                     ->activos()
                     ->where('area_id', $movimiento->area_destino_id)
-                    ->orderBy('name')
-                    ->get(['id', 'name', 'area_id'])
+                    ->orderBy('nombre')
+                    ->orderBy('apellido')
+                    ->get(['id', 'nombre', 'apellido', 'area_id'])
                 : [],
         ]);
     }

@@ -160,7 +160,8 @@ test('gestion de bienes no entra a configuracion', function () {
 test('el admin da de alta y de baja una cuenta', function () {
     $this->actingAs($this->admin)
         ->post(route('patrimonio.usuarios.store'), [
-            'name' => 'Rosa Díaz',
+            'nombre' => 'Rosa',
+            'apellido' => 'Díaz',
             'email' => 'rosa@hospital.test',
             'password' => 'una-clave-larga',
             'rol' => 'coordinador',
@@ -197,7 +198,8 @@ test('el admin y gestion de bienes se dan de alta sin area', function () {
 
     foreach (['admin' => 'otro.admin@hospital.test', 'patrimonio' => 'otro.gestor@hospital.test'] as $rol => $email) {
         $this->post(route('patrimonio.usuarios.store'), [
-            'name' => 'Sin Área',
+            'nombre' => 'Sin',
+            'apellido' => 'Área',
             'email' => $email,
             'password' => 'una-clave-larga',
             'rol' => $rol,
@@ -208,11 +210,24 @@ test('el admin y gestion de bienes se dan de alta sin area', function () {
     }
 
     $this->post(route('patrimonio.usuarios.store'), [
-        'name' => 'Sin Área',
+        'nombre' => 'Sin',
+        'apellido' => 'Área',
         'email' => 'otro.usuario@hospital.test',
         'password' => 'una-clave-larga',
         'rol' => 'usuario',
     ])->assertSessionHasErrors('area_id');
+});
+
+test('el nombre y el apellido de una cuenta se validan por separado', function () {
+    $this->actingAs($this->admin)
+        ->post(route('patrimonio.usuarios.store'), [
+            'nombre' => 'Rosa',
+            'email' => 'rosa@hospital.test',
+            'password' => 'una-clave-larga',
+            'rol' => 'admin',
+        ])
+        ->assertSessionHasErrors(['apellido' => 'Ingresá el apellido.'])
+        ->assertSessionDoesntHaveErrors('nombre');
 });
 
 test('la foto del movimiento es privada y la ve sólo quien puede ver el movimiento', function () {

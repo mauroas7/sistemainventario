@@ -24,10 +24,12 @@ class UsuarioController extends Controller
         return Inertia::render('Patrimonio/Configuracion/Index', [
             'areas' => Area::orderBy('nombre')->get(['id', 'nombre']),
             'roles' => collect(Rol::cases())->map(fn (Rol $rol) => [$rol->value, $rol->etiqueta()]),
-            'usuarios' => User::with('area:id,nombre')->orderBy('name')->get()
+            'usuarios' => User::with('area:id,nombre')->orderBy('nombre')->orderBy('apellido')->get()
                 ->map(fn (User $usuario) => [
                     'id' => $usuario->id,
                     'name' => $usuario->name,
+                    'nombre' => $usuario->nombre,
+                    'apellido' => $usuario->apellido,
                     'email' => $usuario->email,
                     'rol' => $usuario->rol?->value,
                     'rolEtiqueta' => $usuario->rol?->etiqueta(),
