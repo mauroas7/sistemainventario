@@ -201,8 +201,8 @@ documentación técnica está en `docs/`:
 
 Este proyecto fue desarrollado por:
 
-- **[Gianfranco Godoy]** — [https://www.linkedin.com/in/gianfranco-godoy-3b9808237/]()
-- **[Mauro Astudillo]** — [https://www.linkedin.com/in/mauroastudillo/]()
-- **[Nombre integrante 3]** — [LinkedIn]()
-- **[Nombre integrante 4]** — [LinkedIn]()
-- **[Nombre integrante 5]** — [LinkedIn]()
+- **[Gianfranco Godoy]** - [LinkedIn](https://www.linkedin.com/in/gianfranco-godoy-3b9808237/)
+- **[Mauro Astudillo]** - [LinkedIn](https://www.linkedin.com/in/mauroastudillo/)
+- **[Franco Josue Osorio Scheggia]** - [LinkedIn](https://www.linkedin.com/in/franco-josu%C3%A9-osorio-scheggia/)
+- **[Felipe Lemir Mercado]** — [LinkedIn](https://www.linkedin.com/in/felipe-lemir/)
+- **[Jerónimo Asenjo]** — [LinkedIn](https://www.linkedin.com/in/jeronimo-asenjo-031778219/)
