@@ -194,3 +194,15 @@ documentación técnica está en `docs/`:
   datos. Leelo antes de tocar `resources/js/`.
 - **[`docs/comentarios.md`](docs/comentarios.md)**: la regla de comentarios, que
   verifica un test.
+
+---
+
+## Equipo de desarrollo
+
+Este proyecto fue desarrollado por:
+
+- **[Gianfranco Godoy]** — [https://www.linkedin.com/in/gianfranco-godoy-3b9808237/]()
+- **[Mauro Astudillo]** — [https://www.linkedin.com/in/mauroastudillo/]()
+- **[Nombre integrante 3]** — [LinkedIn]()
+- **[Nombre integrante 4]** — [LinkedIn]()
+- **[Nombre integrante 5]** — [LinkedIn]()
